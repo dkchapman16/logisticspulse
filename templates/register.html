@@ -1,0 +1,62 @@
+{% extends 'layout.html' %}
+
+{% block content %}
+<div class="container auth-container">
+    <div class="card">
+        <div class="card-body">
+            <div class="auth-logo">
+                <i data-feather="truck"></i> On-Time Delivery Tracker
+            </div>
+            
+            <h3 class="card-title text-center mb-4">Create Account</h3>
+            
+            <form method="POST" action="{{ url_for('auth.register') }}">
+                <div class="mb-3">
+                    <label for="username" class="form-label">Username</label>
+                    <div class="input-group">
+                        <span class="input-group-text"><i data-feather="user"></i></span>
+                        <input type="text" class="form-control" id="username" name="username" required autofocus>
+                    </div>
+                    <div class="form-text">Choose a unique username for your account.</div>
+                </div>
+                
+                <div class="mb-3">
+                    <label for="email" class="form-label">Email Address</label>
+                    <div class="input-group">
+                        <span class="input-group-text"><i data-feather="mail"></i></span>
+                        <input type="email" class="form-control" id="email" name="email" required>
+                    </div>
+                </div>
+                
+                <div class="mb-3">
+                    <label for="password" class="form-label">Password</label>
+                    <div class="input-group">
+                        <span class="input-group-text"><i data-feather="lock"></i></span>
+                        <input type="password" class="form-control" id="password" name="password" required>
+                    </div>
+                    <div class="form-text">Use at least 8 characters with a mix of letters, numbers, and symbols.</div>
+                </div>
+                
+                <div class="d-grid gap-2 mt-4">
+                    <button type="submit" class="btn btn-primary">
+                        <i data-feather="user-plus"></i> Create Account
+                    </button>
+                </div>
+            </form>
+            
+            <div class="text-center mt-3">
+                <a href="{{ url_for('auth.login') }}" class="text-decoration-none">
+                    Already have an account? Log in here
+                </a>
+            </div>
+        </div>
+    </div>
+    
+    <div class="text-center mt-4">
+        <img src="https://pixabay.com/get/g46c18b0d81c72aaf5fa55fa75f224f66ef3ea1c0315735ef7ff0cc5ed8bc3371f7faaf1d3442d72ff22da22463ccb637671374a97509970cb78d81c92866239a_1280.jpg" 
+             alt="Logistics Control" 
+             class="img-fluid rounded" 
+             style="max-height: 180px; opacity: 0.8;">
+    </div>
+</div>
+{% endblock %}

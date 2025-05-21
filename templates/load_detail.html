@@ -1,0 +1,466 @@
+{% extends 'layout.html' %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">
+                        {% if load %}
+                        <i data-feather="box"></i> Load #{{ load.reference_number }}
+                        {% else %}
+                        <i data-feather="plus-circle"></i> Create New Load
+                        {% endif %}
+                    </h5>
+                    <div>
+                        {% if load %}
+                        <a href="{{ url_for('loads.index') }}" class="btn btn-outline-primary">
+                            <i data-feather="arrow-left"></i> Back to Loads
+                        </a>
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="card-body">
+                    <form id="load-form" method="POST" action="{% if load %}{{ url_for('loads.update_load', load_id=load.id) }}{% else %}{{ url_for('loads.create_load') }}{% endif %}">
+                        <div class="row">
+                            <!-- Basic Information -->
+                            <div class="col-md-4">
+                                <div class="card h-100">
+                                    <div class="card-header bg-light">
+                                        <h6 class="mb-0">Basic Information</h6>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="mb-3">
+                                            <label for="reference_number" class="form-label">Reference Number</label>
+                                            <input type="text" class="form-control" id="reference_number" name="reference_number" value="{{ load.reference_number if load else '' }}" required>
+                                        </div>
+                                        
+                                        <div class="mb-3">
+                                            <label for="client_id" class="form-label">Client</label>
+                                            <select class="form-select" id="client_id" name="client_id" required>
+                                                <option value="">Select Client</option>
+                                                {% if clients %}
+                                                    {% for client in clients %}
+                                                    <option value="{{ client.id }}" {% if load and load.client_id == client.id %}selected{% endif %}>
+                                                        {{ client.name }}
+                                                    </option>
+                                                    {% endfor %}
+                                                {% endif %}
+                                            </select>
+                                        </div>
+                                        
+                                        <div class="mb-3">
+                                            <label for="driver_id" class="form-label">Driver</label>
+                                            <select class="form-select" id="driver_id" name="driver_id">
+                                                <option value="">Select Driver</option>
+                                                {% if drivers %}
+                                                    {% for driver in drivers %}
+                                                    <option value="{{ driver.id }}" {% if load and load.driver_id == driver.id %}selected{% endif %}>
+                                                        {{ driver.name }}
+                                                    </option>
+                                                    {% endfor %}
+                                                {% endif %}
+                                            </select>
+                                        </div>
+                                        
+                                        <div class="mb-3">
+                                            <label for="vehicle_id" class="form-label">Vehicle</label>
+                                            <select class="form-select" id="vehicle_id" name="vehicle_id">
+                                                <option value="">Select Vehicle</option>
+                                                {% if vehicles %}
+                                                    {% for vehicle in vehicles %}
+                                                    <option value="{{ vehicle.id }}" {% if load and load.vehicle_id == vehicle.id %}selected{% endif %}>
+                                                        {{ vehicle.make }} {{ vehicle.model }} ({{ vehicle.license_plate }})
+                                                    </option>
+                                                    {% endfor %}
+                                                {% endif %}
+                                            </select>
+                                        </div>
+                                        
+                                        {% if load %}
+                                        <div class="mb-3">
+                                            <label for="status" class="form-label">Status</label>
+                                            <select class="form-select" id="status" name="status">
+                                                <option value="scheduled" {% if load.status == 'scheduled' %}selected{% endif %}>Scheduled</option>
+                                                <option value="in_transit" {% if load.status == 'in_transit' %}selected{% endif %}>In Transit</option>
+                                                <option value="delivered" {% if load.status == 'delivered' %}selected{% endif %}>Delivered</option>
+                                                <option value="cancelled" {% if load.status == 'cancelled' %}selected{% endif %}>Cancelled</option>
+                                            </select>
+                                        </div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Pickup Information -->
+                            <div class="col-md-4">
+                                <div class="card h-100">
+                                    <div class="card-header bg-light">
+                                        <h6 class="mb-0">Pickup Information</h6>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="mb-3">
+                                            <label for="pickup_facility_id" class="form-label">Pickup Facility</label>
+                                            <select class="form-select" id="pickup_facility_id" name="pickup_facility_id" required>
+                                                <option value="">Select Facility</option>
+                                                {% if facilities %}
+                                                    {% for facility in facilities %}
+                                                    <option value="{{ facility.id }}" 
+                                                            data-address="{{ facility.address }}, {{ facility.city }}, {{ facility.state }} {{ facility.zip_code }}"
+                                                            {% if load and load.pickup_facility_id == facility.id %}selected{% endif %}>
+                                                        {{ facility.name }}
+                                                    </option>
+                                                    {% endfor %}
+                                                {% endif %}
+                                            </select>
+                                        </div>
+                                        
+                                        <div class="mb-3">
+                                            <label for="scheduled_pickup_time" class="form-label">Scheduled Pickup Time</label>
+                                            <input type="datetime-local" class="form-control" id="scheduled_pickup_time" name="scheduled_pickup_time" 
+                                                   value="{{ load.scheduled_pickup_time.strftime('%Y-%m-%dT%H:%M') if load and load.scheduled_pickup_time else '' }}" required>
+                                        </div>
+                                        
+                                        {% if load %}
+                                        <div class="mb-3">
+                                            <label for="actual_pickup_arrival" class="form-label">Actual Arrival</label>
+                                            <input type="datetime-local" class="form-control" id="actual_pickup_arrival" name="actual_pickup_arrival"
+                                                   value="{{ load.actual_pickup_arrival.strftime('%Y-%m-%dT%H:%M') if load and load.actual_pickup_arrival else '' }}">
+                                        </div>
+                                        
+                                        <div class="mb-3">
+                                            <label for="actual_pickup_departure" class="form-label">Actual Departure</label>
+                                            <input type="datetime-local" class="form-control" id="actual_pickup_departure" name="actual_pickup_departure"
+                                                   value="{{ load.actual_pickup_departure.strftime('%Y-%m-%dT%H:%M') if load and load.actual_pickup_departure else '' }}">
+                                        </div>
+                                        
+                                        <div class="alert {% if load.pickup_on_time == True %}alert-success{% elif load.pickup_on_time == False %}alert-danger{% else %}alert-secondary{% endif %} mt-3">
+                                            {% if load.pickup_on_time == True %}
+                                                <i data-feather="check-circle"></i> On-time pickup
+                                            {% elif load.pickup_on_time == False %}
+                                                <i data-feather="alert-circle"></i> Late pickup
+                                            {% else %}
+                                                <i data-feather="clock"></i> Pickup pending
+                                            {% endif %}
+                                        </div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Delivery Information -->
+                            <div class="col-md-4">
+                                <div class="card h-100">
+                                    <div class="card-header bg-light">
+                                        <h6 class="mb-0">Delivery Information</h6>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="mb-3">
+                                            <label for="delivery_facility_id" class="form-label">Delivery Facility</label>
+                                            <select class="form-select" id="delivery_facility_id" name="delivery_facility_id" required>
+                                                <option value="">Select Facility</option>
+                                                {% if facilities %}
+                                                    {% for facility in facilities %}
+                                                    <option value="{{ facility.id }}" 
+                                                            data-address="{{ facility.address }}, {{ facility.city }}, {{ facility.state }} {{ facility.zip_code }}"
+                                                            {% if load and load.delivery_facility_id == facility.id %}selected{% endif %}>
+                                                        {{ facility.name }}
+                                                    </option>
+                                                    {% endfor %}
+                                                {% endif %}
+                                            </select>
+                                        </div>
+                                        
+                                        <div class="mb-3">
+                                            <label for="scheduled_delivery_time" class="form-label">Scheduled Delivery Time</label>
+                                            <input type="datetime-local" class="form-control" id="scheduled_delivery_time" name="scheduled_delivery_time"
+                                                   value="{{ load.scheduled_delivery_time.strftime('%Y-%m-%dT%H:%M') if load and load.scheduled_delivery_time else '' }}" required>
+                                        </div>
+                                        
+                                        {% if load %}
+                                        <div class="mb-3">
+                                            <label for="actual_delivery_arrival" class="form-label">Actual Arrival</label>
+                                            <input type="datetime-local" class="form-control" id="actual_delivery_arrival" name="actual_delivery_arrival"
+                                                   value="{{ load.actual_delivery_arrival.strftime('%Y-%m-%dT%H:%M') if load and load.actual_delivery_arrival else '' }}">
+                                        </div>
+                                        
+                                        <div class="mb-3">
+                                            <label for="actual_delivery_departure" class="form-label">Actual Departure</label>
+                                            <input type="datetime-local" class="form-control" id="actual_delivery_departure" name="actual_delivery_departure"
+                                                   value="{{ load.actual_delivery_departure.strftime('%Y-%m-%dT%H:%M') if load and load.actual_delivery_departure else '' }}">
+                                        </div>
+                                        
+                                        <div class="alert {% if load.delivery_on_time == True %}alert-success{% elif load.delivery_on_time == False %}alert-danger{% else %}alert-secondary{% endif %} mt-3">
+                                            {% if load.delivery_on_time == True %}
+                                                <i data-feather="check-circle"></i> On-time delivery
+                                            {% elif load.delivery_on_time == False %}
+                                                <i data-feather="alert-circle"></i> Late delivery
+                                            {% else %}
+                                                <i data-feather="clock"></i> Delivery pending
+                                            {% endif %}
+                                        </div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="row mt-4">
+                            <!-- Map View -->
+                            <div class="col-md-8">
+                                <div class="card">
+                                    <div class="card-header bg-light">
+                                        <h6 class="mb-0">Location Tracking</h6>
+                                    </div>
+                                    <div class="card-body">
+                                        {% if load %}
+                                        <div id="load-detail-map" class="map-container" data-load-id="{{ load.id }}"></div>
+                                        {% else %}
+                                        <div class="alert alert-info">
+                                            <i data-feather="info"></i> Location tracking will be available after the load is created.
+                                        </div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                
+                                {% if load and load.current_eta %}
+                                <div class="card mt-3">
+                                    <div class="card-header bg-light">
+                                        <h6 class="mb-0">ETA Information</h6>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="row">
+                                            <div class="col-md-6">
+                                                <div class="mb-3">
+                                                    <label class="form-label">Current ETA</label>
+                                                    <div class="form-control bg-light">
+                                                        {{ load.current_eta.strftime('%Y-%m-%d %H:%M') if load.current_eta else 'N/A' }}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <div class="mb-3">
+                                                    <label class="form-label">Status</label>
+                                                    {% if load.current_eta and load.scheduled_delivery_time %}
+                                                        {% if load.current_eta <= load.scheduled_delivery_time %}
+                                                        <div class="form-control bg-success bg-opacity-25">On Time</div>
+                                                        {% else %}
+                                                        <div class="form-control bg-danger bg-opacity-25">
+                                                            Running Late ({{ ((load.current_eta - load.scheduled_delivery_time).total_seconds() / 60)|int }} minutes)
+                                                        </div>
+                                                        {% endif %}
+                                                    {% else %}
+                                                        <div class="form-control bg-light">Unknown</div>
+                                                    {% endif %}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                {% endif %}
+                            </div>
+                            
+                            <!-- Location Updates -->
+                            <div class="col-md-4">
+                                <div class="card h-100">
+                                    <div class="card-header bg-light">
+                                        <h6 class="mb-0">
+                                            {% if load %}
+                                            Recent Location Updates
+                                            {% else %}
+                                            Actions
+                                            {% endif %}
+                                        </h6>
+                                    </div>
+                                    <div class="card-body">
+                                        {% if load %}
+                                            <div id="location-updates">
+                                                <div class="text-center py-3">
+                                                    <div class="spinner-border text-primary" role="status">
+                                                        <span class="visually-hidden">Loading...</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            
+                                            <div class="mt-3">
+                                                <button type="button" class="btn btn-outline-primary" id="refresh-locations">
+                                                    <i data-feather="refresh-cw"></i> Refresh Locations
+                                                </button>
+                                                
+                                                <button type="button" class="btn btn-outline-primary" id="update-eta">
+                                                    <i data-feather="clock"></i> Update ETA
+                                                </button>
+                                            </div>
+                                        {% else %}
+                                            <div class="alert alert-info">
+                                                <i data-feather="info"></i> Location updates will be available after the load is created and in transit.
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="row mt-4">
+                            <div class="col-md-12">
+                                <div class="d-flex justify-content-center">
+                                    <button type="submit" class="btn btn-primary px-5">
+                                        <i data-feather="save"></i> 
+                                        {% if load %}
+                                        Save Changes
+                                        {% else %}
+                                        Create Load
+                                        {% endif %}
+                                    </button>
+                                    
+                                    {% if not load %}
+                                    <a href="{{ url_for('loads.index') }}" class="btn btn-outline-secondary px-5 ms-3">
+                                        <i data-feather="x"></i> Cancel
+                                    </a>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/maps.js') }}"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        if (document.getElementById('load-detail-map')) {
+            loadLocationUpdates();
+        }
+        
+        // Set up refresh button
+        const refreshButton = document.getElementById('refresh-locations');
+        if (refreshButton) {
+            refreshButton.addEventListener('click', loadLocationUpdates);
+        }
+        
+        // Set up update ETA button
+        const updateEtaButton = document.getElementById('update-eta');
+        if (updateEtaButton) {
+            updateEtaButton.addEventListener('click', updateLoadEta);
+        }
+    });
+    
+    function loadLocationUpdates() {
+        const loadId = document.getElementById('load-detail-map')?.dataset.loadId;
+        if (!loadId) return;
+        
+        const locationUpdatesContainer = document.getElementById('location-updates');
+        if (!locationUpdatesContainer) return;
+        
+        locationUpdatesContainer.innerHTML = `
+            <div class="text-center py-3">
+                <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+            </div>
+        `;
+        
+        fetch(`/loads/${loadId}/data`)
+            .then(response => response.json())
+            .then(data => {
+                if (!data.last_locations || data.last_locations.length === 0) {
+                    locationUpdatesContainer.innerHTML = `
+                        <div class="alert alert-info">
+                            <i data-feather="info"></i> No location updates available.
+                        </div>
+                    `;
+                    feather.replace();
+                    return;
+                }
+                
+                let html = '<div class="list-group">';
+                
+                data.last_locations.forEach(location => {
+                    html += `
+                        <div class="list-group-item">
+                            <div class="d-flex w-100 justify-content-between">
+                                <h6 class="mb-1">Location Update</h6>
+                                <small>${formatDateTime(location.timestamp)}</small>
+                            </div>
+                            <p class="mb-1">
+                                Lat: ${location.lat.toFixed(6)}<br>
+                                Lng: ${location.lng.toFixed(6)}
+                            </p>
+                            <small>Speed: ${location.speed || 0} mph</small>
+                        </div>
+                    `;
+                });
+                
+                html += '</div>';
+                locationUpdatesContainer.innerHTML = html;
+                
+                // Reinitialize feather icons
+                feather.replace();
+            })
+            .catch(error => {
+                console.error('Error loading location updates:', error);
+                locationUpdatesContainer.innerHTML = `
+                    <div class="alert alert-danger">
+                        <i data-feather="alert-circle"></i> Error loading location updates.
+                    </div>
+                `;
+                feather.replace();
+            });
+    }
+    
+    function updateLoadEta() {
+        const loadId = document.getElementById('load-detail-map')?.dataset.loadId;
+        if (!loadId) return;
+        
+        const button = document.getElementById('update-eta');
+        if (!button) return;
+        
+        // Show loading state
+        button.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Updating...';
+        button.disabled = true;
+        
+        fetch(`/loads/${loadId}/update-eta`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            // Reset button
+            button.innerHTML = '<i data-feather="clock"></i> Update ETA';
+            button.disabled = false;
+            feather.replace();
+            
+            if (data.success) {
+                // Show success message
+                alert('ETA updated successfully!');
+                // Reload page to reflect changes
+                window.location.reload();
+            } else {
+                alert('Error updating ETA: ' + (data.error || 'Unknown error'));
+            }
+        })
+        .catch(error => {
+            console.error('Error updating ETA:', error);
+            button.innerHTML = '<i data-feather="clock"></i> Update ETA';
+            button.disabled = false;
+            feather.replace();
+            alert('Error updating ETA. Please try again.');
+        });
+    }
+    
+    function formatDateTime(dateTimeStr) {
+        if (!dateTimeStr) return 'N/A';
+        
+        const date = new Date(dateTimeStr);
+        return date.toLocaleDateString() + ' ' + date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    }
+</script>
+{% endblock %}

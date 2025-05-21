@@ -1,0 +1,52 @@
+{% extends 'layout.html' %}
+
+{% block content %}
+<div class="container auth-container">
+    <div class="card">
+        <div class="card-body">
+            <div class="auth-logo">
+                <i data-feather="truck"></i> On-Time Delivery Tracker
+            </div>
+            
+            <h3 class="card-title text-center mb-4">Log In</h3>
+            
+            <form method="POST" action="{{ url_for('auth.login') }}">
+                <div class="mb-3">
+                    <label for="username" class="form-label">Username</label>
+                    <div class="input-group">
+                        <span class="input-group-text"><i data-feather="user"></i></span>
+                        <input type="text" class="form-control" id="username" name="username" required autofocus>
+                    </div>
+                </div>
+                
+                <div class="mb-3">
+                    <label for="password" class="form-label">Password</label>
+                    <div class="input-group">
+                        <span class="input-group-text"><i data-feather="lock"></i></span>
+                        <input type="password" class="form-control" id="password" name="password" required>
+                    </div>
+                </div>
+                
+                <div class="d-grid gap-2 mt-4">
+                    <button type="submit" class="btn btn-primary">
+                        <i data-feather="log-in"></i> Log In
+                    </button>
+                </div>
+            </form>
+            
+            <div class="text-center mt-3">
+                <a href="{{ url_for('auth.register') }}" class="text-decoration-none">
+                    Need an account? Register here
+                </a>
+            </div>
+        </div>
+    </div>
+    
+    <div class="text-center mt-4">
+        <img src="https://pixabay.com/get/g94c3dab6f7298da8e79d08ac5cfad66a12caa0a141ef2af22bb20ca8356eddb71cc729e6c91a10b4c49f743300cc2bae19ddeace671755eafc95b93c83412b7e_1280.jpg" 
+             alt="Logistics Dashboard" 
+             class="img-fluid rounded" 
+             style="max-height: 180px; opacity: 0.8;">
+    </div>
+</div>
+{% endblock %}

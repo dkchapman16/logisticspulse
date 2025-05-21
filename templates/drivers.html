@@ -1,0 +1,509 @@
+{% extends 'layout.html' %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">
+                        <i data-feather="users"></i> Driver Management
+                    </h5>
+                    <div>
+                        <a href="{{ url_for('drivers.create_driver') }}" class="btn btn-primary">
+                            <i data-feather="user-plus"></i> Add Driver
+                        </a>
+                        <a href="{{ url_for('drivers.scorecards') }}" class="btn btn-outline-primary ms-2">
+                            <i data-feather="award"></i> Scorecards
+                        </a>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="row mb-3">
+                        <div class="col-md-8">
+                            <div class="input-group">
+                                <input type="text" class="form-control" id="driver-search" placeholder="Search drivers...">
+                                <button class="btn btn-outline-primary" type="button" id="search-btn">
+                                    <i data-feather="search"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <select class="form-select" id="status-filter">
+                                <option value="">All Statuses</option>
+                                <option value="active">Active</option>
+                                <option value="inactive">Inactive</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <!-- Drivers Grid -->
+                    <div class="row" id="drivers-grid">
+                        <div class="col-12 text-center py-5">
+                            <div class="spinner-border text-primary" role="status">
+                                <span class="visually-hidden">Loading...</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Pagination -->
+                    <div class="d-flex justify-content-between align-items-center mt-3">
+                        <div>
+                            <span id="pagination-info">Showing 0 of 0 drivers</span>
+                        </div>
+                        <nav aria-label="Drivers pagination">
+                            <ul class="pagination" id="drivers-pagination">
+                                <li class="page-item disabled">
+                                    <a class="page-link" href="#" id="prev-page">Previous</a>
+                                </li>
+                                <li class="page-item disabled">
+                                    <a class="page-link" href="#" id="next-page">Next</a>
+                                </li>
+                            </ul>
+                        </nav>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Driver Performance Summary -->
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i data-feather="bar-chart-2"></i> Performance Overview
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-8">
+                            <canvas id="performance-chart" height="250"></canvas>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="card h-100">
+                                <div class="card-header bg-light">
+                                    <h6 class="mb-0">Top Performers</h6>
+                                </div>
+                                <div class="card-body">
+                                    <div class="list-group" id="top-performers">
+                                        <div class="list-group-item text-center">
+                                            <div class="spinner-border spinner-border-sm" role="status">
+                                                <span class="visually-hidden">Loading...</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/animations.js') }}"></script>
+<script>
+    let currentPage = 1;
+    let totalPages = 1;
+    let statusFilter = '';
+    let searchTerm = '';
+    let performanceChart = null;
+    
+    document.addEventListener('DOMContentLoaded', function() {
+        // Load drivers data
+        loadDrivers();
+        
+        // Load performance data
+        loadPerformanceData();
+        
+        // Set up event listeners
+        document.getElementById('status-filter').addEventListener('change', function() {
+            statusFilter = this.value;
+            currentPage = 1;
+            loadDrivers();
+        });
+        
+        document.getElementById('driver-search').addEventListener('keyup', function(e) {
+            if (e.key === 'Enter') {
+                searchTerm = this.value;
+                currentPage = 1;
+                loadDrivers();
+            }
+        });
+        
+        document.getElementById('search-btn').addEventListener('click', function() {
+            searchTerm = document.getElementById('driver-search').value;
+            currentPage = 1;
+            loadDrivers();
+        });
+        
+        document.getElementById('prev-page').addEventListener('click', function(e) {
+            e.preventDefault();
+            if (currentPage > 1) {
+                currentPage--;
+                loadDrivers();
+            }
+        });
+        
+        document.getElementById('next-page').addEventListener('click', function(e) {
+            e.preventDefault();
+            if (currentPage < totalPages) {
+                currentPage++;
+                loadDrivers();
+            }
+        });
+    });
+    
+    function loadDrivers() {
+        const driversGrid = document.getElementById('drivers-grid');
+        driversGrid.innerHTML = `
+            <div class="col-12 text-center py-5">
+                <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+            </div>
+        `;
+        
+        let url = `/drivers/data?page=${currentPage}`;
+        if (statusFilter) {
+            url += `&status=${statusFilter}`;
+        }
+        if (searchTerm) {
+            url += `&search=${encodeURIComponent(searchTerm)}`;
+        }
+        
+        fetch(url)
+            .then(response => response.json())
+            .then(data => {
+                driversGrid.innerHTML = '';
+                
+                if (data.drivers.length === 0) {
+                    driversGrid.innerHTML = `
+                        <div class="col-12 text-center py-4">
+                            <div class="alert alert-info">
+                                <i data-feather="info"></i> No drivers found matching your criteria.
+                            </div>
+                        </div>
+                    `;
+                    feather.replace();
+                    return;
+                }
+                
+                data.drivers.forEach(driver => {
+                    // Create card for each driver
+                    const driverCol = document.createElement('div');
+                    driverCol.className = 'col-md-4 col-lg-3 mb-4';
+                    
+                    let activeLoadHtml = '';
+                    if (driver.active_load) {
+                        let statusBadge = '';
+                        if (driver.active_load.status === 'scheduled') {
+                            statusBadge = '<span class="badge bg-info">Scheduled</span>';
+                        } else if (driver.active_load.status === 'in_transit') {
+                            statusBadge = '<span class="badge bg-primary">In Transit</span>';
+                        }
+                        
+                        activeLoadHtml = `
+                            <div class="card-footer">
+                                <small class="text-muted">Active Load:</small>
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <a href="/loads/${driver.active_load.id}" class="text-decoration-none">
+                                        ${driver.active_load.reference}
+                                    </a>
+                                    <div>${statusBadge}</div>
+                                </div>
+                                <div class="small text-muted mt-1">
+                                    ETA: ${formatDateTime(driver.active_load.eta) || 'N/A'}
+                                </div>
+                            </div>
+                        `;
+                    }
+                    
+                    // Set border color based on on-time percentage
+                    let borderClass = '';
+                    if (driver.on_time_delivery_percentage >= 90) {
+                        borderClass = 'border-success';
+                    } else if (driver.on_time_delivery_percentage >= 75) {
+                        borderClass = 'border-warning';
+                    } else if (driver.on_time_delivery_percentage > 0) {
+                        borderClass = 'border-danger';
+                    }
+                    
+                    driverCol.innerHTML = `
+                        <div class="card h-100 driver-card ${borderClass}">
+                            <div class="card-header bg-light d-flex justify-content-between align-items-center">
+                                <h6 class="mb-0">${driver.name}</h6>
+                                <span class="badge ${driver.status === 'active' ? 'bg-success' : 'bg-secondary'}">
+                                    ${driver.status}
+                                </span>
+                            </div>
+                            <div class="card-body">
+                                <div class="mb-2">
+                                    <i data-feather="phone"></i> ${driver.phone || 'N/A'}
+                                </div>
+                                <div class="mb-3">
+                                    <i data-feather="mail"></i> ${driver.email || 'N/A'}
+                                </div>
+                                
+                                <div class="stats mt-3">
+                                    <div class="mb-1">
+                                        <div class="d-flex justify-content-between">
+                                            <span>On-Time Delivery:</span>
+                                            <span class="fw-bold">${driver.on_time_delivery_percentage}%</span>
+                                        </div>
+                                        <div class="progress" style="height: 6px;">
+                                            <div class="progress-bar ${getProgressBarClass(driver.on_time_delivery_percentage)}" 
+                                                 style="width: ${driver.on_time_delivery_percentage}%" 
+                                                 aria-valuenow="${driver.on_time_delivery_percentage}" 
+                                                 aria-valuemin="0" 
+                                                 aria-valuemax="100"></div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="mb-1">
+                                        <div class="d-flex justify-content-between">
+                                            <span>On-Time Pickup:</span>
+                                            <span class="fw-bold">${driver.on_time_pickup_percentage}%</span>
+                                        </div>
+                                        <div class="progress" style="height: 6px;">
+                                            <div class="progress-bar ${getProgressBarClass(driver.on_time_pickup_percentage)}" 
+                                                 style="width: ${driver.on_time_pickup_percentage}%" 
+                                                 aria-valuenow="${driver.on_time_pickup_percentage}" 
+                                                 aria-valuemin="0" 
+                                                 aria-valuemax="100"></div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="text-center mt-3">
+                                        <span class="badge bg-secondary">
+                                            ${driver.total_loads} loads completed
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="card-footer bg-light d-flex justify-content-center">
+                                <a href="/drivers/${driver.id}" class="btn btn-sm btn-primary">
+                                    <i data-feather="eye"></i> View Details
+                                </a>
+                            </div>
+                            ${activeLoadHtml}
+                        </div>
+                    `;
+                    
+                    driversGrid.appendChild(driverCol);
+                });
+                
+                // Update pagination
+                currentPage = data.page;
+                totalPages = data.pages;
+                
+                updatePagination();
+                
+                // Reinitialize feather icons
+                feather.replace();
+            })
+            .catch(error => {
+                console.error('Error loading drivers:', error);
+                driversGrid.innerHTML = `
+                    <div class="col-12 text-center py-4">
+                        <div class="alert alert-danger">
+                            <i data-feather="alert-circle"></i> Error loading drivers. Please try again.
+                        </div>
+                    </div>
+                `;
+                feather.replace();
+            });
+    }
+    
+    function loadPerformanceData() {
+        // Load top performers
+        loadTopPerformers();
+        
+        // Load performance chart data
+        fetch('/api/dashboard/performance_trends')
+            .then(response => response.json())
+            .then(data => {
+                if (!data || data.length === 0) return;
+                
+                // Prepare data for chart
+                const dates = [];
+                const pickupPercentages = [];
+                const deliveryPercentages = [];
+                
+                data.forEach(entry => {
+                    dates.push(formatDate(entry.date));
+                    pickupPercentages.push(entry.on_time_pickup_percentage);
+                    deliveryPercentages.push(entry.on_time_delivery_percentage);
+                });
+                
+                // Create the performance chart
+                const ctx = document.getElementById('performance-chart');
+                if (ctx) {
+                    performanceChart = new Chart(ctx, {
+                        type: 'line',
+                        data: {
+                            labels: dates,
+                            datasets: [
+                                {
+                                    label: 'On-Time Pickup %',
+                                    data: pickupPercentages,
+                                    borderColor: 'rgba(54, 162, 235, 1)',
+                                    backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                                    tension: 0.1
+                                },
+                                {
+                                    label: 'On-Time Delivery %',
+                                    data: deliveryPercentages,
+                                    borderColor: 'rgba(255, 99, 132, 1)',
+                                    backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                                    tension: 0.1
+                                }
+                            ]
+                        },
+                        options: {
+                            responsive: true,
+                            plugins: {
+                                title: {
+                                    display: true,
+                                    text: '30-Day Performance Trends'
+                                }
+                            },
+                            scales: {
+                                y: {
+                                    min: 0,
+                                    max: 100,
+                                    title: {
+                                        display: true,
+                                        text: 'Percentage'
+                                    }
+                                }
+                            }
+                        }
+                    });
+                }
+            })
+            .catch(error => console.error('Error loading performance trends:', error));
+    }
+    
+    function loadTopPerformers() {
+        const topPerformersContainer = document.getElementById('top-performers');
+        if (!topPerformersContainer) return;
+        
+        fetch('/drivers/scorecards/data?period=month')
+            .then(response => response.json())
+            .then(data => {
+                if (!data.scorecards || data.scorecards.length === 0) {
+                    topPerformersContainer.innerHTML = `
+                        <div class="list-group-item">
+                            <div class="text-center">No data available</div>
+                        </div>
+                    `;
+                    return;
+                }
+                
+                // Show top 5 performers
+                const topFive = data.scorecards.slice(0, 5);
+                
+                topPerformersContainer.innerHTML = '';
+                
+                topFive.forEach((driver, index) => {
+                    const item = document.createElement('a');
+                    item.href = `/drivers/${driver.driver_id}`;
+                    item.className = 'list-group-item list-group-item-action';
+                    
+                    let rankIcon = `<span class="badge bg-secondary">#${driver.rank}</span>`;
+                    if (driver.rank === 1) {
+                        rankIcon = '<i data-feather="award" class="text-warning"></i>';
+                    } else if (driver.rank === 2) {
+                        rankIcon = '<i data-feather="award" class="text-secondary"></i>';
+                    } else if (driver.rank === 3) {
+                        rankIcon = '<i data-feather="award" class="text-danger"></i>';
+                    }
+                    
+                    item.innerHTML = `
+                        <div class="d-flex w-100 justify-content-between align-items-center">
+                            <div>
+                                ${rankIcon}
+                                <span class="ms-2">${driver.name}</span>
+                            </div>
+                            <span class="badge ${getPercentageBadgeClass(driver.on_time_delivery_percentage)}">
+                                ${driver.on_time_delivery_percentage}%
+                            </span>
+                        </div>
+                    `;
+                    
+                    topPerformersContainer.appendChild(item);
+                });
+                
+                // Reinitialize feather icons
+                feather.replace();
+            })
+            .catch(error => {
+                console.error('Error loading top performers:', error);
+                topPerformersContainer.innerHTML = `
+                    <div class="list-group-item">
+                        <div class="text-danger">Error loading data</div>
+                    </div>
+                `;
+            });
+    }
+    
+    function updatePagination() {
+        document.getElementById('pagination-info').textContent = `Showing page ${currentPage} of ${totalPages}`;
+        
+        const prevPageBtn = document.getElementById('prev-page').parentElement;
+        const nextPageBtn = document.getElementById('next-page').parentElement;
+        
+        if (currentPage <= 1) {
+            prevPageBtn.classList.add('disabled');
+        } else {
+            prevPageBtn.classList.remove('disabled');
+        }
+        
+        if (currentPage >= totalPages) {
+            nextPageBtn.classList.add('disabled');
+        } else {
+            nextPageBtn.classList.remove('disabled');
+        }
+    }
+    
+    function getProgressBarClass(percentage) {
+        if (percentage >= 90) {
+            return 'bg-success';
+        } else if (percentage >= 75) {
+            return 'bg-warning';
+        } else {
+            return 'bg-danger';
+        }
+    }
+    
+    function getPercentageBadgeClass(percentage) {
+        if (percentage >= 90) {
+            return 'bg-success';
+        } else if (percentage >= 75) {
+            return 'bg-warning';
+        } else {
+            return 'bg-danger';
+        }
+    }
+    
+    function formatDateTime(dateTimeStr) {
+        if (!dateTimeStr) return null;
+        
+        const date = new Date(dateTimeStr);
+        return date.toLocaleDateString() + ' ' + date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    }
+    
+    function formatDate(dateStr) {
+        if (!dateStr) return 'N/A';
+        
+        const date = new Date(dateStr);
+        return date.toLocaleDateString([], { month: 'short', day: 'numeric' });
+    }
+</script>
+{% endblock %}

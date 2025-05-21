@@ -1,0 +1,831 @@
+{% extends 'layout.html' %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Driver Information Section -->
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">
+                        {% if driver %}
+                        <i data-feather="user"></i> Driver: {{ driver.name }}
+                        {% else %}
+                        <i data-feather="user-plus"></i> Add New Driver
+                        {% endif %}
+                    </h5>
+                    <div>
+                        <a href="{{ url_for('drivers.index') }}" class="btn btn-outline-primary">
+                            <i data-feather="arrow-left"></i> Back to Drivers
+                        </a>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <form id="driver-form" method="POST" action="{% if driver %}{{ url_for('drivers.update_driver', driver_id=driver.id) }}{% else %}{{ url_for('drivers.create_driver') }}{% endif %}">
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div class="card h-100">
+                                    <div class="card-header bg-light">
+                                        <h6 class="mb-0">Basic Information</h6>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="mb-3">
+                                            <label for="name" class="form-label">Driver Name</label>
+                                            <input type="text" class="form-control" id="name" name="name" value="{{ driver.name if driver else '' }}" required>
+                                        </div>
+                                        
+                                        <div class="mb-3">
+                                            <label for="phone" class="form-label">Phone Number</label>
+                                            <input type="tel" class="form-control" id="phone" name="phone" value="{{ driver.phone if driver else '' }}">
+                                        </div>
+                                        
+                                        <div class="mb-3">
+                                            <label for="email" class="form-label">Email Address</label>
+                                            <input type="email" class="form-control" id="email" name="email" value="{{ driver.email if driver else '' }}">
+                                        </div>
+                                        
+                                        <div class="mb-3">
+                                            <label for="motive_driver_id" class="form-label">Motive Driver ID</label>
+                                            <input type="text" class="form-control" id="motive_driver_id" name="motive_driver_id" value="{{ driver.motive_driver_id if driver else '' }}">
+                                            <div class="form-text">ID from the Motive ELD system for location tracking</div>
+                                        </div>
+                                        
+                                        {% if driver %}
+                                        <div class="mb-3">
+                                            <label for="status" class="form-label">Status</label>
+                                            <select class="form-select" id="status" name="status">
+                                                <option value="active" {% if driver.status == 'active' %}selected{% endif %}>Active</option>
+                                                <option value="inactive" {% if driver.status == 'inactive' %}selected{% endif %}>Inactive</option>
+                                            </select>
+                                        </div>
+                                        
+                                        <div class="mb-3">
+                                            <label class="form-label">Created</label>
+                                            <input type="text" class="form-control" value="{{ driver.created_at.strftime('%Y-%m-%d') if driver.created_at else '' }}" readonly>
+                                        </div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            {% if driver %}
+                            <div class="col-md-8">
+                                <div class="card h-100">
+                                    <div class="card-header bg-light">
+                                        <h6 class="mb-0">Performance Metrics</h6>
+                                    </div>
+                                    <div class="card-body">
+                                        <!-- Performance Tabs -->
+                                        <ul class="nav nav-tabs" id="performance-tabs" role="tablist">
+                                            <li class="nav-item" role="presentation">
+                                                <button class="nav-link active" id="daily-tab" data-bs-toggle="tab" data-bs-target="#daily-tab-pane" type="button" role="tab" aria-controls="daily-tab-pane" aria-selected="true">Daily</button>
+                                            </li>
+                                            <li class="nav-item" role="presentation">
+                                                <button class="nav-link" id="weekly-tab" data-bs-toggle="tab" data-bs-target="#weekly-tab-pane" type="button" role="tab" aria-controls="weekly-tab-pane" aria-selected="false">Weekly</button>
+                                            </li>
+                                            <li class="nav-item" role="presentation">
+                                                <button class="nav-link" id="monthly-tab" data-bs-toggle="tab" data-bs-target="#monthly-tab-pane" type="button" role="tab" aria-controls="monthly-tab-pane" aria-selected="false">Monthly</button>
+                                            </li>
+                                            <li class="nav-item" role="presentation">
+                                                <button class="nav-link" id="chart-tab" data-bs-toggle="tab" data-bs-target="#chart-tab-pane" type="button" role="tab" aria-controls="chart-tab-pane" aria-selected="false">Trend Chart</button>
+                                            </li>
+                                        </ul>
+                                        
+                                        <div class="tab-content pt-3" id="performance-tabs-content">
+                                            <!-- Daily Tab -->
+                                            <div class="tab-pane fade show active" id="daily-tab-pane" role="tabpanel" aria-labelledby="daily-tab" tabindex="0">
+                                                <div class="row">
+                                                    <div class="col-md-3">
+                                                        <div class="card bg-light mb-3">
+                                                            <div class="card-body text-center">
+                                                                <h2 id="today-loads" class="mb-1">...</h2>
+                                                                <p class="mb-0">Loads Today</p>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-3">
+                                                        <div class="card bg-light mb-3">
+                                                            <div class="card-body text-center">
+                                                                <h2 id="today-pickup-pct" class="mb-1">...</h2>
+                                                                <p class="mb-0">On-Time Pickup</p>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-3">
+                                                        <div class="card bg-light mb-3">
+                                                            <div class="card-body text-center">
+                                                                <h2 id="today-delivery-pct" class="mb-1">...</h2>
+                                                                <p class="mb-0">On-Time Delivery</p>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-3">
+                                                        <div class="card bg-light mb-3">
+                                                            <div class="card-body text-center">
+                                                                <h2 id="today-delay" class="mb-1">...</h2>
+                                                                <p class="mb-0">Avg. Delay (min)</p>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                
+                                                <!-- Add Performance Data Form -->
+                                                <div class="card mt-3">
+                                                    <div class="card-header bg-light">
+                                                        <h6 class="mb-0">Update Performance Data</h6>
+                                                    </div>
+                                                    <div class="card-body">
+                                                        <form id="performance-update-form">
+                                                            <div class="row">
+                                                                <div class="col-md-3">
+                                                                    <div class="mb-3">
+                                                                        <label for="performance-date" class="form-label">Date</label>
+                                                                        <input type="date" class="form-control" id="performance-date" name="date" value="{{ today_date }}">
+                                                                    </div>
+                                                                </div>
+                                                                <div class="col-md-3">
+                                                                    <div class="mb-3">
+                                                                        <label for="loads-completed" class="form-label">Loads Completed</label>
+                                                                        <input type="number" class="form-control" id="loads-completed" name="loads_completed" min="0" value="0">
+                                                                    </div>
+                                                                </div>
+                                                                <div class="col-md-3">
+                                                                    <div class="mb-3">
+                                                                        <label for="on-time-pickups" class="form-label">On-Time Pickups</label>
+                                                                        <input type="number" class="form-control" id="on-time-pickups" name="on_time_pickups" min="0" value="0">
+                                                                    </div>
+                                                                </div>
+                                                                <div class="col-md-3">
+                                                                    <div class="mb-3">
+                                                                        <label for="on-time-deliveries" class="form-label">On-Time Deliveries</label>
+                                                                        <input type="number" class="form-control" id="on-time-deliveries" name="on_time_deliveries" min="0" value="0">
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                            <div class="row">
+                                                                <div class="col-md-6">
+                                                                    <div class="mb-3">
+                                                                        <label for="average-delay" class="form-label">Average Delay (minutes)</label>
+                                                                        <input type="number" class="form-control" id="average-delay" name="average_delay_minutes" min="0" value="0">
+                                                                    </div>
+                                                                </div>
+                                                                <div class="col-md-6 d-flex align-items-end">
+                                                                    <button type="button" class="btn btn-primary w-100" id="update-performance-btn">
+                                                                        <i data-feather="save"></i> Update Performance
+                                                                    </button>
+                                                                </div>
+                                                            </div>
+                                                        </form>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            
+                                            <!-- Weekly Tab -->
+                                            <div class="tab-pane fade" id="weekly-tab-pane" role="tabpanel" aria-labelledby="weekly-tab" tabindex="0">
+                                                <div class="row">
+                                                    <div class="col-md-3">
+                                                        <div class="card bg-light mb-3">
+                                                            <div class="card-body text-center">
+                                                                <h2 id="weekly-loads" class="mb-1">...</h2>
+                                                                <p class="mb-0">Loads This Week</p>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-3">
+                                                        <div class="card bg-light mb-3">
+                                                            <div class="card-body text-center">
+                                                                <h2 id="weekly-pickup-pct" class="mb-1">...</h2>
+                                                                <p class="mb-0">On-Time Pickup</p>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-3">
+                                                        <div class="card bg-light mb-3">
+                                                            <div class="card-body text-center">
+                                                                <h2 id="weekly-delivery-pct" class="mb-1">...</h2>
+                                                                <p class="mb-0">On-Time Delivery</p>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-3">
+                                                        <div class="card bg-light mb-3">
+                                                            <div class="card-body text-center">
+                                                                <h2 id="weekly-delay" class="mb-1">...</h2>
+                                                                <p class="mb-0">Avg. Delay (min)</p>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                
+                                                <div class="alert alert-info mt-3">
+                                                    <i data-feather="info"></i> Weekly performance data is calculated based on the last 7 days.
+                                                </div>
+                                            </div>
+                                            
+                                            <!-- Monthly Tab -->
+                                            <div class="tab-pane fade" id="monthly-tab-pane" role="tabpanel" aria-labelledby="monthly-tab" tabindex="0">
+                                                <div class="row">
+                                                    <div class="col-md-3">
+                                                        <div class="card bg-light mb-3">
+                                                            <div class="card-body text-center">
+                                                                <h2 id="monthly-loads" class="mb-1">...</h2>
+                                                                <p class="mb-0">Loads This Month</p>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-3">
+                                                        <div class="card bg-light mb-3">
+                                                            <div class="card-body text-center">
+                                                                <h2 id="monthly-pickup-pct" class="mb-1">...</h2>
+                                                                <p class="mb-0">On-Time Pickup</p>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-3">
+                                                        <div class="card bg-light mb-3">
+                                                            <div class="card-body text-center">
+                                                                <h2 id="monthly-delivery-pct" class="mb-1">...</h2>
+                                                                <p class="mb-0">On-Time Delivery</p>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-3">
+                                                        <div class="card bg-light mb-3">
+                                                            <div class="card-body text-center">
+                                                                <h2 id="monthly-delay" class="mb-1">...</h2>
+                                                                <p class="mb-0">Avg. Delay (min)</p>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                
+                                                <!-- Milestones -->
+                                                <div class="card mt-3">
+                                                    <div class="card-header bg-light">
+                                                        <h6 class="mb-0">Recent Achievements</h6>
+                                                    </div>
+                                                    <div class="card-body">
+                                                        <div id="milestones-container">
+                                                            <div class="text-center py-3">
+                                                                <div class="spinner-border spinner-border-sm" role="status">
+                                                                    <span class="visually-hidden">Loading...</span>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            
+                                            <!-- Trend Chart Tab -->
+                                            <div class="tab-pane fade" id="chart-tab-pane" role="tabpanel" aria-labelledby="chart-tab" tabindex="0">
+                                                <canvas id="performance-trend-chart" height="300"></canvas>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endif %}
+                        </div>
+                        
+                        {% if driver %}
+                        <!-- Load History Section -->
+                        <div class="row mt-4">
+                            <div class="col-md-12">
+                                <div class="card">
+                                    <div class="card-header bg-light">
+                                        <h6 class="mb-0">Load History</h6>
+                                    </div>
+                                    <div class="card-body">
+                                        <ul class="nav nav-tabs" id="load-tabs" role="tablist">
+                                            <li class="nav-item" role="presentation">
+                                                <button class="nav-link active" id="upcoming-tab" data-bs-toggle="tab" data-bs-target="#upcoming-tab-pane" type="button" role="tab" aria-controls="upcoming-tab-pane" aria-selected="true">Upcoming Loads</button>
+                                            </li>
+                                            <li class="nav-item" role="presentation">
+                                                <button class="nav-link" id="completed-tab" data-bs-toggle="tab" data-bs-target="#completed-tab-pane" type="button" role="tab" aria-controls="completed-tab-pane" aria-selected="false">Completed Loads</button>
+                                            </li>
+                                        </ul>
+                                        
+                                        <div class="tab-content pt-3" id="load-tabs-content">
+                                            <!-- Upcoming Loads -->
+                                            <div class="tab-pane fade show active" id="upcoming-tab-pane" role="tabpanel" aria-labelledby="upcoming-tab" tabindex="0">
+                                                <div class="table-responsive">
+                                                    <table class="table table-hover">
+                                                        <thead>
+                                                            <tr>
+                                                                <th>Reference #</th>
+                                                                <th>Status</th>
+                                                                <th>Pickup</th>
+                                                                <th>Delivery</th>
+                                                                <th>Scheduled Pickup</th>
+                                                                <th>Scheduled Delivery</th>
+                                                                <th>Current ETA</th>
+                                                                <th>Actions</th>
+                                                            </tr>
+                                                        </thead>
+                                                        <tbody id="upcoming-loads-body">
+                                                            <tr>
+                                                                <td colspan="8" class="text-center">
+                                                                    <div class="spinner-border spinner-border-sm" role="status">
+                                                                        <span class="visually-hidden">Loading...</span>
+                                                                    </div>
+                                                                </td>
+                                                            </tr>
+                                                        </tbody>
+                                                    </table>
+                                                </div>
+                                            </div>
+                                            
+                                            <!-- Completed Loads -->
+                                            <div class="tab-pane fade" id="completed-tab-pane" role="tabpanel" aria-labelledby="completed-tab" tabindex="0">
+                                                <div class="table-responsive">
+                                                    <table class="table table-hover">
+                                                        <thead>
+                                                            <tr>
+                                                                <th>Reference #</th>
+                                                                <th>Pickup</th>
+                                                                <th>Delivery</th>
+                                                                <th>Scheduled Delivery</th>
+                                                                <th>Actual Delivery</th>
+                                                                <th>On Time</th>
+                                                                <th>Actions</th>
+                                                            </tr>
+                                                        </thead>
+                                                        <tbody id="completed-loads-body">
+                                                            <tr>
+                                                                <td colspan="7" class="text-center">
+                                                                    <div class="spinner-border spinner-border-sm" role="status">
+                                                                        <span class="visually-hidden">Loading...</span>
+                                                                    </div>
+                                                                </td>
+                                                            </tr>
+                                                        </tbody>
+                                                    </table>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% endif %}
+                        
+                        <!-- Action Buttons -->
+                        <div class="row mt-4">
+                            <div class="col-md-12">
+                                <div class="d-flex justify-content-center">
+                                    <button type="submit" class="btn btn-primary px-5">
+                                        <i data-feather="save"></i> 
+                                        {% if driver %}
+                                        Save Changes
+                                        {% else %}
+                                        Create Driver
+                                        {% endif %}
+                                    </button>
+                                    
+                                    {% if not driver %}
+                                    <a href="{{ url_for('drivers.index') }}" class="btn btn-outline-secondary px-5 ms-3">
+                                        <i data-feather="x"></i> Cancel
+                                    </a>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/animations.js') }}"></script>
+<script>
+    let performanceTrendChart = null;
+    
+    document.addEventListener('DOMContentLoaded', function() {
+        {% if driver %}
+        // Load driver performance data
+        loadDriverData();
+        
+        // Set up event listener for performance update
+        document.getElementById('update-performance-btn').addEventListener('click', updatePerformance);
+        {% endif %}
+    });
+    
+    {% if driver %}
+    function loadDriverData() {
+        fetch('/drivers/{{ driver.id }}/data')
+            .then(response => response.json())
+            .then(data => {
+                // Update metrics display
+                updateMetricsDisplay(data.metrics);
+                
+                // Update loads
+                updateLoadsDisplay(data.loads);
+                
+                // Update milestones
+                updateMilestonesDisplay(data.milestones);
+                
+                // Create performance trend chart
+                createPerformanceTrendChart(data.daily_performance);
+            })
+            .catch(error => {
+                console.error('Error loading driver data:', error);
+                alert('Error loading driver data. Please try again.');
+            });
+    }
+    
+    function updateMetricsDisplay(metrics) {
+        // Update today's metrics
+        document.getElementById('today-loads').textContent = metrics.today.loads;
+        document.getElementById('today-pickup-pct').textContent = metrics.today.pickup_percentage + '%';
+        document.getElementById('today-delivery-pct').textContent = metrics.today.delivery_percentage + '%';
+        document.getElementById('today-delay').textContent = metrics.today.avg_delay;
+        
+        // Update weekly metrics
+        document.getElementById('weekly-loads').textContent = metrics.weekly.loads;
+        document.getElementById('weekly-pickup-pct').textContent = metrics.weekly.pickup_percentage + '%';
+        document.getElementById('weekly-delivery-pct').textContent = metrics.weekly.delivery_percentage + '%';
+        document.getElementById('weekly-delay').textContent = metrics.weekly.avg_delay;
+        
+        // Update monthly metrics
+        document.getElementById('monthly-loads').textContent = metrics.monthly.loads;
+        document.getElementById('monthly-pickup-pct').textContent = metrics.monthly.pickup_percentage + '%';
+        document.getElementById('monthly-delivery-pct').textContent = metrics.monthly.delivery_percentage + '%';
+        document.getElementById('monthly-delay').textContent = metrics.monthly.avg_delay;
+        
+        // Apply color classes based on percentages
+        applyPercentageColors('today-pickup-pct', metrics.today.pickup_percentage);
+        applyPercentageColors('today-delivery-pct', metrics.today.delivery_percentage);
+        applyPercentageColors('weekly-pickup-pct', metrics.weekly.pickup_percentage);
+        applyPercentageColors('weekly-delivery-pct', metrics.weekly.delivery_percentage);
+        applyPercentageColors('monthly-pickup-pct', metrics.monthly.pickup_percentage);
+        applyPercentageColors('monthly-delivery-pct', metrics.monthly.delivery_percentage);
+        
+        // If monthly metrics are very good (>=95%), show celebration
+        if (metrics.monthly.delivery_percentage >= 95 && metrics.monthly.loads >= 10) {
+            setTimeout(() => {
+                showConfetti();
+                celebrateMilestone('monthly_perfect', 1, '{{ driver.name }}');
+            }, 500);
+        }
+    }
+    
+    function updateLoadsDisplay(loads) {
+        // Update upcoming loads
+        const upcomingLoadsBody = document.getElementById('upcoming-loads-body');
+        if (upcomingLoadsBody) {
+            if (loads.upcoming && loads.upcoming.length > 0) {
+                upcomingLoadsBody.innerHTML = '';
+                
+                loads.upcoming.forEach(load => {
+                    let statusBadge = '';
+                    if (load.status === 'scheduled') {
+                        statusBadge = '<span class="badge bg-info">Scheduled</span>';
+                    } else if (load.status === 'in_transit') {
+                        statusBadge = '<span class="badge bg-primary">In Transit</span>';
+                    }
+                    
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>
+                            <a href="/loads/${load.id}" class="text-decoration-none">
+                                ${load.reference}
+                            </a>
+                        </td>
+                        <td>${statusBadge}</td>
+                        <td>${load.pickup}</td>
+                        <td>${load.delivery}</td>
+                        <td>${formatDateTime(load.scheduled_pickup)}</td>
+                        <td>${formatDateTime(load.scheduled_delivery)}</td>
+                        <td>${formatDateTime(load.current_eta) || 'N/A'}</td>
+                        <td>
+                            <a href="/loads/${load.id}" class="btn btn-sm btn-outline-primary">
+                                <i data-feather="eye"></i>
+                            </a>
+                        </td>
+                    `;
+                    
+                    upcomingLoadsBody.appendChild(row);
+                });
+                
+                // Reinitialize feather icons
+                feather.replace();
+            } else {
+                upcomingLoadsBody.innerHTML = `
+                    <tr>
+                        <td colspan="8" class="text-center">No upcoming loads</td>
+                    </tr>
+                `;
+            }
+        }
+        
+        // Update completed loads
+        const completedLoadsBody = document.getElementById('completed-loads-body');
+        if (completedLoadsBody) {
+            if (loads.completed && loads.completed.length > 0) {
+                completedLoadsBody.innerHTML = '';
+                
+                loads.completed.forEach(load => {
+                    const row = document.createElement('tr');
+                    
+                    let onTimeBadge = '';
+                    if (load.on_time === true) {
+                        onTimeBadge = '<span class="badge bg-success">On Time</span>';
+                    } else if (load.on_time === false) {
+                        onTimeBadge = '<span class="badge bg-danger">Late</span>';
+                    } else {
+                        onTimeBadge = '<span class="badge bg-secondary">Unknown</span>';
+                    }
+                    
+                    row.innerHTML = `
+                        <td>
+                            <a href="/loads/${load.id}" class="text-decoration-none">
+                                ${load.reference}
+                            </a>
+                        </td>
+                        <td>${load.pickup}</td>
+                        <td>${load.delivery}</td>
+                        <td>${formatDateTime(load.scheduled_delivery)}</td>
+                        <td>${formatDateTime(load.actual_delivery) || 'N/A'}</td>
+                        <td>${onTimeBadge}</td>
+                        <td>
+                            <a href="/loads/${load.id}" class="btn btn-sm btn-outline-primary">
+                                <i data-feather="eye"></i>
+                            </a>
+                        </td>
+                    `;
+                    
+                    completedLoadsBody.appendChild(row);
+                });
+                
+                // Reinitialize feather icons
+                feather.replace();
+            } else {
+                completedLoadsBody.innerHTML = `
+                    <tr>
+                        <td colspan="7" class="text-center">No completed loads</td>
+                    </tr>
+                `;
+            }
+        }
+    }
+    
+    function updateMilestonesDisplay(milestones) {
+        const milestonesContainer = document.getElementById('milestones-container');
+        if (!milestonesContainer) return;
+        
+        if (milestones && milestones.length > 0) {
+            let html = '';
+            
+            milestones.forEach(milestone => {
+                let icon = 'award';
+                let title = 'Achievement';
+                
+                if (milestone.type === 'consecutive_on_time') {
+                    icon = 'check-circle';
+                    title = 'Consecutive On-Time Deliveries';
+                } else if (milestone.type === 'monthly_perfect') {
+                    icon = 'calendar';
+                    title = 'Perfect Month';
+                } else if (milestone.type === 'total_loads') {
+                    icon = 'truck';
+                    title = 'Total Loads Milestone';
+                }
+                
+                html += `
+                    <div class="mb-3">
+                        <div class="d-flex align-items-center">
+                            <div class="me-3">
+                                <div class="bg-success bg-opacity-10 p-3 rounded-circle">
+                                    <i data-feather="${icon}" class="text-success"></i>
+                                </div>
+                            </div>
+                            <div>
+                                <h6 class="mb-1">${title}</h6>
+                                <p class="mb-0 text-muted">
+                                    ${milestone.value} ${milestone.type === 'consecutive_on_time' ? 'consecutive on-time deliveries' : 
+                                      milestone.type === 'monthly_perfect' ? 'month(s) of perfect delivery' : 
+                                      milestone.type === 'total_loads' ? 'total loads completed' : 'achievement points'}
+                                </p>
+                                <small class="text-muted">Achieved on ${formatDate(milestone.achieved_at)}</small>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            milestonesContainer.innerHTML = html;
+            
+            // Reinitialize feather icons
+            feather.replace();
+        } else {
+            milestonesContainer.innerHTML = `
+                <div class="alert alert-info">
+                    <i data-feather="info"></i> No milestones achieved yet.
+                </div>
+            `;
+            feather.replace();
+        }
+    }
+    
+    function createPerformanceTrendChart(performanceData) {
+        if (!performanceData || performanceData.length === 0) return;
+        
+        const ctx = document.getElementById('performance-trend-chart');
+        if (!ctx) return;
+        
+        // Prepare chart data
+        const dates = [];
+        const pickupPercentages = [];
+        const deliveryPercentages = [];
+        const loadCounts = [];
+        
+        performanceData.forEach(entry => {
+            dates.push(formatDate(entry.date));
+            pickupPercentages.push(entry.pickup_percentage);
+            deliveryPercentages.push(entry.delivery_percentage);
+            loadCounts.push(entry.loads);
+        });
+        
+        // Destroy existing chart if it exists
+        if (performanceTrendChart) {
+            performanceTrendChart.destroy();
+        }
+        
+        // Create new chart
+        performanceTrendChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: dates,
+                datasets: [
+                    {
+                        label: 'On-Time Pickup %',
+                        data: pickupPercentages,
+                        borderColor: 'rgba(54, 162, 235, 1)',
+                        backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                        tension: 0.1,
+                        yAxisID: 'y'
+                    },
+                    {
+                        label: 'On-Time Delivery %',
+                        data: deliveryPercentages,
+                        borderColor: 'rgba(255, 99, 132, 1)',
+                        backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                        tension: 0.1,
+                        yAxisID: 'y'
+                    },
+                    {
+                        label: 'Loads',
+                        data: loadCounts,
+                        borderColor: 'rgba(75, 192, 192, 1)',
+                        backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                        tension: 0.1,
+                        borderDash: [5, 5],
+                        yAxisID: 'y1'
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                interaction: {
+                    mode: 'index',
+                    intersect: false,
+                },
+                plugins: {
+                    title: {
+                        display: true,
+                        text: '30-Day Performance Trend'
+                    }
+                },
+                scales: {
+                    y: {
+                        type: 'linear',
+                        display: true,
+                        position: 'left',
+                        title: {
+                            display: true,
+                            text: 'Percentage'
+                        },
+                        min: 0,
+                        max: 100
+                    },
+                    y1: {
+                        type: 'linear',
+                        display: true,
+                        position: 'right',
+                        title: {
+                            display: true,
+                            text: 'Load Count'
+                        },
+                        min: 0,
+                        grid: {
+                            drawOnChartArea: false
+                        }
+                    }
+                }
+            }
+        });
+    }
+    
+    function updatePerformance() {
+        const date = document.getElementById('performance-date').value;
+        const loadsCompleted = parseInt(document.getElementById('loads-completed').value) || 0;
+        const onTimePickups = parseInt(document.getElementById('on-time-pickups').value) || 0;
+        const onTimeDeliveries = parseInt(document.getElementById('on-time-deliveries').value) || 0;
+        const averageDelay = parseFloat(document.getElementById('average-delay').value) || 0;
+        
+        if (!date) {
+            alert('Please select a date.');
+            return;
+        }
+        
+        if (onTimePickups > loadsCompleted || onTimeDeliveries > loadsCompleted) {
+            alert('On-time counts cannot exceed total loads.');
+            return;
+        }
+        
+        const data = {
+            date: date,
+            loads_completed: loadsCompleted,
+            on_time_pickups: onTimePickups,
+            on_time_deliveries: onTimeDeliveries,
+            average_delay_minutes: averageDelay
+        };
+        
+        // Show loading state
+        const button = document.getElementById('update-performance-btn');
+        button.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Updating...';
+        button.disabled = true;
+        
+        fetch('/drivers/{{ driver.id }}/performance/update', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(data)
+        })
+        .then(response => response.json())
+        .then(result => {
+            // Reset button
+            button.innerHTML = '<i data-feather="save"></i> Update Performance';
+            button.disabled = false;
+            feather.replace();
+            
+            if (result.success) {
+                // Show success message
+                alert('Performance data updated successfully!');
+                
+                // Reload driver data
+                loadDriverData();
+                
+                // Reset form
+                document.getElementById('loads-completed').value = '0';
+                document.getElementById('on-time-pickups').value = '0';
+                document.getElementById('on-time-deliveries').value = '0';
+                document.getElementById('average-delay').value = '0';
+            } else {
+                alert('Error updating performance: ' + (result.error || 'Unknown error'));
+            }
+        })
+        .catch(error => {
+            console.error('Error updating performance:', error);
+            button.innerHTML = '<i data-feather="save"></i> Update Performance';
+            button.disabled = false;
+            feather.replace();
+            alert('Error updating performance. Please try again.');
+        });
+    }
+    
+    function applyPercentageColors(elementId, percentage) {
+        const element = document.getElementById(elementId);
+        if (!element) return;
+        
+        if (percentage >= 90) {
+            element.className = 'mb-1 text-success';
+        } else if (percentage >= 75) {
+            element.className = 'mb-1 text-warning';
+        } else if (percentage > 0) {
+            element.className = 'mb-1 text-danger';
+        } else {
+            element.className = 'mb-1';
+        }
+    }
+    {% endif %}
+    
+    function formatDateTime(dateTimeStr) {
+        if (!dateTimeStr) return null;
+        
+        const date = new Date(dateTimeStr);
+        return date.toLocaleDateString() + ' ' + date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    }
+    
+    function formatDate(dateStr) {
+        if (!dateStr) return null;
+        
+        const date = new Date(dateStr);
+        return date.toLocaleDateString();
+    }
+</script>
+{% endblock %}

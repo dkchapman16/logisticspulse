@@ -1,0 +1,326 @@
+{% extends 'layout.html' %}
+
+{% block content %}
+<div id="dashboard-content">
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">
+                        <i data-feather="activity"></i> Performance Dashboard
+                    </h5>
+                    <div>
+                        <button class="btn btn-sm btn-outline-primary" id="refresh-dashboard">
+                            <i data-feather="refresh-cw"></i> Refresh
+                        </button>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <!-- Active Loads -->
+                        <div class="col-md-4">
+                            <div class="stats-card">
+                                <i data-feather="truck" class="text-primary mb-2" style="width: 32px; height: 32px;"></i>
+                                <h2 id="active-loads-count">0</h2>
+                                <p>Active Loads</p>
+                            </div>
+                        </div>
+                        
+                        <!-- On-Time Pickup -->
+                        <div class="col-md-4">
+                            <div class="stats-card">
+                                <i data-feather="package" class="text-success mb-2" style="width: 32px; height: 32px;"></i>
+                                <h2 id="on-time-pickup-percentage">0%</h2>
+                                <p>On-Time Pickup</p>
+                                <div class="progress mt-2">
+                                    <div id="pickup-progress" class="progress-bar" role="progressbar" style="width: 0%;" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- On-Time Delivery -->
+                        <div class="col-md-4">
+                            <div class="stats-card">
+                                <i data-feather="check-circle" class="text-primary mb-2" style="width: 32px; height: 32px;"></i>
+                                <h2 id="on-time-delivery-percentage">0%</h2>
+                                <p>On-Time Delivery</p>
+                                <div class="progress mt-2">
+                                    <div id="delivery-progress" class="progress-bar" role="progressbar" style="width: 0%;" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row mb-4">
+        <!-- At-Risk Loads -->
+        <div class="col-md-6">
+            <div class="card h-100">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i data-feather="alert-triangle"></i> Loads At Risk
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div id="no-at-risk-loads" class="text-center py-4 d-none">
+                        <i data-feather="check-circle" class="text-success mb-3" style="width: 48px; height: 48px;"></i>
+                        <h5>No Loads At Risk</h5>
+                        <p class="text-muted">All deliveries are on track</p>
+                    </div>
+                    
+                    <table id="at-risk-loads-table" class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Reference #</th>
+                                <th>Driver</th>
+                                <th>Scheduled</th>
+                                <th>ETA</th>
+                                <th>Delay</th>
+                            </tr>
+                        </thead>
+                        <tbody id="at-risk-loads-body">
+                            <!-- Dynamically filled by JavaScript -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Map Preview -->
+        <div class="col-md-6">
+            <div class="card h-100">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i data-feather="map"></i> Active Loads Map
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div id="tracking-map" class="map-container"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row mb-4">
+        <!-- Performance Chart -->
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i data-feather="bar-chart-2"></i> Performance Trends
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="performance-chart" height="250"></canvas>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Quick Info -->
+        <div class="col-md-4">
+            <div class="row mb-4">
+                <div class="col-12">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="mb-0">
+                                <i data-feather="award"></i> Top Drivers
+                            </h5>
+                        </div>
+                        <div class="list-group list-group-flush" id="top-drivers-list">
+                            <!-- Dynamically filled by JavaScript -->
+                            <div class="list-group-item text-center">
+                                <div class="spinner-border spinner-border-sm" role="status">
+                                    <span class="visually-hidden">Loading...</span>
+                                </div>
+                                <span class="ms-2">Loading top drivers...</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="row">
+                <div class="col-12">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="mb-0">
+                                <i data-feather="bell"></i> Recent Notifications
+                            </h5>
+                        </div>
+                        <div class="list-group list-group-flush" id="recent-notifications">
+                            <!-- Dynamically filled by JavaScript -->
+                            <div class="list-group-item text-center">
+                                <div class="spinner-border spinner-border-sm" role="status">
+                                    <span class="visually-hidden">Loading...</span>
+                                </div>
+                                <span class="ms-2">Loading notifications...</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row mb-4">
+        <!-- Quick Actions -->
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i data-feather="zap"></i> Quick Actions
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="quick-actions">
+                        <a href="{{ url_for('loads.create_load') }}" class="btn btn-primary">
+                            <i data-feather="plus"></i> New Load
+                        </a>
+                        <a href="{{ url_for('loads.index') }}" class="btn btn-outline-primary">
+                            <i data-feather="list"></i> View All Loads
+                        </a>
+                        <a href="{{ url_for('drivers.scorecards') }}" class="btn btn-outline-primary">
+                            <i data-feather="award"></i> Driver Scorecards
+                        </a>
+                        <a href="{{ url_for('geofencing.index') }}" class="btn btn-outline-primary">
+                            <i data-feather="map-pin"></i> Manage Geofences
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Hidden success alert for milestones -->
+<div id="celebration-message" class="celebration-message mb-3 d-none"></div>
+{% endblock %}
+
+{% block scripts %}
+<!-- Include Dashboard Scripts -->
+<script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
+<script src="{{ url_for('static', filename='js/maps.js') }}"></script>
+<script src="{{ url_for('static', filename='js/tracking.js') }}"></script>
+<script src="{{ url_for('static', filename='js/animations.js') }}"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Set up refresh button
+        document.getElementById('refresh-dashboard').addEventListener('click', function() {
+            loadDashboardSummary();
+            loadAtRiskLoads();
+            
+            // Show button loading state
+            this.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Refreshing...';
+            this.disabled = true;
+            
+            // Reset button after 1 second
+            setTimeout(() => {
+                this.innerHTML = '<i data-feather="refresh-cw"></i> Refresh';
+                this.disabled = false;
+                feather.replace();
+            }, 1000);
+        });
+    });
+    
+    // Initialize map on the dashboard page
+    function initMap() {
+        // Regular map initialization
+        const mapElement = document.getElementById('tracking-map');
+        if (mapElement) {
+            map = new google.maps.Map(mapElement, {
+                center: { lat: 39.8283, lng: -98.5795 },
+                zoom: 4,
+                styles: [
+                    { elementType: "geometry", stylers: [{ color: "#242f3e" }] },
+                    { elementType: "labels.text.stroke", stylers: [{ color: "#242f3e" }] },
+                    { elementType: "labels.text.fill", stylers: [{ color: "#746855" }] },
+                    {
+                        featureType: "administrative.locality",
+                        elementType: "labels.text.fill",
+                        stylers: [{ color: "#d59563" }],
+                    },
+                    {
+                        featureType: "poi",
+                        elementType: "labels.text.fill",
+                        stylers: [{ color: "#d59563" }],
+                    },
+                    {
+                        featureType: "poi.park",
+                        elementType: "geometry",
+                        stylers: [{ color: "#263c3f" }],
+                    },
+                    {
+                        featureType: "poi.park",
+                        elementType: "labels.text.fill",
+                        stylers: [{ color: "#6b9a76" }],
+                    },
+                    {
+                        featureType: "road",
+                        elementType: "geometry",
+                        stylers: [{ color: "#38414e" }],
+                    },
+                    {
+                        featureType: "road",
+                        elementType: "geometry.stroke",
+                        stylers: [{ color: "#212a37" }],
+                    },
+                    {
+                        featureType: "road",
+                        elementType: "labels.text.fill",
+                        stylers: [{ color: "#9ca5b3" }],
+                    },
+                    {
+                        featureType: "road.highway",
+                        elementType: "geometry",
+                        stylers: [{ color: "#746855" }],
+                    },
+                    {
+                        featureType: "road.highway",
+                        elementType: "geometry.stroke",
+                        stylers: [{ color: "#1f2835" }],
+                    },
+                    {
+                        featureType: "road.highway",
+                        elementType: "labels.text.fill",
+                        stylers: [{ color: "#f3d19c" }],
+                    },
+                    {
+                        featureType: "transit",
+                        elementType: "geometry",
+                        stylers: [{ color: "#2f3948" }],
+                    },
+                    {
+                        featureType: "transit.station",
+                        elementType: "labels.text.fill",
+                        stylers: [{ color: "#d59563" }],
+                    },
+                    {
+                        featureType: "water",
+                        elementType: "geometry",
+                        stylers: [{ color: "#17263c" }],
+                    },
+                    {
+                        featureType: "water",
+                        elementType: "labels.text.fill",
+                        stylers: [{ color: "#515c6d" }],
+                    },
+                    {
+                        featureType: "water",
+                        elementType: "labels.text.stroke",
+                        stylers: [{ color: "#17263c" }],
+                    },
+                ],
+            });
+            
+            // Store map reference for tracking functionality
+            trackingMap = map;
+            
+            // Load active loads for the map
+            loadActiveLoads();
+        }
+    }
+</script>
+{% endblock %}

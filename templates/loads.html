@@ -1,0 +1,423 @@
+{% extends 'layout.html' %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">
+                        <i data-feather="box"></i> Load Management
+                    </h5>
+                    <div>
+                        <a href="{{ url_for('loads.create_load') }}" class="btn btn-primary">
+                            <i data-feather="plus"></i> New Load
+                        </a>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="row mb-3">
+                        <div class="col-md-8">
+                            <div class="input-group">
+                                <input type="text" class="form-control" id="load-search" placeholder="Search loads...">
+                                <button class="btn btn-outline-primary" type="button" id="search-btn">
+                                    <i data-feather="search"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <select class="form-select" id="status-filter">
+                                <option value="">All Statuses</option>
+                                <option value="scheduled">Scheduled</option>
+                                <option value="in_transit">In Transit</option>
+                                <option value="delivered">Delivered</option>
+                                <option value="cancelled">Cancelled</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <!-- PDF Upload Section -->
+                    <div class="card mb-4">
+                        <div class="card-header bg-light">
+                            <h6 class="mb-0">
+                                <i data-feather="upload"></i> Upload RateCon
+                            </h6>
+                        </div>
+                        <div class="card-body">
+                            <div id="upload-status" class="alert d-none"></div>
+                            
+                            <form id="ratecon-upload-form" enctype="multipart/form-data">
+                                <div id="drop-zone" class="mb-3">
+                                    <i data-feather="file-text" style="width: 48px; height: 48px;" class="mb-2"></i>
+                                    <p>Drag & drop your RateCon PDF here<br>or click to browse files</p>
+                                    
+                                    <div class="input-group mt-3 w-75 mx-auto">
+                                        <input type="file" class="form-control" id="ratecon-file" name="ratecon_file" accept=".pdf">
+                                        <button class="btn btn-primary" type="submit">
+                                            <i data-feather="upload"></i> Upload RateCon
+                                        </button>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                    
+                    <!-- Loads Table -->
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Reference #</th>
+                                    <th>Status</th>
+                                    <th>Driver</th>
+                                    <th>Pickup</th>
+                                    <th>Scheduled Pickup</th>
+                                    <th>Delivery</th>
+                                    <th>Scheduled Delivery</th>
+                                    <th>ETA</th>
+                                    <th>On Time</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="loads-table-body">
+                                <tr>
+                                    <td colspan="10" class="text-center">
+                                        <div class="spinner-border text-primary" role="status">
+                                            <span class="visually-hidden">Loading...</span>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    <!-- Pagination -->
+                    <div class="d-flex justify-content-between align-items-center mt-3">
+                        <div>
+                            <span id="pagination-info">Showing 0 of 0 loads</span>
+                        </div>
+                        <nav aria-label="Loads pagination">
+                            <ul class="pagination" id="loads-pagination">
+                                <li class="page-item disabled">
+                                    <a class="page-link" href="#" id="prev-page">Previous</a>
+                                </li>
+                                <li class="page-item disabled">
+                                    <a class="page-link" href="#" id="next-page">Next</a>
+                                </li>
+                            </ul>
+                        </nav>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Extracted Data Section (Initially Hidden) -->
+    <div id="extracted-data" class="row mb-4 d-none">
+        <div class="col-md-12">
+            <div class="card border-success">
+                <div class="card-header bg-success bg-opacity-25">
+                    <h5 class="mb-0">
+                        <i data-feather="file-text"></i> Extracted Data from RateCon
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-success">
+                        <i data-feather="check-circle"></i> Data successfully extracted from the PDF. You can now create a new load with this information.
+                    </div>
+                    
+                    <form id="extracted-load-form" action="{{ url_for('loads.create_load') }}" method="POST">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="reference-number" class="form-label">Reference Number</label>
+                                    <input type="text" class="form-control" id="reference-number" name="reference_number" required>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label for="client-id" class="form-label">Client</label>
+                                    <select class="form-select" id="client-id" name="client_id" required>
+                                        <option value="">Select Client</option>
+                                        <!-- Client options will be populated dynamically -->
+                                    </select>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label for="driver-id" class="form-label">Driver</label>
+                                    <select class="form-select" id="driver-id" name="driver_id">
+                                        <option value="">Select Driver</option>
+                                        <!-- Driver options will be populated dynamically -->
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="pickup-facility-id" class="form-label">Pickup Facility</label>
+                                    <select class="form-select" id="pickup-facility-id" name="pickup_facility_id" required>
+                                        <option value="">Select Pickup Facility</option>
+                                        <!-- Facility options will be populated dynamically -->
+                                    </select>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label for="scheduled-pickup-time" class="form-label">Scheduled Pickup Time</label>
+                                    <input type="datetime-local" class="form-control" id="scheduled-pickup-time" name="scheduled_pickup_time" required>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label for="delivery-facility-id" class="form-label">Delivery Facility</label>
+                                    <select class="form-select" id="delivery-facility-id" name="delivery_facility_id" required>
+                                        <option value="">Select Delivery Facility</option>
+                                        <!-- Facility options will be populated dynamically -->
+                                    </select>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label for="scheduled-delivery-time" class="form-label">Scheduled Delivery Time</label>
+                                    <input type="datetime-local" class="form-control" id="scheduled-delivery-time" name="scheduled_delivery_time" required>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="d-grid gap-2 col-md-6 mx-auto">
+                            <button type="submit" class="btn btn-primary">
+                                <i data-feather="save"></i> Create Load
+                            </button>
+                            <button type="button" class="btn btn-outline-secondary" id="cancel-extract">
+                                <i data-feather="x"></i> Cancel
+                            </button>
+                        </div>
+                        
+                        <!-- Hidden fields for coordinates -->
+                        <input type="hidden" id="pickup-lat" name="pickup_lat">
+                        <input type="hidden" id="pickup-lng" name="pickup_lng">
+                        <input type="hidden" id="delivery-lat" name="delivery_lat">
+                        <input type="hidden" id="delivery-lng" name="delivery_lng">
+                        <input type="hidden" id="pickup-address" name="pickup_address">
+                        <input type="hidden" id="delivery-address" name="delivery_address">
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/pdf_upload.js') }}"></script>
+<script src="{{ url_for('static', filename='js/animations.js') }}"></script>
+<script>
+    let currentPage = 1;
+    let totalPages = 1;
+    let statusFilter = '';
+    let searchTerm = '';
+    
+    document.addEventListener('DOMContentLoaded', function() {
+        // Load loads data
+        loadLoads();
+        
+        // Set up event listeners
+        document.getElementById('status-filter').addEventListener('change', function() {
+            statusFilter = this.value;
+            currentPage = 1;
+            loadLoads();
+        });
+        
+        document.getElementById('load-search').addEventListener('keyup', function(e) {
+            if (e.key === 'Enter') {
+                searchTerm = this.value;
+                currentPage = 1;
+                loadLoads();
+            }
+        });
+        
+        document.getElementById('search-btn').addEventListener('click', function() {
+            searchTerm = document.getElementById('load-search').value;
+            currentPage = 1;
+            loadLoads();
+        });
+        
+        document.getElementById('prev-page').addEventListener('click', function(e) {
+            e.preventDefault();
+            if (currentPage > 1) {
+                currentPage--;
+                loadLoads();
+            }
+        });
+        
+        document.getElementById('next-page').addEventListener('click', function(e) {
+            e.preventDefault();
+            if (currentPage < totalPages) {
+                currentPage++;
+                loadLoads();
+            }
+        });
+        
+        // Set up cancel button for extracted data
+        document.getElementById('cancel-extract').addEventListener('click', function() {
+            document.getElementById('extracted-data').classList.add('d-none');
+        });
+        
+        // Load initial clients, drivers, and facilities data
+        loadFormData();
+    });
+    
+    function loadLoads() {
+        const loadsTableBody = document.getElementById('loads-table-body');
+        loadsTableBody.innerHTML = `
+            <tr>
+                <td colspan="10" class="text-center">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                </td>
+            </tr>
+        `;
+        
+        let url = `/loads/data?page=${currentPage}`;
+        if (statusFilter) {
+            url += `&status=${statusFilter}`;
+        }
+        if (searchTerm) {
+            url += `&search=${encodeURIComponent(searchTerm)}`;
+        }
+        
+        fetch(url)
+            .then(response => response.json())
+            .then(data => {
+                loadsTableBody.innerHTML = '';
+                
+                if (data.loads.length === 0) {
+                    loadsTableBody.innerHTML = `
+                        <tr>
+                            <td colspan="10" class="text-center">No loads found</td>
+                        </tr>
+                    `;
+                    return;
+                }
+                
+                data.loads.forEach(load => {
+                    const row = document.createElement('tr');
+                    
+                    // Set row color based on status
+                    if (load.status === 'in_transit') {
+                        row.className = 'table-primary';
+                    } else if (load.status === 'delivered') {
+                        row.className = 'table-success';
+                    } else if (load.status === 'cancelled') {
+                        row.className = 'table-secondary';
+                    }
+                    
+                    // On-time badge
+                    let onTimeBadge = '';
+                    if (load.on_time_delivery === true) {
+                        onTimeBadge = '<span class="badge bg-success">On Time</span>';
+                    } else if (load.on_time_delivery === false) {
+                        onTimeBadge = '<span class="badge bg-danger">Late</span>';
+                    } else if (load.on_time_pickup === true) {
+                        onTimeBadge = '<span class="badge bg-success">Pickup On Time</span>';
+                    } else if (load.on_time_pickup === false) {
+                        onTimeBadge = '<span class="badge bg-danger">Pickup Late</span>';
+                    }
+                    
+                    // Status badge
+                    let statusBadge = '';
+                    if (load.status === 'scheduled') {
+                        statusBadge = '<span class="badge bg-info">Scheduled</span>';
+                    } else if (load.status === 'in_transit') {
+                        statusBadge = '<span class="badge bg-primary">In Transit</span>';
+                    } else if (load.status === 'delivered') {
+                        statusBadge = '<span class="badge bg-success">Delivered</span>';
+                    } else if (load.status === 'cancelled') {
+                        statusBadge = '<span class="badge bg-secondary">Cancelled</span>';
+                    }
+                    
+                    row.innerHTML = `
+                        <td>
+                            <a href="/loads/${load.id}" class="text-decoration-none">
+                                ${load.reference_number}
+                            </a>
+                        </td>
+                        <td>${statusBadge}</td>
+                        <td>${load.driver}</td>
+                        <td>${load.pickup}</td>
+                        <td>${formatDateTime(load.scheduled_pickup)}</td>
+                        <td>${load.delivery}</td>
+                        <td>${formatDateTime(load.scheduled_delivery)}</td>
+                        <td>${formatDateTime(load.current_eta)}</td>
+                        <td>${onTimeBadge}</td>
+                        <td>
+                            <a href="/loads/${load.id}" class="btn btn-sm btn-outline-primary">
+                                <i data-feather="eye"></i>
+                            </a>
+                        </td>
+                    `;
+                    
+                    loadsTableBody.appendChild(row);
+                });
+                
+                // Update pagination
+                currentPage = data.page;
+                totalPages = data.pages;
+                
+                updatePagination();
+                
+                // Reinitialize feather icons
+                feather.replace();
+            })
+            .catch(error => {
+                console.error('Error loading loads:', error);
+                loadsTableBody.innerHTML = `
+                    <tr>
+                        <td colspan="10" class="text-center text-danger">
+                            Error loading loads. Please try again.
+                        </td>
+                    </tr>
+                `;
+            });
+    }
+    
+    function updatePagination() {
+        document.getElementById('pagination-info').textContent = `Showing page ${currentPage} of ${totalPages}`;
+        
+        const prevPageBtn = document.getElementById('prev-page').parentElement;
+        const nextPageBtn = document.getElementById('next-page').parentElement;
+        
+        if (currentPage <= 1) {
+            prevPageBtn.classList.add('disabled');
+        } else {
+            prevPageBtn.classList.remove('disabled');
+        }
+        
+        if (currentPage >= totalPages) {
+            nextPageBtn.classList.add('disabled');
+        } else {
+            nextPageBtn.classList.remove('disabled');
+        }
+    }
+    
+    function loadFormData() {
+        // Load clients
+        fetch('/api/clients')
+            .then(response => response.json())
+            .catch(error => console.error('Error loading clients:', error));
+        
+        // Load drivers
+        fetch('/api/drivers')
+            .then(response => response.json())
+            .catch(error => console.error('Error loading drivers:', error));
+        
+        // Load facilities
+        fetch('/api/facilities')
+            .then(response => response.json())
+            .catch(error => console.error('Error loading facilities:', error));
+    }
+    
+    function formatDateTime(dateTimeStr) {
+        if (!dateTimeStr) return 'N/A';
+        
+        const date = new Date(dateTimeStr);
+        return date.toLocaleDateString() + ' ' + date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    }
+</script>
+{% endblock %}
