@@ -226,63 +226,155 @@ function loadPerformanceTrends() {
                 loadCounts.push(entry.loads);
             });
             
-            // Create the performance chart
+            // Create the Tesla-style performance chart
             const ctx = document.getElementById('performance-chart');
             if (ctx) {
+                // Define chart gradient fills
+                const chartContext = ctx.getContext('2d');
+                
+                // Create glowing mint green gradient for primary line
+                const primaryGradient = chartContext.createLinearGradient(0, 0, 0, 300);
+                primaryGradient.addColorStop(0, 'rgba(0, 196, 140, 0.5)');
+                primaryGradient.addColorStop(1, 'rgba(0, 196, 140, 0)');
+                
+                // Create glowing gold gradient for secondary line
+                const secondaryGradient = chartContext.createLinearGradient(0, 0, 0, 300);
+                secondaryGradient.addColorStop(0, 'rgba(255, 215, 0, 0.3)');
+                secondaryGradient.addColorStop(1, 'rgba(255, 215, 0, 0)');
+                
+                // Configure Chart.js with dark mode defaults
+                Chart.defaults.color = 'rgba(255, 255, 255, 0.7)';
+                Chart.defaults.borderColor = 'rgba(255, 255, 255, 0.1)';
+                
                 new Chart(ctx, {
                     type: 'line',
                     data: {
                         labels: dates,
                         datasets: [
                             {
-                                label: 'On-Time Pickup %',
-                                data: pickupPercentages,
-                                borderColor: 'rgba(54, 162, 235, 1)',
-                                backgroundColor: 'rgba(54, 162, 235, 0.2)',
-                                tension: 0.1,
+                                label: 'On-Time Delivery',
+                                data: deliveryPercentages,
+                                borderColor: '#00C48C', // FreightPace mint green
+                                backgroundColor: primaryGradient,
+                                borderWidth: 3,
+                                pointBackgroundColor: '#00C48C',
+                                pointBorderColor: '#00C48C',
+                                pointHoverBackgroundColor: '#FFFFFF',
+                                pointHoverBorderColor: '#00C48C',
+                                pointRadius: 4,
+                                pointHoverRadius: 6,
+                                tension: 0.4,
+                                fill: true,
                                 yAxisID: 'y'
                             },
                             {
-                                label: 'On-Time Delivery %',
-                                data: deliveryPercentages,
-                                borderColor: 'rgba(255, 99, 132, 1)',
-                                backgroundColor: 'rgba(255, 99, 132, 0.2)',
-                                tension: 0.1,
+                                label: 'On-Time Pickup',
+                                data: pickupPercentages,
+                                borderColor: '#FFD700', // Gold
+                                backgroundColor: secondaryGradient,
+                                borderWidth: 3,
+                                pointBackgroundColor: '#FFD700',
+                                pointBorderColor: '#FFD700',
+                                pointHoverBackgroundColor: '#FFFFFF',
+                                pointHoverBorderColor: '#FFD700',
+                                pointRadius: 4,
+                                pointHoverRadius: 6,
+                                tension: 0.4,
+                                fill: true,
                                 yAxisID: 'y'
                             },
                             {
                                 label: 'Total Loads',
                                 data: loadCounts,
-                                borderColor: 'rgba(75, 192, 192, 1)',
-                                backgroundColor: 'rgba(75, 192, 192, 0.2)',
-                                tension: 0.1,
+                                borderColor: 'rgba(255, 255, 255, 0.5)', // White with opacity
+                                borderWidth: 2,
+                                borderDash: [5, 5],
+                                pointBackgroundColor: 'rgba(255, 255, 255, 0.8)',
+                                pointBorderColor: 'rgba(255, 255, 255, 0.8)',
+                                pointRadius: 3,
+                                tension: 0.4,
+                                fill: false,
                                 yAxisID: 'y1'
                             }
                         ]
                     },
                     options: {
                         responsive: true,
+                        maintainAspectRatio: false,
                         interaction: {
                             mode: 'index',
                             intersect: false,
                         },
                         plugins: {
-                            title: {
-                                display: true,
-                                text: '30-Day Performance Trends'
+                            legend: {
+                                position: 'top',
+                                labels: {
+                                    boxWidth: 12,
+                                    usePointStyle: true,
+                                    pointStyle: 'circle',
+                                    padding: 20,
+                                    color: 'rgba(255, 255, 255, 0.7)'
+                                }
+                            },
+                            tooltip: {
+                                backgroundColor: 'rgba(30, 31, 37, 0.9)',
+                                titleColor: '#FFFFFF',
+                                bodyColor: '#FFFFFF',
+                                borderColor: 'rgba(0, 196, 140, 0.5)',
+                                borderWidth: 1,
+                                padding: 12,
+                                boxPadding: 6,
+                                usePointStyle: true,
+                                bodyFont: {
+                                    family: "'Inter', sans-serif"
+                                },
+                                titleFont: {
+                                    family: "'Inter', sans-serif",
+                                    weight: 'bold'
+                                }
                             }
                         },
                         scales: {
+                            x: {
+                                grid: {
+                                    color: 'rgba(255, 255, 255, 0.05)',
+                                    drawBorder: false
+                                },
+                                ticks: {
+                                    color: 'rgba(255, 255, 255, 0.5)',
+                                    font: {
+                                        family: "'Inter', sans-serif",
+                                        size: 10
+                                    }
+                                }
+                            },
                             y: {
                                 type: 'linear',
                                 display: true,
                                 position: 'left',
                                 title: {
                                     display: true,
-                                    text: 'Percentage'
+                                    text: 'ON-TIME PERCENTAGE',
+                                    color: 'rgba(255, 255, 255, 0.5)',
+                                    font: {
+                                        family: "'Inter', sans-serif",
+                                        size: 10,
+                                        weight: 'bold'
+                                    }
                                 },
                                 min: 0,
-                                max: 100
+                                max: 100,
+                                grid: {
+                                    color: 'rgba(255, 255, 255, 0.05)',
+                                    drawBorder: false
+                                },
+                                ticks: {
+                                    color: 'rgba(255, 255, 255, 0.5)',
+                                    font: {
+                                        family: "'Inter', sans-serif",
+                                        size: 10
+                                    }
+                                }
                             },
                             y1: {
                                 type: 'linear',
@@ -290,11 +382,26 @@ function loadPerformanceTrends() {
                                 position: 'right',
                                 title: {
                                     display: true,
-                                    text: 'Load Count'
+                                    text: 'LOAD COUNT',
+                                    color: 'rgba(255, 255, 255, 0.5)',
+                                    font: {
+                                        family: "'Inter', sans-serif",
+                                        size: 10,
+                                        weight: 'bold'
+                                    }
                                 },
                                 min: 0,
                                 grid: {
-                                    drawOnChartArea: false
+                                    drawOnChartArea: false,
+                                    color: 'rgba(255, 255, 255, 0.05)',
+                                    drawBorder: false
+                                },
+                                ticks: {
+                                    color: 'rgba(255, 255, 255, 0.5)',
+                                    font: {
+                                        family: "'Inter', sans-serif",
+                                        size: 10
+                                    }
                                 }
                             }
                         }

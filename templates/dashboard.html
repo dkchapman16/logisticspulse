@@ -202,95 +202,159 @@
         </div>
     </div>
     
-    <div class="row mb-4">
-        <!-- Performance Chart -->
-        <div class="col-md-8">
-            <div class="card">
-                <div class="card-header">
-                    <h5 class="mb-0">
-                        <i data-feather="bar-chart-2"></i> Performance Trends
-                    </h5>
-                </div>
-                <div class="card-body">
-                    <canvas id="performance-chart" height="250"></canvas>
-                </div>
+    <!-- Performance Charts and Driver Rankings - Tesla-style -->
+    <div class="dashboard-grid" style="grid-template-columns: 2fr 1fr;">
+        <!-- Performance Trends Chart -->
+        <div class="dashboard-card">
+            <div class="dashboard-card-header d-flex justify-content-between align-items-center">
+                <span>PERFORMANCE TRENDS</span>
+                <i data-feather="trending-up" style="color: var(--primary-action); opacity: 0.8;"></i>
+            </div>
+            <div class="dashboard-card-body">
+                <canvas id="performance-chart" height="250"></canvas>
             </div>
         </div>
         
-        <!-- Quick Info -->
-        <div class="col-md-4">
-            <div class="row mb-4">
-                <div class="col-12">
-                    <div class="card">
-                        <div class="card-header">
-                            <h5 class="mb-0">
-                                <i data-feather="award"></i> Top Drivers
-                            </h5>
-                        </div>
-                        <div class="list-group list-group-flush" id="top-drivers-list">
-                            <!-- Dynamically filled by JavaScript -->
-                            <div class="list-group-item text-center">
-                                <div class="spinner-border spinner-border-sm" role="status">
-                                    <span class="visually-hidden">Loading...</span>
-                                </div>
-                                <span class="ms-2">Loading top drivers...</span>
+        <!-- Driver Performance Rankings -->
+        <div class="dashboard-card">
+            <div class="dashboard-card-header d-flex justify-content-between align-items-center">
+                <span>TOP DRIVERS</span>
+                <i data-feather="award" style="color: var(--celebration-gold); opacity: 0.8;"></i>
+            </div>
+            <div class="dashboard-card-body p-0">
+                <!-- Driver Ranking List -->
+                <div class="list-group list-group-flush bg-transparent" id="top-drivers-list" style="border-radius: 0 0 16px 16px; overflow: hidden;">
+                    <!-- Driver #1 -->
+                    <div class="list-group-item driver-ranking-item d-flex justify-content-between align-items-center bg-transparent border-0 border-bottom border-dark px-3 py-3" style="border-color: var(--border-color) !important;">
+                        <div class="d-flex align-items-center">
+                            <div class="d-flex align-items-center justify-content-center me-3" style="width: 32px; height: 32px; background-color: var(--celebration-gold); border-radius: 50%; color: #000; font-weight: 700;">1</div>
+                            <div>
+                                <span style="color: var(--bright-text); font-weight: 600;">Jonathan C.</span>
+                                <div style="color: var(--neutral-text); font-size: 0.75rem;">20 on-time loads</div>
                             </div>
+                        </div>
+                        <div>
+                            <span style="color: var(--primary-action); font-size: 1.25rem; font-weight: 700;">94%</span>
                         </div>
                     </div>
-                </div>
-            </div>
-            
-            <div class="row">
-                <div class="col-12">
-                    <div class="card">
-                        <div class="card-header">
-                            <h5 class="mb-0">
-                                <i data-feather="bell"></i> Recent Notifications
-                            </h5>
-                        </div>
-                        <div class="list-group list-group-flush" id="recent-notifications">
-                            <!-- Dynamically filled by JavaScript -->
-                            <div class="list-group-item text-center">
-                                <div class="spinner-border spinner-border-sm" role="status">
-                                    <span class="visually-hidden">Loading...</span>
-                                </div>
-                                <span class="ms-2">Loading notifications...</span>
+                    
+                    <!-- Driver #2 -->
+                    <div class="list-group-item driver-ranking-item d-flex justify-content-between align-items-center bg-transparent border-0 border-bottom border-dark px-3 py-3" style="border-color: var(--border-color) !important;">
+                        <div class="d-flex align-items-center">
+                            <div class="d-flex align-items-center justify-content-center me-3" style="width: 32px; height: 32px; background-color: #C0C0C0; border-radius: 50%; color: #000; font-weight: 700;">2</div>
+                            <div>
+                                <span style="color: var(--bright-text); font-weight: 600;">Ryan T.</span>
+                                <div style="color: var(--neutral-text); font-size: 0.75rem;">18 on-time loads</div>
                             </div>
                         </div>
+                        <div>
+                            <span style="color: var(--primary-action); font-size: 1.25rem; font-weight: 700;">92%</span>
+                        </div>
+                    </div>
+                    
+                    <!-- Driver #3 -->
+                    <div class="list-group-item driver-ranking-item d-flex justify-content-between align-items-center bg-transparent border-0 border-bottom border-dark px-3 py-3" style="border-color: var(--border-color) !important;">
+                        <div class="d-flex align-items-center">
+                            <div class="d-flex align-items-center justify-content-center me-3" style="width: 32px; height: 32px; background-color: #CD7F32; border-radius: 50%; color: #000; font-weight: 700;">3</div>
+                            <div>
+                                <span style="color: var(--bright-text); font-weight: 600;">Alex M.</span>
+                                <div style="color: var(--neutral-text); font-size: 0.75rem;">15 on-time loads</div>
+                            </div>
+                        </div>
+                        <div>
+                            <span style="color: var(--primary-action); font-size: 1.25rem; font-weight: 700;">89%</span>
+                        </div>
+                    </div>
+                    
+                    <!-- Loading State (initially hidden) -->
+                    <div class="list-group-item text-center bg-transparent border-0 d-none">
+                        <div class="spinner-border spinner-border-sm text-primary" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                        <span class="ms-2" style="color: var(--neutral-text);">Loading top drivers...</span>
                     </div>
                 </div>
             </div>
         </div>
     </div>
     
-    <div class="row mb-4">
-        <!-- Quick Actions -->
-        <div class="col-md-12">
-            <div class="card">
-                <div class="card-header">
-                    <h5 class="mb-0">
-                        <i data-feather="zap"></i> Quick Actions
-                    </h5>
-                </div>
-                <div class="card-body">
-                    <div class="quick-actions">
-                        <a href="{{ url_for('loads.create_load') }}" class="btn btn-primary">
-                            <i data-feather="plus"></i> New Load
-                        </a>
-                        <a href="{{ url_for('loads.index') }}" class="btn btn-outline-primary">
-                            <i data-feather="list"></i> View All Loads
-                        </a>
-                        <a href="{{ url_for('drivers.scorecards') }}" class="btn btn-outline-primary">
-                            <i data-feather="award"></i> Driver Scorecards
-                        </a>
-                        <a href="{{ url_for('geofencing.index') }}" class="btn btn-outline-primary">
-                            <i data-feather="map-pin"></i> Manage Geofences
-                        </a>
+    <!-- Quick Actions - Tesla-style -->
+    <div class="dashboard-card mb-4">
+        <div class="dashboard-card-header d-flex justify-content-between align-items-center">
+            <span>QUICK ACTIONS</span>
+            <i data-feather="zap" style="color: var(--celebration-gold); opacity: 0.8;"></i>
+        </div>
+        <div class="dashboard-card-body">
+            <div class="d-flex flex-wrap gap-3">
+                <a href="{{ url_for('loads.create_load') }}" class="action-button">
+                    <div class="action-icon">
+                        <i data-feather="plus"></i>
                     </div>
-                </div>
+                    <div class="action-text">NEW LOAD</div>
+                </a>
+                
+                <a href="{{ url_for('loads.index') }}" class="action-button">
+                    <div class="action-icon">
+                        <i data-feather="list"></i>
+                    </div>
+                    <div class="action-text">VIEW LOADS</div>
+                </a>
+                
+                <a href="{{ url_for('drivers.scorecards') }}" class="action-button">
+                    <div class="action-icon">
+                        <i data-feather="award"></i>
+                    </div>
+                    <div class="action-text">SCORECARDS</div>
+                </a>
+                
+                <a href="{{ url_for('geofencing.index') }}" class="action-button">
+                    <div class="action-icon">
+                        <i data-feather="map-pin"></i>
+                    </div>
+                    <div class="action-text">GEOFENCES</div>
+                </a>
             </div>
         </div>
     </div>
+    
+    <style>
+        /* Tesla-style action buttons */
+        .action-button {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 1.5rem;
+            border-radius: 12px;
+            background-color: rgba(30, 31, 37, 0.7);
+            border: 1px solid var(--border-color);
+            color: var(--bright-text);
+            text-decoration: none;
+            transition: all 0.3s ease;
+            min-width: 130px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+        
+        .action-button:hover {
+            transform: translateY(-5px);
+            background-color: rgba(0, 196, 140, 0.1);
+            border-color: var(--primary-action);
+            box-shadow: 0 8px 20px rgba(0, 196, 140, 0.15);
+            color: var(--bright-text);
+        }
+        
+        .action-icon {
+            font-size: 1.5rem;
+            margin-bottom: 0.75rem;
+            color: var(--primary-action);
+            filter: drop-shadow(0 0 5px var(--primary-glow));
+        }
+        
+        .action-text {
+            font-size: 0.8rem;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+        }
+    </style>
 </div>
 
 <!-- Hidden success alert for milestones -->
