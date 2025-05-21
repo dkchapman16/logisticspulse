@@ -8,6 +8,24 @@ document.addEventListener('DOMContentLoaded', function() {
     loadAtRiskLoads();
     loadPerformanceTrends();
     
+    // Initialize streak tracker (simulated for demo)
+    initializeStreakTracker();
+    
+    // Apply slot machine effect to stats on initial load
+    setTimeout(() => {
+        // Get all elements with slot machine effect class
+        const slotElements = document.querySelectorAll('.slot-machine-effect');
+        slotElements.forEach(element => {
+            // Get current value and apply slot machine animation
+            const currentValue = element.textContent;
+            if (currentValue.includes('%')) {
+                showSlotMachineEffect(element, parseInt(currentValue), '', '%');
+            } else {
+                showSlotMachineEffect(element, currentValue);
+            }
+        });
+    }, 500);
+    
     // Set up refresh interval (every 5 minutes)
     setInterval(loadDashboardSummary, 300000);
     setInterval(loadAtRiskLoads, 300000);
@@ -291,7 +309,65 @@ function formatDate(dateStr) {
 
 // Play success sound for achievements
 function playSuccessSound() {
-    // This would play a success sound if needed
-    // For now, we'll just log it
-    console.log('Playing success sound');
+    // Use the success sound function from animations.js
+    if (typeof window.playSuccessSound === 'function') {
+        window.playSuccessSound();
+    } else {
+        console.log('Playing success sound');
+    }
+}
+
+// Initialize streak tracker with sample data (in a real app, this would come from the server)
+function initializeStreakTracker() {
+    const streakContainer = document.getElementById('streak-container');
+    if (!streakContainer) return;
+    
+    // In a real application, this would fetch actual streak data from the server
+    // For demo purposes, we'll use a static streak count
+    const streakCount = 7;
+    const streakCountElement = document.getElementById('streak-count');
+    
+    if (streakCount > 0) {
+        // Show the streak container
+        streakContainer.classList.remove('d-none');
+        
+        // Set the streak count
+        if (streakCountElement) {
+            streakCountElement.textContent = streakCount;
+        }
+        
+        // Calculate progress to next milestone
+        const nextMilestone = streakCount >= 10 ? 15 : streakCount >= 5 ? 10 : 5;
+        const progress = (streakCount % 5) / 5 * 100;
+        
+        // Update progress bar
+        const progressBar = streakContainer.querySelector('.progress-bar');
+        if (progressBar) {
+            progressBar.style.width = `${progress}%`;
+            progressBar.setAttribute('aria-valuenow', progress);
+        }
+        
+        // Update next milestone text
+        const nextMilestoneElement = streakContainer.querySelector('small.text-muted.text-end');
+        if (nextMilestoneElement) {
+            nextMilestoneElement.textContent = `Next milestone: ${nextMilestone} days`;
+        }
+        
+        // Add fire emoji animation
+        animateStreakFire();
+    }
+}
+
+// Animate the streak fire icon
+function animateStreakFire() {
+    const fireIcon = document.querySelector('.streak-fire i');
+    if (!fireIcon) return;
+    
+    // Add pulsing animation
+    setInterval(() => {
+        fireIcon.classList.add('pulse-animation');
+        setTimeout(() => {
+            fireIcon.classList.remove('pulse-animation');
+        }, 1000);
+    }, 3000);
 }

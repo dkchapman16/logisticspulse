@@ -73,11 +73,13 @@ function showConfetti() {
 // Create confetti particles
 function createConfettiParticles() {
     const particleCount = 150;
+    // Use FreightPace brand colors from the creative vision
     const colors = [
-        '#f44336', '#e91e63', '#9c27b0', '#673ab7', 
-        '#3f51b5', '#2196f3', '#03a9f4', '#00bcd4', 
-        '#009688', '#4caf50', '#8bc34a', '#cddc39', 
-        '#ffeb3b', '#ffc107', '#ff9800', '#ff5722'
+        '#00C48C', // Mint Green (Primary Action) 
+        '#FFD700', // Celebration Gold
+        '#1E1F25', // Graphite Black (Secondary Accent)
+        '#FFFFFF', // White
+        '#FF5757'  // Punch Red (Highlight Alert)
     ];
     
     for (let i = 0; i < particleCount; i++) {
@@ -185,9 +187,32 @@ function showSlotMachineEffect(container, finalValue, prefix = '', suffix = '') 
 
 // Play slot machine sound effect
 function playSlotMachineSound() {
-    // This would play a slot machine sound if needed
-    // For now, we'll just log it
-    console.log('Playing slot machine sound');
+    const audio = new Audio();
+    audio.src = 'https://freesound.org/data/previews/337/337049_3232293-lq.mp3'; // Slot machine sound
+    audio.volume = 0.5;
+    audio.play().catch(error => {
+        console.log('Audio playback prevented by browser: ' + error);
+    });
+}
+
+// Play success sound effect
+function playSuccessSound() {
+    const audio = new Audio();
+    audio.src = 'https://freesound.org/data/previews/320/320654_5260872-lq.mp3'; // Success chime
+    audio.volume = 0.5;
+    audio.play().catch(error => {
+        console.log('Audio playback prevented by browser: ' + error);
+    });
+}
+
+// Play coin sound effect for achievements
+function playCoinSound() {
+    const audio = new Audio();
+    audio.src = 'https://freesound.org/data/previews/511/511484_9353313-lq.mp3'; // Coin sound
+    audio.volume = 0.5;
+    audio.play().catch(error => {
+        console.log('Audio playback prevented by browser: ' + error);
+    });
 }
 
 // Pulse animation for important elements
