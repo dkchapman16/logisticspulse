@@ -1,13 +1,19 @@
 /* Custom styles for FreightPace - On-Time Delivery Tracker */
 
-/* Color variables based on creative vision */
+/* Color variables based on creative vision - Tesla dark mode inspired */
 :root {
     --primary-action: #00C48C; /* Mint Green - used for buttons, on-time badges, positive feedback */
+    --primary-glow: rgba(0, 196, 140, 0.3); /* Glow effect for primary action */
     --secondary-accent: #1E1F25; /* Graphite Black - headers, side nav, UI containers */
     --highlight-alert: #FF5757; /* Punch Red - late alerts, risk warnings, missed milestones */
     --celebration-gold: #FFD700; /* Gold Yellow - confetti pops, badge rewards, slot machine wins */
-    --background: #F9FAFB; /* Off White - clean background */
-    --neutral-text: #4B5563; /* Slate Gray - dates, table labels, secondary UI text */
+    --background: #0E1117; /* Dark background - almost black */
+    --card-background: #13151D; /* Slightly lighter than background for cards */
+    --neutral-text: #8F96A3; /* Muted gray - dates, table labels, secondary UI text */
+    --bright-text: #FFFFFF; /* Bright white for primary text */
+    --dim-text: #565D68; /* Very dim text for less important items */
+    --border-color: #2A2E38; /* Subtle border color */
+    --map-highlight: rgba(0, 196, 140, 0.2); /* Map highlight color */
     
     /* Legacy colors - kept for backward compatibility */
     --primary-blue: #00C48C; /* Replaced with mint green */
@@ -19,16 +25,136 @@
     --light-gray: #F9FAFB;
 }
 
-/* Global styles */
+/* Global styles - Tesla-inspired dark mode */
 body {
     min-height: 100vh;
     display: flex;
     flex-direction: column;
     font-family: 'Inter', sans-serif;
+    background-color: var(--background);
+    color: var(--bright-text);
 }
 
 main {
     flex: 1;
+    padding: 1.5rem;
+}
+
+/* Container styling */
+.container, .container-fluid {
+    padding: 0 1.5rem;
+}
+
+/* Custom scrollbar for dark theme */
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: var(--background);
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--border-color);
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: var(--primary-action);
+}
+
+/* Tesla-style circular metrics */
+.circular-metric {
+    position: relative;
+    width: 150px;
+    height: 150px;
+    margin: 0 auto;
+}
+
+.circular-metric-value {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: var(--primary-action);
+    z-index: 3;
+    text-shadow: 0 0 10px var(--primary-glow);
+}
+
+.circular-metric-label {
+    position: absolute;
+    bottom: -25px;
+    left: 0;
+    right: 0;
+    text-align: center;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--neutral-text);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.circular-metric svg {
+    transform: rotate(-90deg);
+    overflow: visible;
+}
+
+.circular-metric circle {
+    fill: none;
+    stroke-width: 8;
+    stroke-linecap: round;
+}
+
+.circular-metric .bg-circle {
+    stroke: rgba(255, 255, 255, 0.1);
+}
+
+.circular-metric .progress-circle {
+    stroke: var(--primary-action);
+    stroke-dasharray: 440;
+    stroke-dashoffset: calc(440 - (440 * var(--percent)) / 100);
+    filter: drop-shadow(0 0 5px var(--primary-glow));
+    transition: stroke-dashoffset 1s ease;
+}
+
+/* Dashboard grid layout */
+.dashboard-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 1.5rem;
+}
+
+.dashboard-card {
+    background-color: var(--card-background);
+    border-radius: 16px;
+    border: 1px solid var(--border-color);
+    overflow: hidden;
+    transition: all 0.3s ease;
+    height: 100%;
+}
+
+.dashboard-card:hover {
+    border-color: var(--primary-action);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    transform: translateY(-4px);
+}
+
+.dashboard-card-header {
+    padding: 1.25rem;
+    font-size: 1rem;
+    color: var(--bright-text);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    border-bottom: 1px solid var(--border-color);
+    font-weight: 600;
+}
+
+.dashboard-card-body {
+    padding: 1.25rem;
 }
 
 /* Style the Inter font usage */
@@ -472,29 +598,123 @@ p, a, span, div, button, input, select, textarea {
     font-weight: 600;
 }
 
-/* Card styling for the modern Tesla-like dashboard feel */
+/* Card styling for the Tesla-like dashboard feel */
 .card {
     border: none;
-    border-radius: 12px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    border-radius: 16px;
+    background-color: var(--card-background);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
     transition: all 0.3s ease;
     overflow: hidden;
+    margin-bottom: 1.5rem;
+    backdrop-filter: blur(10px);
+    border: 1px solid var(--border-color);
 }
 
 .card:hover {
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    border-color: var(--primary-action);
     transform: translateY(-4px);
 }
 
 .card-header {
-    background-color: var(--secondary-accent);
-    color: white;
+    background-color: transparent;
+    color: var(--bright-text);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    font-size: 0.85rem;
+    padding: 1.25rem 1.5rem;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.card-body {
+    padding: 1.5rem;
+}
+
+/* Dashboard stat cards - glowing Tesla-like appearance */
+.stats-card {
+    background-color: var(--card-background);
+    border-radius: 16px;
+    color: var(--bright-text);
+    padding: 1.75rem;
+    position: relative;
+    overflow: hidden;
+    border: 1px solid var(--border-color);
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+}
+
+.stats-card .stats-icon {
+    position: absolute;
+    top: 1.25rem;
+    right: 1.25rem;
+    color: var(--primary-action);
+    font-size: 1.5rem;
+    opacity: 0.7;
+}
+
+.stats-card h2 {
+    font-size: 3rem;
     font-weight: 700;
+    margin-bottom: 0.5rem;
+    color: var(--primary-action);
+    text-shadow: 0 0 15px var(--primary-glow);
+}
+
+.stats-card .progress {
+    background-color: rgba(255, 255, 255, 0.1);
+    height: 8px;
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.stats-card .progress-bar {
+    background-color: var(--primary-action);
+    box-shadow: 0 0 10px var(--primary-glow);
+}
+
+/* Dashboard metrics and visualization cards */
+.metric-card {
+    position: relative;
+    border-radius: 16px;
+    overflow: hidden;
+    background-color: var(--card-background);
+    border: 1px solid var(--border-color);
+}
+
+.metric-card-header {
+    padding: 1rem 1.5rem;
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--bright-text);
     text-transform: uppercase;
     letter-spacing: 0.5px;
+}
+
+.metric-card-value {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: var(--primary-action);
+    text-shadow: 0 0 10px var(--primary-glow);
+    padding: 0.5rem 1.5rem 1.5rem;
+}
+
+.metric-card-desc {
     font-size: 0.9rem;
-    padding: 1rem;
-    border-bottom: none;
+    color: var(--neutral-text);
+    padding: 0 1.5rem 1.5rem;
+}
+
+.metric-card-icon {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    color: var(--primary-action);
+    opacity: 0.7;
 }
 
 /* Badge styling */

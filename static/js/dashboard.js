@@ -36,22 +36,36 @@ function loadDashboardSummary() {
     fetch('/api/dashboard/summary')
         .then(response => response.json())
         .then(data => {
-            // Update active loads count
-            document.getElementById('active-loads-count').textContent = data.active_loads;
+            // Update active loads count with slot machine effect
+            const activeLoadsElement = document.getElementById('active-loads-count');
+            if (activeLoadsElement) {
+                showSlotMachineEffect(activeLoadsElement, data.active_loads);
+            }
             
-            // Update on-time percentages
-            document.getElementById('on-time-pickup-percentage').textContent = data.on_time.pickup_percentage + '%';
-            document.getElementById('on-time-delivery-percentage').textContent = data.on_time.delivery_percentage + '%';
-            
-            // Update pickup progress bar
-            const pickupProgressBar = document.getElementById('pickup-progress');
-            pickupProgressBar.style.width = data.on_time.pickup_percentage + '%';
-            pickupProgressBar.setAttribute('aria-valuenow', data.on_time.pickup_percentage);
-            
-            // Update delivery progress bar
-            const deliveryProgressBar = document.getElementById('delivery-progress');
-            deliveryProgressBar.style.width = data.on_time.delivery_percentage + '%';
-            deliveryProgressBar.setAttribute('aria-valuenow', data.on_time.delivery_percentage);
+            // Update on-time percentages with Tesla-style circular progress
+            const onTimeDeliveryElement = document.getElementById('on-time-delivery-percentage');
+            if (onTimeDeliveryElement) {
+                const percentValue = data.on_time.delivery_percentage;
+                onTimeDeliveryElement.textContent = percentValue;
+                
+                // Find the parent circular-metric element and update the --percent CSS variable
+                const circularMetric = onTimeDeliveryElement.closest('.circular-metric');
+                if (circularMetric) {
+                    circularMetric.style.setProperty('--percent', percentValue);
+                }
+                
+                // Apply glowing effect based on percentage
+                if (percentValue >= 90) {
+                    onTimeDeliveryElement.style.color = 'var(--primary-action)';
+                    onTimeDeliveryElement.style.textShadow = '0 0 15px var(--primary-glow)';
+                } else if (percentValue >= 75) {
+                    onTimeDeliveryElement.style.color = 'var(--celebration-gold)';
+                    onTimeDeliveryElement.style.textShadow = '0 0 15px rgba(255, 215, 0, 0.4)';
+                } else {
+                    onTimeDeliveryElement.style.color = 'var(--highlight-alert)';
+                    onTimeDeliveryElement.style.textShadow = '0 0 15px rgba(255, 87, 87, 0.4)';
+                }
+            }
             
             // Set appropriate colors based on percentages
             if (data.on_time.pickup_percentage >= 90) {

@@ -18,15 +18,15 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
-    <!-- Navigation Header -->
-    <nav class="navbar navbar-expand-lg navbar-dark mb-4" style="background-color: var(--secondary-accent);">
+    <!-- Tesla-Inspired Navigation Header -->
+    <nav class="navbar navbar-expand-lg mb-4" style="background-color: var(--background); border-bottom: 1px solid var(--border-color);">
         <div class="container-fluid">
             <a class="navbar-brand fw-bold" href="{{ url_for('dashboard.index') }}" style="display: flex; align-items: center;">
-                <i data-feather="truck" style="margin-right: 8px; color: var(--primary-action);"></i>
-                <span style="font-size: 1.4rem;">FreightPace</span>
-                <span class="ms-2 text-muted" style="font-size: 0.75rem; font-weight: 400; letter-spacing: 0.5px;">TURN PRECISION INTO PERFORMANCE</span>
+                <i data-feather="truck" style="margin-right: 12px; color: var(--primary-action); filter: drop-shadow(0 0 8px var(--primary-glow));"></i>
+                <span style="font-size: 1.5rem; color: var(--bright-text);">FreightPace</span>
+                <span class="ms-2" style="color: var(--neutral-text); font-size: 0.75rem; font-weight: 500; letter-spacing: 1px;">PRECISION TO PERFORMANCE</span>
             </a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation" style="border-color: var(--border-color);">
                 <span class="navbar-toggler-icon"></span>
             </button>
             <div class="collapse navbar-collapse" id="navbarNav">

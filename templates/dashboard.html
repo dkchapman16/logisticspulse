@@ -28,113 +28,176 @@
         </div>
     </div>
 
-    <div class="row mb-4">
-        <div class="col-md-12">
-            <div class="card">
-                <div class="card-header d-flex justify-content-between align-items-center">
-                    <h5 class="mb-0">
-                        <i data-feather="activity"></i> Performance Dashboard
-                    </h5>
+    <!-- Tesla-style Dashboard Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h4 class="mb-0">LOGISTICS DASHBOARD</h4>
+        <button class="btn btn-sm btn-primary px-3" id="refresh-dashboard">
+            <i data-feather="refresh-cw"></i> REFRESH
+        </button>
+    </div>
+
+    <!-- Tesla-style Dashboard Grid -->
+    <div class="dashboard-grid">
+        <!-- On-Time Percentage Metric -->
+        <div class="dashboard-card">
+            <div class="dashboard-card-header d-flex justify-content-between align-items-center">
+                <span>ON-TIME RATE</span>
+                <i data-feather="clock" style="color: var(--primary-action); opacity: 0.8;"></i>
+            </div>
+            <div class="dashboard-card-body">
+                <div class="circular-metric" style="--percent: 87;">
+                    <div class="circular-metric-value"><span id="on-time-delivery-percentage">87</span>%</div>
+                    <svg viewBox="0 0 160 160" width="160" height="160">
+                        <circle r="70" cx="80" cy="80" class="bg-circle" />
+                        <circle r="70" cx="80" cy="80" class="progress-circle" />
+                    </svg>
+                </div>
+            </div>
+        </div>
+
+        <!-- Late Shipments Metric -->
+        <div class="dashboard-card">
+            <div class="dashboard-card-header d-flex justify-content-between align-items-center">
+                <span>LATE SHIPMENTS</span>
+                <i data-feather="alert-circle" style="color: var(--highlight-alert); opacity: 0.8;"></i>
+            </div>
+            <div class="dashboard-card-body">
+                <div class="d-flex align-items-center mb-3">
+                    <div class="me-3">
+                        <div style="width: 12px; height: 12px; border-radius: 50%; background-color: var(--highlight-alert);"></div>
+                    </div>
                     <div>
-                        <button class="btn btn-sm btn-primary" id="refresh-dashboard">
-                            <i data-feather="refresh-cw"></i> Refresh
-                        </button>
+                        <h2 id="late-loads-count" class="mb-0 slot-machine-effect" style="font-size: 3rem; color: var(--highlight-alert); text-shadow: 0 0 10px rgba(255, 87, 87, 0.4);">5</h2>
                     </div>
                 </div>
-                <div class="card-body">
-                    <div class="row">
-                        <!-- Active Loads with gamified UI -->
-                        <div class="col-md-4">
-                            <div class="stats-card">
-                                <i data-feather="truck" class="stats-icon"></i>
-                                <div class="d-flex flex-column justify-content-center h-100">
-                                    <h6 class="text-uppercase mb-2 text-muted">Active Loads</h6>
-                                    <h2 id="active-loads-count" class="mb-0 display-4 fw-bold slot-machine-effect">0</h2>
-                                    <div class="mt-3 text-muted">
-                                        <small><i data-feather="trending-up" style="width: 14px; height: 14px;"></i> Manage your fleet</small>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <!-- On-Time Pickup with modernized UI -->
-                        <div class="col-md-4">
-                            <div class="stats-card">
-                                <i data-feather="package" class="stats-icon"></i>
-                                <div class="d-flex flex-column justify-content-center h-100">
-                                    <h6 class="text-uppercase mb-2 text-muted">On-Time Pickup</h6>
-                                    <h2 id="on-time-pickup-percentage" class="mb-0 display-4 fw-bold slot-machine-effect">0%</h2>
-                                    <div class="progress mt-3" style="height: 8px; border-radius: 4px;">
-                                        <div id="pickup-progress" class="progress-bar bg-success" role="progressbar" style="width: 0%;" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <!-- On-Time Delivery with modernized UI -->
-                        <div class="col-md-4">
-                            <div class="stats-card">
-                                <i data-feather="check-circle" class="stats-icon"></i>
-                                <div class="d-flex flex-column justify-content-center h-100">
-                                    <h6 class="text-uppercase mb-2 text-muted">On-Time Delivery</h6>
-                                    <h2 id="on-time-delivery-percentage" class="mb-0 display-4 fw-bold slot-machine-effect">0%</h2>
-                                    <div class="progress mt-3" style="height: 8px; border-radius: 4px;">
-                                        <div id="delivery-progress" class="progress-bar bg-success" role="progressbar" style="width: 0%;" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
+                <div class="mt-3">
+                    <div id="late-trend-chart" style="height: 50px;">
+                        <!-- Mini chart goes here -->
+                        <svg width="100%" height="100%" viewBox="0 0 200 50">
+                            <path d="M0,40 L20,35 L40,38 L60,30 L80,32 L100,25 L120,28 L140,20 L160,22 L180,15 L200,18" 
+                                  fill="none" 
+                                  stroke-width="2" 
+                                  stroke="#FFD700" 
+                                  style="filter: drop-shadow(0 0 3px rgba(255, 215, 0, 0.5));"/>
+                        </svg>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Total Deliveries Metric -->
+        <div class="dashboard-card">
+            <div class="dashboard-card-header d-flex justify-content-between align-items-center">
+                <span>DELIVERIES</span>
+                <i data-feather="package" style="color: var(--primary-action); opacity: 0.8;"></i>
+            </div>
+            <div class="dashboard-card-body text-center">
+                <div class="d-flex justify-content-center align-items-center" style="height: 120px;">
+                    <h2 id="active-loads-count" class="mb-0 display-4 fw-bold slot-machine-effect" style="font-size: 4rem; color: var(--primary-action); text-shadow: 0 0 15px var(--primary-glow);">120</h2>
+                </div>
+                <div class="mt-3 d-flex justify-content-between">
+                    <div class="text-start">
+                        <h6 class="mb-1 text-neutral-text">DRIVERS</h6>
+                        <span style="color: var(--bright-text);">34</span>
+                    </div>
+                    <div class="text-end">
+                        <h6 class="mb-1 text-neutral-text">TOP DRIVER</h6>
+                        <span style="color: var(--celebration-gold);">Ryan (29)</span>
                     </div>
                 </div>
             </div>
         </div>
     </div>
     
-    <div class="row mb-4">
-        <!-- At-Risk Loads -->
-        <div class="col-md-6">
-            <div class="card h-100">
-                <div class="card-header">
-                    <h5 class="mb-0">
-                        <i data-feather="alert-triangle"></i> Loads At Risk
-                    </h5>
-                </div>
-                <div class="card-body">
-                    <div id="no-at-risk-loads" class="text-center py-4 d-none">
-                        <i data-feather="check-circle" class="text-success mb-3" style="width: 48px; height: 48px;"></i>
-                        <h5>No Loads At Risk</h5>
-                        <p class="text-muted">All deliveries are on track</p>
-                    </div>
-                    
-                    <table id="at-risk-loads-table" class="table table-hover">
-                        <thead>
-                            <tr>
-                                <th>Reference #</th>
-                                <th>Driver</th>
-                                <th>Scheduled</th>
-                                <th>ETA</th>
-                                <th>Delay</th>
-                            </tr>
-                        </thead>
-                        <tbody id="at-risk-loads-body">
-                            <!-- Dynamically filled by JavaScript -->
-                        </tbody>
-                    </table>
+    <!-- Map and At-Risk Loads Section -->
+    <div class="dashboard-grid" style="grid-template-columns: 1fr 1fr;">
+        <!-- Active Loads Map with Tesla-style dark theme -->
+        <div class="dashboard-card" style="min-height: 400px;">
+            <div class="dashboard-card-header d-flex justify-content-between align-items-center">
+                <span>ACTIVE LOADS MAP</span>
+                <i data-feather="map-pin" style="color: var(--primary-action); opacity: 0.8;"></i>
+            </div>
+            <div class="dashboard-card-body p-0">
+                <div id="tracking-map" style="height: 360px; border-radius: 0 0 16px 16px; overflow: hidden;"></div>
+                <div class="position-absolute" style="bottom: 20px; left: 20px; z-index: 100;">
+                    <button class="btn btn-sm btn-primary" style="backdrop-filter: blur(10px); background-color: rgba(0, 196, 140, 0.2); border: 1px solid var(--primary-action);">
+                        <i data-feather="truck" style="width: 16px; height: 16px;"></i> TRACK
+                    </button>
                 </div>
             </div>
         </div>
         
-        <!-- Map Preview -->
-        <div class="col-md-6">
-            <div class="card h-100">
-                <div class="card-header">
-                    <h5 class="mb-0">
-                        <i data-feather="map"></i> Active Loads Map
-                    </h5>
+        <!-- At-Risk Loads in Tesla-style dark theme -->
+        <div class="dashboard-card">
+            <div class="dashboard-card-header d-flex justify-content-between align-items-center">
+                <span>LOADS AT RISK</span>
+                <i data-feather="alert-triangle" style="color: var(--highlight-alert); opacity: 0.8;"></i>
+            </div>
+            <div class="dashboard-card-body" style="max-height: 360px; overflow-y: auto;">
+                <div id="no-at-risk-loads" class="text-center py-4 d-none">
+                    <i data-feather="check-circle" style="color: var(--primary-action); width: 48px; height: 48px; margin-bottom: 1rem;"></i>
+                    <h5 style="color: var(--bright-text);">No Loads At Risk</h5>
+                    <p style="color: var(--neutral-text);">All deliveries are on track</p>
                 </div>
-                <div class="card-body">
-                    <div id="tracking-map" class="map-container"></div>
+                
+                <div id="at-risk-loads-content">
+                    <!-- Miami to Atlanta -->
+                    <div class="at-risk-load-item mb-3 p-3" style="background-color: rgba(255, 87, 87, 0.1); border-radius: 8px; border-left: 3px solid var(--highlight-alert);">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <span style="color: var(--bright-text); font-weight: 600;">REF-2023-089</span>
+                            <span class="badge" style="background-color: var(--highlight-alert);">Delayed 32m</span>
+                        </div>
+                        <div class="d-flex justify-content-between mb-2">
+                            <div>
+                                <div style="color: var(--neutral-text); font-size: 0.8rem;">ORIGIN-DESTINATION</div>
+                                <div style="color: var(--bright-text);">Miami, FL → Atlanta, GA</div>
+                            </div>
+                            <div class="text-end">
+                                <div style="color: var(--neutral-text); font-size: 0.8rem;">DRIVER</div>
+                                <div style="color: var(--bright-text);">Jonathan C.</div>
+                            </div>
+                        </div>
+                        <div class="progress" style="height: 4px; background-color: rgba(255, 255, 255, 0.1);">
+                            <div class="progress-bar" role="progressbar" style="width: 75%; background-color: var(--highlight-alert);" aria-valuenow="75" aria-valuemin="0" aria-valuemax="100"></div>
+                        </div>
+                    </div>
+                    
+                    <!-- Chicago to Detroit -->
+                    <div class="at-risk-load-item mb-3 p-3" style="background-color: rgba(255, 215, 0, 0.1); border-radius: 8px; border-left: 3px solid var(--celebration-gold);">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <span style="color: var(--bright-text); font-weight: 600;">REF-2023-094</span>
+                            <span class="badge" style="background-color: var(--celebration-gold); color: #000;">At Risk 12m</span>
+                        </div>
+                        <div class="d-flex justify-content-between mb-2">
+                            <div>
+                                <div style="color: var(--neutral-text); font-size: 0.8rem;">ORIGIN-DESTINATION</div>
+                                <div style="color: var(--bright-text);">Chicago, IL → Detroit, MI</div>
+                            </div>
+                            <div class="text-end">
+                                <div style="color: var(--neutral-text); font-size: 0.8rem;">DRIVER</div>
+                                <div style="color: var(--bright-text);">Alex R.</div>
+                            </div>
+                        </div>
+                        <div class="progress" style="height: 4px; background-color: rgba(255, 255, 255, 0.1);">
+                            <div class="progress-bar" role="progressbar" style="width: 82%; background-color: var(--celebration-gold);" aria-valuenow="82" aria-valuemin="0" aria-valuemax="100"></div>
+                        </div>
+                    </div>
                 </div>
+                
+                <table id="at-risk-loads-table" class="table table-hover d-none" style="color: var(--bright-text); margin-top: 1rem;">
+                    <thead>
+                        <tr style="color: var(--neutral-text); border-color: var(--border-color);">
+                            <th>Reference #</th>
+                            <th>Driver</th>
+                            <th>Scheduled</th>
+                            <th>ETA</th>
+                            <th>Delay</th>
+                        </tr>
+                    </thead>
+                    <tbody id="at-risk-loads-body">
+                        <!-- Dynamically filled by JavaScript -->
+                    </tbody>
+                </table>
             </div>
         </div>
     </div>
