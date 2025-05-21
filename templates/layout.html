@@ -3,11 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>On-Time Delivery Tracker</title>
+    <title>FreightPace | Turn precision into performance</title>
     <!-- Bootstrap CSS -->
     <link rel="stylesheet" href="https://cdn.replit.com/agent/bootstrap-agent-dark-theme.min.css">
     <!-- Feather Icons -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/feather-icons/dist/feather.min.css">
+    <!-- Google Fonts - Inter -->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
     <!-- Custom CSS -->
     <link rel="stylesheet" href="{{ url_for('static', filename='css/custom.css') }}">
     <!-- Google Maps JavaScript API -->
@@ -17,10 +19,12 @@
 </head>
 <body>
     <!-- Navigation Header -->
-    <nav class="navbar navbar-expand-lg navbar-dark bg-dark mb-4">
+    <nav class="navbar navbar-expand-lg navbar-dark mb-4" style="background-color: var(--secondary-accent);">
         <div class="container-fluid">
-            <a class="navbar-brand" href="{{ url_for('dashboard.index') }}">
-                <i data-feather="truck"></i> On-Time Delivery Tracker
+            <a class="navbar-brand fw-bold" href="{{ url_for('dashboard.index') }}" style="display: flex; align-items: center;">
+                <i data-feather="truck" style="margin-right: 8px; color: var(--primary-action);"></i>
+                <span style="font-size: 1.4rem;">FreightPace</span>
+                <span class="ms-2 text-muted" style="font-size: 0.75rem; font-weight: 400; letter-spacing: 0.5px;">TURN PRECISION INTO PERFORMANCE</span>
             </a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>

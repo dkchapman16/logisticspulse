@@ -1,14 +1,22 @@
-/* Custom styles for On-Time Delivery Tracker */
+/* Custom styles for FreightPace - On-Time Delivery Tracker */
 
-/* Color variables */
+/* Color variables based on creative vision */
 :root {
-    --primary-blue: #1a73e8;
-    --success-green: #4caf50;
-    --warning-yellow: #ff9800;
-    --danger-red: #f44336;
-    --dark-gray: #212529;
-    --medium-gray: #6c757d;
-    --light-gray: #f8f9fa;
+    --primary-action: #00C48C; /* Mint Green - used for buttons, on-time badges, positive feedback */
+    --secondary-accent: #1E1F25; /* Graphite Black - headers, side nav, UI containers */
+    --highlight-alert: #FF5757; /* Punch Red - late alerts, risk warnings, missed milestones */
+    --celebration-gold: #FFD700; /* Gold Yellow - confetti pops, badge rewards, slot machine wins */
+    --background: #F9FAFB; /* Off White - clean background */
+    --neutral-text: #4B5563; /* Slate Gray - dates, table labels, secondary UI text */
+    
+    /* Legacy colors - kept for backward compatibility */
+    --primary-blue: #00C48C; /* Replaced with mint green */
+    --success-green: #00C48C;
+    --warning-yellow: #FFD700;
+    --danger-red: #FF5757;
+    --dark-gray: #1E1F25;
+    --medium-gray: #4B5563;
+    --light-gray: #F9FAFB;
 }
 
 /* Global styles */
@@ -16,10 +24,53 @@ body {
     min-height: 100vh;
     display: flex;
     flex-direction: column;
+    font-family: 'Inter', sans-serif;
 }
 
 main {
     flex: 1;
+}
+
+/* Style the Inter font usage */
+h1, h2, h3, h4, h5, h6 {
+    font-family: 'Inter', sans-serif;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+}
+
+p, a, span, div, button, input, select, textarea {
+    font-family: 'Inter', sans-serif;
+}
+
+/* Dashboard stats cards with Robinhood-like appearance */
+.stats-card {
+    background: var(--secondary-accent);
+    border-radius: 12px;
+    color: white;
+    padding: 1.5rem;
+    position: relative;
+    overflow: hidden;
+    border: none;
+    transform: translateZ(0);
+}
+
+.stats-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    background: linear-gradient(120deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0) 100%);
+    z-index: 1;
+}
+
+.stats-card .stats-icon {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    color: rgba(255,255,255,0.2);
+    font-size: 2rem;
 }
 
 .footer {
@@ -281,25 +332,89 @@ main {
     font-size: 0.9rem;
 }
 
-/* Customize Bootstrap colors for theme compatibility */
+/* Customize Bootstrap colors for FreightPace brand */
 .btn-primary {
-    background-color: var(--primary-blue);
-    border-color: var(--primary-blue);
+    background-color: var(--primary-action);
+    border-color: var(--primary-action);
+    border-radius: 8px;
+    font-weight: 600;
+    transition: all 0.2s ease;
+    box-shadow: 0 2px 4px rgba(0, 196, 140, 0.2);
+}
+
+.btn-primary:hover, .btn-primary:focus {
+    background-color: var(--primary-action);
+    border-color: var(--primary-action);
+    opacity: 0.9;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 196, 140, 0.3);
 }
 
 .btn-success {
     background-color: var(--success-green);
     border-color: var(--success-green);
+    border-radius: 8px;
+    font-weight: 600;
 }
 
 .btn-warning {
     background-color: var(--warning-yellow);
     border-color: var(--warning-yellow);
+    border-radius: 8px;
+    font-weight: 600;
+    color: #000 !important;
 }
 
 .btn-danger {
-    background-color: var(--danger-red);
-    border-color: var(--danger-red);
+    background-color: var(--highlight-alert);
+    border-color: var(--highlight-alert);
+    border-radius: 8px;
+    font-weight: 600;
+}
+
+/* Card styling for the modern Tesla-like dashboard feel */
+.card {
+    border: none;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    transition: all 0.3s ease;
+    overflow: hidden;
+}
+
+.card:hover {
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+    transform: translateY(-4px);
+}
+
+.card-header {
+    background-color: var(--secondary-accent);
+    color: white;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-size: 0.9rem;
+    padding: 1rem;
+    border-bottom: none;
+}
+
+/* Badge styling */
+.badge {
+    font-weight: 600;
+    border-radius: 6px;
+    padding: 0.4em 0.8em;
+}
+
+.badge-success, .bg-success {
+    background-color: var(--primary-action) !important;
+}
+
+.badge-warning, .bg-warning {
+    background-color: var(--celebration-gold) !important;
+    color: #000 !important;
+}
+
+.badge-danger, .bg-danger {
+    background-color: var(--highlight-alert) !important;
 }
 
 /* Loading indicators */
