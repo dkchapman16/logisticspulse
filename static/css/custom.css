@@ -194,15 +194,114 @@ p, a, span, div, button, input, select, textarea {
     }
 }
 
+/* Achievement Badges */
+.achievement-badge {
+    position: relative;
+    display: inline-flex;
+    flex-direction: column;
+    align-items: center;
+    margin: 0.5rem;
+    width: 120px;
+    transition: all 0.3s ease;
+}
+
+.achievement-badge:hover {
+    transform: translateY(-5px);
+}
+
+.badge-icon {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, var(--secondary-accent), #333);
+    color: white;
+    font-size: 2rem;
+    margin-bottom: 0.5rem;
+    position: relative;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    border: 3px solid var(--primary-action);
+}
+
+.badge-icon.gold {
+    background: linear-gradient(135deg, var(--celebration-gold), #d4af37);
+    border-color: var(--celebration-gold);
+    color: #000;
+}
+
+.badge-icon.silver {
+    background: linear-gradient(135deg, #C0C0C0, #E8E8E8);
+    border-color: #A9A9A9;
+    color: #000;
+}
+
+.badge-icon.bronze {
+    background: linear-gradient(135deg, #CD7F32, #B87333);
+    border-color: #A0522D;
+    color: #000;
+}
+
+.badge-icon.locked {
+    background: linear-gradient(135deg, #444, #222);
+    border-color: #666;
+    color: #888;
+    opacity: 0.7;
+}
+
+.badge-name {
+    font-size: 0.8rem;
+    font-weight: 600;
+    margin-bottom: 0.2rem;
+    text-align: center;
+}
+
+.badge-desc {
+    font-size: 0.7rem;
+    color: var(--neutral-text);
+    text-align: center;
+}
+
+.badge-sparkle {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    background: radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.5) 0%, rgba(255, 255, 255, 0) 70%);
+    pointer-events: none;
+}
+
+/* Achievement Unlocked Animation */
+.badge-unlocked-animation {
+    animation: unlockPulse 1.5s ease;
+}
+
+@keyframes unlockPulse {
+    0% {
+        transform: scale(1);
+        box-shadow: 0 0 0 0 rgba(var(--celebration-gold), 0.7);
+    }
+    50% {
+        transform: scale(1.2);
+        box-shadow: 0 0 0 15px rgba(var(--celebration-gold), 0);
+    }
+    100% {
+        transform: scale(1);
+        box-shadow: 0 0 0 0 rgba(var(--celebration-gold), 0);
+    }
+}
+
 /* Milestone popup */
 .milestone-popup {
     position: fixed;
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%) scale(0.9);
-    background-color: #fff;
-    border-radius: 10px;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+    background-color: var(--secondary-accent);
+    color: white;
+    border-radius: 16px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
     padding: 2rem;
     max-width: 400px;
     width: 90%;
@@ -211,6 +310,7 @@ p, a, span, div, button, input, select, textarea {
     visibility: hidden;
     transition: all 0.3s ease;
     text-align: center;
+    border: 2px solid var(--primary-action);
 }
 
 .milestone-visible {
