@@ -98,6 +98,55 @@ function displayExtractedData(data) {
     extractedDataContainer.classList.remove('d-none');
     
     // Populate form fields with extracted data
+    if (data.reference_number) {
+        const refField = document.getElementById('reference_number');
+        if (refField) refField.value = data.reference_number;
+    }
+    
+    if (data.pickup) {
+        const pickupNameField = document.getElementById('pickup_facility_name');
+        const pickupAddrField = document.getElementById('pickup_address');
+        const pickupTimeField = document.getElementById('scheduled_pickup_time');
+        
+        if (pickupNameField && data.pickup.facility_name) {
+            pickupNameField.value = data.pickup.facility_name;
+        }
+        if (pickupAddrField && data.pickup.address) {
+            pickupAddrField.value = data.pickup.address;
+        }
+        if (pickupTimeField && data.pickup.scheduled_time) {
+            pickupTimeField.value = data.pickup.scheduled_time;
+        }
+    }
+    
+    if (data.delivery) {
+        const deliveryNameField = document.getElementById('delivery_facility_name');
+        const deliveryAddrField = document.getElementById('delivery_address');
+        const deliveryTimeField = document.getElementById('scheduled_delivery_time');
+        
+        if (deliveryNameField && data.delivery.facility_name) {
+            deliveryNameField.value = data.delivery.facility_name;
+        }
+        if (deliveryAddrField && data.delivery.address) {
+            deliveryAddrField.value = data.delivery.address;
+        }
+        if (deliveryTimeField && data.delivery.scheduled_time) {
+            deliveryTimeField.value = data.delivery.scheduled_time;
+        }
+    }
+    
+    if (data.client && data.client.name) {
+        const clientField = document.getElementById('client_name');
+        if (clientField) clientField.value = data.client.name;
+    }
+    
+    // Show raw text for debugging if needed
+    if (data.raw_text) {
+        const rawTextContainer = document.getElementById('raw-text-preview');
+        if (rawTextContainer) {
+            rawTextContainer.innerHTML = `<pre>${data.raw_text}</pre>`;
+        }
+    }
     populateFormField('reference-number', data.reference_number);
     
     // Populate client info
