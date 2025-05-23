@@ -305,50 +305,6 @@ function loadCustomersAndMatch(customerName, selectId) {
         console.log(`⚠️ No customer match found for: ${customerName}`);
     }
     
-    /*
-    // Alternative approach using API (when endpoint becomes available)
-    fetch('/api/clients')
-        .then(response => response.json())
-        .then(customers => {
-            console.log(`📡 Loaded ${customers.length} customers from API`);
-            const selectElement = document.getElementById(selectId);
-            
-            if (!selectElement) {
-                console.log(`⚠️ Select element not found: ${selectId}`);
-                return;
-            }
-            
-            // Clear existing options except the first one
-            while (selectElement.options.length > 1) {
-                selectElement.removeChild(selectElement.lastChild);
-            }
-            
-            // Add customers as options
-            customers.forEach(customer => {
-                const option = document.createElement('option');
-                option.value = customer.id;
-                option.textContent = customer.name;
-                selectElement.appendChild(option);
-            });
-            
-            // Now try matching
-            const options = Array.from(selectElement.options);
-            const matchingOption = options.find(option => {
-                const optionText = option.textContent.toLowerCase();
-                const searchName = customerName.toLowerCase();
-                return optionText.includes(searchName) || searchName.includes(optionText);
-            });
-            
-            if (matchingOption) {
-                selectElement.value = matchingOption.value;
-                console.log(`✅ Matched customer: ${customerName} -> ${matchingOption.textContent}`);
-            } else {
-                console.log(`⚠️ No customer match found for: ${customerName}`);
-            }
-        })
-        .catch(error => {
-            console.error(`❌ Error loading customers:`, error);
-        });
 }
 
 // Populate a form field with extracted data
