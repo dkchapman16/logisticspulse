@@ -154,18 +154,9 @@ function displayExtractedData(data) {
     
     // Populate customer info
     if (data.client && data.client.name) {
-        const customerSelect = document.getElementById('client-id');
-        if (customerSelect) {
-            // Try to find a matching customer by name
-            const customerOptions = Array.from(customerSelect.options);
-            const matchingOption = customerOptions.find(option => 
-                option.text.toLowerCase().includes(data.client.name.toLowerCase())
-            );
-            
-            if (matchingOption) {
-                customerSelect.value = matchingOption.value;
-            }
-        }
+        console.log(`🔍 Looking for customer: ${data.client.name}`);
+        // Load customers directly from API and then match
+        loadCustomersAndMatch(data.client.name, 'client-id');
     }
     
     // Populate pickup information
@@ -287,6 +278,53 @@ function loadFacilitiesAndMatch(facilityName, selectId) {
         })
         .catch(error => {
             console.error(`❌ Error loading facilities:`, error);
+        });
+}
+
+// Load customers and match them
+function loadCustomersAndMatch(customerName, selectId) {
+    // First try to load from the existing API endpoint for clients
+    fetch('/api/clients')
+        .then(response => response.json())
+        .then(customers => {
+            console.log(`📡 Loaded ${customers.length} customers from API`);
+            const selectElement = document.getElementById(selectId);
+            
+            if (!selectElement) {
+                console.log(`⚠️ Select element not found: ${selectId}`);
+                return;
+            }
+            
+            // Clear existing options except the first one
+            while (selectElement.options.length > 1) {
+                selectElement.removeChild(selectElement.lastChild);
+            }
+            
+            // Add customers as options
+            customers.forEach(customer => {
+                const option = document.createElement('option');
+                option.value = customer.id;
+                option.textContent = customer.name;
+                selectElement.appendChild(option);
+            });
+            
+            // Now try matching
+            const options = Array.from(selectElement.options);
+            const matchingOption = options.find(option => {
+                const optionText = option.textContent.toLowerCase();
+                const searchName = customerName.toLowerCase();
+                return optionText.includes(searchName) || searchName.includes(optionText);
+            });
+            
+            if (matchingOption) {
+                selectElement.value = matchingOption.value;
+                console.log(`✅ Matched customer: ${customerName} -> ${matchingOption.textContent}`);
+            } else {
+                console.log(`⚠️ No customer match found for: ${customerName}`);
+            }
+        })
+        .catch(error => {
+            console.error(`❌ Error loading customers:`, error);
         });
 }
 
