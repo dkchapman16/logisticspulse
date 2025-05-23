@@ -5,7 +5,7 @@ import json
 from werkzeug.utils import secure_filename
 from app import db
 from models import Load, Driver, Vehicle, Client, Facility, LocationUpdate
-from services.pdf_extractor_advanced import extract_from_pdf
+from services.pdf_extractor_ocr_ai import extract_from_pdf
 from services.google_maps_api import get_eta
 
 loads_bp = Blueprint('loads', __name__)
