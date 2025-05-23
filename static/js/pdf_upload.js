@@ -170,31 +170,29 @@ function displayExtractedData(data) {
     
     // Populate pickup information
     if (data.pickup) {
-        if (data.pickup.facility_name) {
-            populateFormField('pickup_facility_name', data.pickup.facility_name);
-        }
-        if (data.pickup.address) {
-            populateFormField('pickup_address', data.pickup.address);
-        }
         if (data.pickup.scheduled_time) {
             // Convert datetime format for input field
             const pickupTime = formatDateTimeForInput(data.pickup.scheduled_time);
-            populateFormField('scheduled_pickup_time', pickupTime);
+            populateFormField('scheduled-pickup-time', pickupTime);
+        }
+        
+        // Try to find matching pickup facility by name
+        if (data.pickup.facility_name) {
+            findMatchingFacility(data.pickup.facility_name, 'pickup-facility-id');
         }
     }
     
     // Populate delivery information
     if (data.delivery) {
-        if (data.delivery.facility_name) {
-            populateFormField('delivery_facility_name', data.delivery.facility_name);
-        }
-        if (data.delivery.address) {
-            populateFormField('delivery_address', data.delivery.address);
-        }
         if (data.delivery.scheduled_time) {
             // Convert datetime format for input field
             const deliveryTime = formatDateTimeForInput(data.delivery.scheduled_time);
-            populateFormField('scheduled_delivery_time', deliveryTime);
+            populateFormField('scheduled-delivery-time', deliveryTime);
+        }
+        
+        // Try to find matching delivery facility by name
+        if (data.delivery.facility_name) {
+            findMatchingFacility(data.delivery.facility_name, 'delivery-facility-id');
         }
     }
     
