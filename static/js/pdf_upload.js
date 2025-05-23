@@ -176,6 +176,11 @@ function displayExtractedData(data) {
             populateFormField('scheduled-pickup-time', pickupTime);
         }
         
+        // Populate pickup address
+        if (data.pickup.address) {
+            populateFormField('pickup-address', data.pickup.address);
+        }
+        
         // Try to find matching pickup facility by name
         if (data.pickup.facility_name) {
             console.log(`🔍 Looking for pickup facility: ${data.pickup.facility_name}`);
@@ -190,6 +195,11 @@ function displayExtractedData(data) {
             // Convert datetime format for input field
             const deliveryTime = formatDateTimeForInput(data.delivery.scheduled_time);
             populateFormField('scheduled-delivery-time', deliveryTime);
+        }
+        
+        // Populate delivery address
+        if (data.delivery.address) {
+            populateFormField('delivery-address', data.delivery.address);
         }
         
         // Try to find matching delivery facility by name
