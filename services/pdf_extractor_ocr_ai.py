@@ -10,6 +10,9 @@ from PIL import Image
 from werkzeug.datastructures import FileStorage
 import openai
 
+# Configure tesseract path for Replit environment
+pytesseract.pytesseract.tesseract_cmd = '/nix/store/vq7aq1x4wjcl69f3jfgddlpwdh2r9hhm-tesseract-5.3.4/bin/tesseract'
+
 logger = logging.getLogger(__name__)
 
 # Initialize OpenAI client
