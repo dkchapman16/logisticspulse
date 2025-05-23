@@ -49,7 +49,20 @@ def extract_from_pdf(file):
         logger.error(f"Error extracting PDF data: {str(e)}")
         return {
             'error': str(e),
-            'partial_data': {}
+            'reference_number': 'AUTO-' + datetime.now().strftime('%Y%m%d-%H%M%S'),
+            'pickup': {
+                'facility_name': 'Unknown Pickup Location',
+                'address': '',
+                'scheduled_time': None
+            },
+            'delivery': {
+                'facility_name': 'Unknown Delivery Location', 
+                'address': '',
+                'scheduled_time': None
+            },
+            'client': {
+                'name': 'Unknown Client'
+            }
         }
 
 def extract_reference_number(text):

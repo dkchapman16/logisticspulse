@@ -287,29 +287,34 @@ def update_load(load_id):
 @loads_bp.route('/loads/upload-ratecon', methods=['POST'])
 def upload_ratecon():
     """Upload and process a RateCon PDF"""
-    if 'ratecon_file' not in request.files:
-        return jsonify({'error': 'No file part'}), 400
-    
-    file = request.files['ratecon_file']
-    
-    if file.filename == '':
-        return jsonify({'error': 'No selected file'}), 400
-    
-    if file and file.filename.lower().endswith('.pdf'):
-        try:
+    try:
+        if 'ratecon_file' not in request.files:
+            return jsonify({'error': 'No file part'}), 400
+        
+        file = request.files['ratecon_file']
+        
+        if file.filename == '':
+            return jsonify({'error': 'No selected file'}), 400
+        
+        if file and file.filename.lower().endswith('.pdf'):
             # Extract data from PDF
             extracted_data = extract_from_pdf(file)
             
-            # Return the extracted data
+            # Return the extracted data with success status
             return jsonify({
                 'success': True,
+                'message': 'PDF processed successfully',
                 'data': extracted_data
             })
             
-        except Exception as e:
-            return jsonify({'error': str(e)}), 500
-    else:
-        return jsonify({'error': 'File must be a PDF'}), 400
+        else:
+            return jsonify({'error': 'File must be a PDF'}), 400
+            
+    except Exception as e:
+        return jsonify({
+            'success': False,
+            'error': f'Error processing PDF: {str(e)}'
+        }), 500
 
 @loads_bp.route('/loads/<int:load_id>/update-location', methods=['POST'])
 def update_location(load_id):
