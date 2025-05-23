@@ -178,6 +178,7 @@ function displayExtractedData(data) {
         
         // Try to find matching pickup facility by name
         if (data.pickup.facility_name) {
+            console.log(`🔍 Looking for pickup facility: ${data.pickup.facility_name}`);
             findMatchingFacility(data.pickup.facility_name, 'pickup-facility-id');
         }
     }
@@ -192,6 +193,7 @@ function displayExtractedData(data) {
         
         // Try to find matching delivery facility by name
         if (data.delivery.facility_name) {
+            console.log(`🔍 Looking for delivery facility: ${data.delivery.facility_name}`);
             findMatchingFacility(data.delivery.facility_name, 'delivery-facility-id');
         }
     }
