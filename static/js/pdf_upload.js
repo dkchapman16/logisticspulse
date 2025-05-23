@@ -150,13 +150,13 @@ function displayExtractedData(data) {
     populateFormField('reference-number', data.reference_number);
     
     // Populate client info
-    if (data.client) {
+    if (data.client && data.client.name) {
         const clientSelect = document.getElementById('client-id');
         if (clientSelect) {
             // Try to find a matching client by name
             const clientOptions = Array.from(clientSelect.options);
             const matchingOption = clientOptions.find(option => 
-                option.text.toLowerCase().includes(data.client.toLowerCase())
+                option.text.toLowerCase().includes(data.client.name.toLowerCase())
             );
             
             if (matchingOption) {
