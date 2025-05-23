@@ -76,7 +76,10 @@ function handlePdfUpload(event) {
             
             // Reset form
             form.reset();
-            document.querySelector('.custom-file-label').textContent = 'Choose file...';
+            const fileLabel = document.querySelector('.custom-file-label');
+            if (fileLabel) {
+                fileLabel.textContent = 'Choose file...';
+            }
         } else {
             showUploadError(data.error || 'Failed to process PDF.');
         }
