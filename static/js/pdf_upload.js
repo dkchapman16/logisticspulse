@@ -179,7 +179,8 @@ function displayExtractedData(data) {
         // Try to find matching pickup facility by name
         if (data.pickup.facility_name) {
             console.log(`🔍 Looking for pickup facility: ${data.pickup.facility_name}`);
-            findMatchingFacility(data.pickup.facility_name, 'pickup-facility-id');
+            // Load facilities directly from API and then match
+            loadFacilitiesAndMatch(data.pickup.facility_name, 'pickup-facility-id');
         }
     }
     
@@ -194,7 +195,8 @@ function displayExtractedData(data) {
         // Try to find matching delivery facility by name
         if (data.delivery.facility_name) {
             console.log(`🔍 Looking for delivery facility: ${data.delivery.facility_name}`);
-            findMatchingFacility(data.delivery.facility_name, 'delivery-facility-id');
+            // Load facilities directly from API and then match
+            loadFacilitiesAndMatch(data.delivery.facility_name, 'delivery-facility-id');
         }
     }
     
@@ -230,6 +232,52 @@ function findMatchingFacility(address, selectId) {
         const event = new Event('change');
         facilitySelect.dispatchEvent(event);
     }
+}
+
+// Load facilities and match them
+function loadFacilitiesAndMatch(facilityName, selectId) {
+    fetch('/geofencing/facilities')
+        .then(response => response.json())
+        .then(facilities => {
+            console.log(`📡 Loaded ${facilities.length} facilities from API`);
+            const selectElement = document.getElementById(selectId);
+            
+            if (!selectElement) {
+                console.log(`⚠️ Select element not found: ${selectId}`);
+                return;
+            }
+            
+            // Clear existing options except the first one
+            while (selectElement.options.length > 1) {
+                selectElement.removeChild(selectElement.lastChild);
+            }
+            
+            // Add facilities as options
+            facilities.forEach(facility => {
+                const option = document.createElement('option');
+                option.value = facility.id;
+                option.textContent = facility.name;
+                selectElement.appendChild(option);
+            });
+            
+            // Now try matching
+            const options = Array.from(selectElement.options);
+            const matchingOption = options.find(option => {
+                const optionText = option.textContent.toLowerCase();
+                const searchName = facilityName.toLowerCase();
+                return optionText.includes(searchName) || searchName.includes(optionText);
+            });
+            
+            if (matchingOption) {
+                selectElement.value = matchingOption.value;
+                console.log(`✅ Matched facility: ${facilityName} -> ${matchingOption.textContent}`);
+            } else {
+                console.log(`⚠️ No facility match found for: ${facilityName}`);
+            }
+        })
+        .catch(error => {
+            console.error(`❌ Error loading facilities:`, error);
+        });
 }
 
 // Populate a form field with extracted data
