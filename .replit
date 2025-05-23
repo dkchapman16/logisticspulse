@@ -2,7 +2,7 @@ modules = ["python-3.11"]
 
 [nix]
 channel = "stable-24_05"
-packages = ["jre", "openssl", "postgresql"]
+packages = ["freetype", "gumbo", "harfbuzz", "jbig2dec", "jre", "libjpeg_turbo", "mupdf", "openjpeg", "openssl", "postgresql", "swig", "xcbuild"]
 
 [deployment]
 deploymentTarget = "autoscale"
