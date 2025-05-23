@@ -40,7 +40,9 @@ def extract_from_pdf(file) -> Dict[str, Any]:
         logger.info(f"Starting OCR + AI extraction for PDF ({len(pdf_bytes)} bytes)")
         
         # Step 1: Convert PDF pages to images
-        images = convert_from_bytes(pdf_bytes, dpi=300, fmt='PNG')
+        # Specify poppler path for Replit environment
+        poppler_path = "/nix/store/1f2vbia1rg1rh5cs0ii49v3hln9i36rv-poppler-utils-24.02.0/bin"
+        images = convert_from_bytes(pdf_bytes, dpi=300, fmt='PNG', poppler_path=poppler_path)
         logger.info(f"Converted PDF to {len(images)} images")
         
         # Step 2: Extract text using OCR from all pages
