@@ -74,6 +74,56 @@ main {
     margin-right: 0.5rem;
 }
 
+/* Card styling - fix white headers */
+.card {
+    background-color: var(--card-background) !important;
+    border: 1px solid var(--border-color) !important;
+    color: var(--bright-text) !important;
+}
+
+.card-header {
+    background-color: var(--secondary-accent) !important;
+    border-bottom: 1px solid var(--border-color) !important;
+    color: var(--bright-text) !important;
+}
+
+.card-title {
+    color: var(--bright-text) !important;
+    margin-bottom: 0;
+}
+
+.card-body {
+    background-color: var(--card-background) !important;
+    color: var(--bright-text) !important;
+}
+
+.card h5, .card h6, .card .h5, .card .h6 {
+    color: var(--bright-text) !important;
+}
+
+/* Dashboard card headers - fix white text */
+.dashboard-card-header {
+    color: var(--neutral-text) !important;
+}
+
+.dashboard-card-header span {
+    color: var(--neutral-text) !important;
+}
+
+/* Bootstrap override for any remaining white text */
+h1, h2, h3, h4, h5, h6, .h1, .h2, .h3, .h4, .h5, .h6 {
+    color: var(--bright-text) !important;
+}
+
+/* Text color overrides */
+.text-white {
+    color: var(--bright-text) !important;
+}
+
+.text-muted {
+    color: var(--neutral-text) !important;
+}
+
 /* Custom scrollbar for dark theme */
 ::-webkit-scrollbar {
     width: 8px;
