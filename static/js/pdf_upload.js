@@ -170,39 +170,31 @@ function displayExtractedData(data) {
     
     // Populate pickup information
     if (data.pickup) {
+        if (data.pickup.facility_name) {
+            populateFormField('pickup_facility_name', data.pickup.facility_name);
+        }
         if (data.pickup.address) {
-            populateFormField('pickup-address', data.pickup.address);
-            
-            // Try to match a facility
-            findMatchingFacility(data.pickup.address, 'pickup-facility-id');
+            populateFormField('pickup_address', data.pickup.address);
         }
-        
-        if (data.pickup.date_time) {
-            populateFormField('scheduled-pickup-time', formatDateTimeForInput(data.pickup.date_time));
-        }
-        
-        if (data.pickup.coordinates) {
-            populateFormField('pickup-lat', data.pickup.coordinates.lat);
-            populateFormField('pickup-lng', data.pickup.coordinates.lng);
+        if (data.pickup.scheduled_time) {
+            // Convert datetime format for input field
+            const pickupTime = formatDateTimeForInput(data.pickup.scheduled_time);
+            populateFormField('scheduled_pickup_time', pickupTime);
         }
     }
     
     // Populate delivery information
     if (data.delivery) {
+        if (data.delivery.facility_name) {
+            populateFormField('delivery_facility_name', data.delivery.facility_name);
+        }
         if (data.delivery.address) {
-            populateFormField('delivery-address', data.delivery.address);
-            
-            // Try to match a facility
-            findMatchingFacility(data.delivery.address, 'delivery-facility-id');
+            populateFormField('delivery_address', data.delivery.address);
         }
-        
-        if (data.delivery.date_time) {
-            populateFormField('scheduled-delivery-time', formatDateTimeForInput(data.delivery.date_time));
-        }
-        
-        if (data.delivery.coordinates) {
-            populateFormField('delivery-lat', data.delivery.coordinates.lat);
-            populateFormField('delivery-lng', data.delivery.coordinates.lng);
+        if (data.delivery.scheduled_time) {
+            // Convert datetime format for input field
+            const deliveryTime = formatDateTimeForInput(data.delivery.scheduled_time);
+            populateFormField('scheduled_delivery_time', deliveryTime);
         }
     }
     
