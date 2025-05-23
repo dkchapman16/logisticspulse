@@ -300,6 +300,11 @@ def upload_ratecon():
             # Extract data from PDF
             extracted_data = extract_from_pdf(file)
             
+            # Debug what AI extracted
+            print(f"🔍 AI EXTRACTED: {extracted_data}")
+            print(f"🔍 PICKUP: {extracted_data.get('pickup', 'None')}")
+            print(f"🔍 DELIVERY: {extracted_data.get('delivery', 'None')}")
+            
             # Return the extracted data with success status
             return jsonify({
                 'success': True,
