@@ -1,5 +1,4 @@
 from flask import Blueprint, render_template, request, jsonify, flash, redirect, url_for
-from flask_login import login_required
 from datetime import datetime, timedelta
 from sqlalchemy import func
 from app import db
@@ -8,13 +7,11 @@ from models import Driver, DriverPerformance, Load, Milestone
 drivers_bp = Blueprint('drivers', __name__)
 
 @drivers_bp.route('/drivers')
-@login_required
 def index():
     """Show all drivers"""
     return render_template('drivers.html')
 
 @drivers_bp.route('/drivers/data')
-@login_required
 def get_drivers():
     """API endpoint to get all drivers with pagination and filtering"""
     page = request.args.get('page', 1, type=int)
@@ -85,14 +82,12 @@ def get_drivers():
     })
 
 @drivers_bp.route('/drivers/<int:driver_id>')
-@login_required
 def driver_detail(driver_id):
     """Show driver details and performance"""
     driver = Driver.query.get_or_404(driver_id)
     return render_template('driver_detail.html', driver=driver)
 
 @drivers_bp.route('/drivers/<int:driver_id>/data')
-@login_required
 def get_driver_data(driver_id):
     """API endpoint to get detailed driver performance data"""
     driver = Driver.query.get_or_404(driver_id)
@@ -243,7 +238,6 @@ def get_driver_data(driver_id):
     return jsonify(driver_data)
 
 @drivers_bp.route('/drivers/create', methods=['GET', 'POST'])
-@login_required
 def create_driver():
     """Create a new driver"""
     if request.method == 'POST':
@@ -279,7 +273,6 @@ def create_driver():
     return render_template('driver_detail.html', driver=None)  # None indicates this is a create form
 
 @drivers_bp.route('/drivers/<int:driver_id>/update', methods=['POST'])
-@login_required
 def update_driver(driver_id):
     """Update an existing driver"""
     driver = Driver.query.get_or_404(driver_id)
@@ -314,7 +307,6 @@ def update_driver(driver_id):
         return redirect(url_for('drivers.driver_detail', driver_id=driver.id))
 
 @drivers_bp.route('/drivers/<int:driver_id>/performance/update', methods=['POST'])
-@login_required
 def update_performance(driver_id):
     """Manually update a driver's performance metrics"""
     driver = Driver.query.get_or_404(driver_id)
@@ -374,13 +366,11 @@ def update_performance(driver_id):
         return jsonify({'error': str(e)}), 500
 
 @drivers_bp.route('/drivers/scorecards')
-@login_required
 def scorecards():
     """Show driver scorecards and rankings"""
     return render_template('scorecards.html')
 
 @drivers_bp.route('/drivers/scorecards/data')
-@login_required
 def get_scorecards_data():
     """API endpoint to get driver scorecard data"""
     # Get time range (default to last 30 days)

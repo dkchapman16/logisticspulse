@@ -1,5 +1,4 @@
 from flask import Blueprint, render_template, request, jsonify, flash, redirect, url_for, current_app
-from flask_login import login_required
 from datetime import datetime
 import os
 import json
@@ -12,13 +11,11 @@ from services.google_maps_api import get_eta
 loads_bp = Blueprint('loads', __name__)
 
 @loads_bp.route('/loads')
-@login_required
 def index():
     """Show all loads"""
     return render_template('loads.html')
 
 @loads_bp.route('/loads/data')
-@login_required
 def get_loads():
     """API endpoint to get all loads with pagination and filtering"""
     page = request.args.get('page', 1, type=int)
@@ -67,14 +64,12 @@ def get_loads():
     })
 
 @loads_bp.route('/loads/<int:load_id>')
-@login_required
 def load_detail(load_id):
     """Show load details"""
     load = Load.query.get_or_404(load_id)
     return render_template('load_detail.html', load=load)
 
 @loads_bp.route('/loads/<int:load_id>/data')
-@login_required
 def get_load_data(load_id):
     """API endpoint to get detailed load data"""
     load = Load.query.get_or_404(load_id)
@@ -153,7 +148,6 @@ def get_load_data(load_id):
     return jsonify(load_data)
 
 @loads_bp.route('/loads/create', methods=['GET', 'POST'])
-@login_required
 def create_load():
     """Create a new load"""
     if request.method == 'POST':
@@ -217,7 +211,6 @@ def create_load():
                           load=None)  # None indicates this is a create form
 
 @loads_bp.route('/loads/<int:load_id>/update', methods=['POST'])
-@login_required
 def update_load(load_id):
     """Update an existing load"""
     load = Load.query.get_or_404(load_id)
@@ -292,7 +285,6 @@ def update_load(load_id):
         return redirect(url_for('loads.load_detail', load_id=load.id))
 
 @loads_bp.route('/loads/upload-ratecon', methods=['POST'])
-@login_required
 def upload_ratecon():
     """Upload and process a RateCon PDF"""
     if 'ratecon_file' not in request.files:
@@ -320,7 +312,6 @@ def upload_ratecon():
         return jsonify({'error': 'File must be a PDF'}), 400
 
 @loads_bp.route('/loads/<int:load_id>/update-location', methods=['POST'])
-@login_required
 def update_location(load_id):
     """Manually update a load's location"""
     load = Load.query.get_or_404(load_id)

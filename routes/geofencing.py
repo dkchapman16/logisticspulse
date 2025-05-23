@@ -1,5 +1,4 @@
 from flask import Blueprint, render_template, request, jsonify, flash, redirect, url_for
-from flask_login import login_required
 from datetime import datetime
 from app import db
 from models import Facility, Load
@@ -8,13 +7,11 @@ from services.geofencing import check_geofence_entry
 geofencing_bp = Blueprint('geofencing', __name__)
 
 @geofencing_bp.route('/geofencing')
-@login_required
 def index():
     """Show geofencing management interface"""
     return render_template('geofencing.html')
 
 @geofencing_bp.route('/geofencing/facilities')
-@login_required
 def get_facilities():
     """API endpoint to get all facilities with geofences"""
     facilities = Facility.query.all()
@@ -35,7 +32,6 @@ def get_facilities():
     return jsonify(facilities_data)
 
 @geofencing_bp.route('/geofencing/facility/<int:facility_id>', methods=['GET', 'PUT'])
-@login_required
 def facility_detail(facility_id):
     """Get or update a facility's geofence"""
     facility = Facility.query.get_or_404(facility_id)
@@ -90,7 +86,6 @@ def facility_detail(facility_id):
     return jsonify(facility_data)
 
 @geofencing_bp.route('/geofencing/check', methods=['POST'])
-@login_required
 def check_geofence():
     """Check if a vehicle has entered or exited a geofence"""
     try:
@@ -119,7 +114,6 @@ def check_geofence():
         return jsonify({'error': str(e)}), 500
 
 @geofencing_bp.route('/geofencing/create-facility', methods=['POST'])
-@login_required
 def create_facility():
     """Create a new facility with geofence"""
     try:

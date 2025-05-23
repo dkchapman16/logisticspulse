@@ -5,7 +5,7 @@ from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.orm import DeclarativeBase
 from werkzeug.middleware.proxy_fix import ProxyFix
-from flask_login import LoginManager
+
 
 # Set up logging
 logging.basicConfig(level=logging.DEBUG)
@@ -33,10 +33,7 @@ app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 # Initialize the database
 db.init_app(app)
 
-# Initialize Login Manager
-login_manager = LoginManager()
-login_manager.init_app(app)
-login_manager.login_view = 'auth.login'
+# Removed login manager - no authentication needed
 
 # Set up API keys from environment
 app.config["GOOGLE_MAPS_API_KEY"] = os.environ.get("GOOGLE_MAPS_API_KEY", "")
@@ -46,25 +43,18 @@ with app.app_context():
     # Import models
     import models  # noqa: F401
     
-    # Import user loader
-    from models import User
-    
-    @login_manager.user_loader
-    def load_user(user_id):
-        return User.query.get(int(user_id))
+    # Removed user loader - no authentication needed
     
     # Create database tables
     db.create_all()
     
-    # Register blueprints
-    from routes.auth import auth_bp
+    # Register blueprints (removed auth blueprint)
     from routes.dashboard import dashboard_bp
     from routes.loads import loads_bp
     from routes.drivers import drivers_bp
     from routes.geofencing import geofencing_bp
     from routes.notifications import notifications_bp
     
-    app.register_blueprint(auth_bp)
     app.register_blueprint(dashboard_bp)
     app.register_blueprint(loads_bp)
     app.register_blueprint(drivers_bp)

@@ -1,5 +1,4 @@
 from flask import Blueprint, render_template, request, jsonify, flash, redirect, url_for
-from flask_login import login_required, current_user
 from datetime import datetime
 from app import db
 from models import Notification, User, Load, Driver
@@ -8,13 +7,11 @@ from services.notification_service import send_notification
 notifications_bp = Blueprint('notifications', __name__)
 
 @notifications_bp.route('/notifications')
-@login_required
 def index():
     """Show notifications interface"""
     return render_template('notifications.html')
 
 @notifications_bp.route('/notifications/data')
-@login_required
 def get_notifications():
     """API endpoint to get notifications with pagination and filtering"""
     page = request.args.get('page', 1, type=int)
@@ -23,8 +20,7 @@ def get_notifications():
     
     query = Notification.query
     
-    # Filter by current user
-    query = query.filter(Notification.user_id == current_user.id)
+    # No user filtering since authentication is removed
     
     # Apply unread filter if requested
     if unread_only:
@@ -69,11 +65,10 @@ def get_notifications():
         'per_page': per_page,
         'total': notifications_page.total,
         'pages': notifications_page.pages,
-        'unread_count': Notification.query.filter_by(user_id=current_user.id, read=False).count()
+        'unread_count': Notification.query.filter_by(user_id=None, read=False).count()
     })
 
 @notifications_bp.route('/notifications/mark-read', methods=['POST'])
-@login_required
 def mark_read():
     """Mark notifications as read"""
     try:
@@ -86,7 +81,7 @@ def mark_read():
         # Make sure the user can only mark their own notifications as read
         notifications = Notification.query.filter(
             Notification.id.in_(notification_ids),
-            Notification.user_id == current_user.id
+            Notification.user_id == 1
         ).all()
         
         for notification in notifications:
@@ -97,7 +92,7 @@ def mark_read():
         return jsonify({
             'success': True,
             'marked_count': len(notifications),
-            'unread_count': Notification.query.filter_by(user_id=current_user.id, read=False).count()
+            'unread_count': Notification.query.filter_by(user_id=None, read=False).count()
         })
         
     except Exception as e:
@@ -105,13 +100,12 @@ def mark_read():
         return jsonify({'error': str(e)}), 500
 
 @notifications_bp.route('/notifications/mark-all-read', methods=['POST'])
-@login_required
 def mark_all_read():
     """Mark all notifications as read"""
     try:
         # Update all unread notifications for the current user
         updated = Notification.query.filter_by(
-            user_id=current_user.id,
+            user_id=None,
             read=False
         ).update({'read': True})
         
@@ -128,7 +122,6 @@ def mark_all_read():
         return jsonify({'error': str(e)}), 500
 
 @notifications_bp.route('/notifications/create', methods=['POST'])
-@login_required
 def create_notification():
     """Create a new notification (for testing)"""
     try:
@@ -146,7 +139,7 @@ def create_notification():
         
         # Create the notification
         notification = Notification(
-            user_id=current_user.id,
+            user_id=None,
             load_id=load.id if load else None,
             driver_id=driver.id if driver else None,
             type=data.get('type', 'info'),
@@ -160,7 +153,7 @@ def create_notification():
         # Send the notification through the service
         if data.get('send', False):
             send_notification(
-                user_id=current_user.id,
+                user_id=None,
                 message=data['message'],
                 notification_type=data.get('type', 'info'),
                 load_id=load.id if load else None,
@@ -182,10 +175,9 @@ def create_notification():
         return jsonify({'error': str(e)}), 500
 
 @notifications_bp.route('/notifications/count')
-@login_required
 def get_unread_count():
     """Get count of unread notifications"""
-    count = Notification.query.filter_by(user_id=current_user.id, read=False).count()
+    count = Notification.query.filter_by(user_id=None, read=False).count()
     return jsonify({
         'unread_count': count
     })
