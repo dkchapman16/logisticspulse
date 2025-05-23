@@ -96,72 +96,46 @@ def extract_reference_number(text):
 
 def extract_pickup_info(text):
     """Extract pickup information from text"""
-    # Try to find pickup section
-    pickup_section = extract_section(text, 'pickup', 'delivery')
+    # Look for pickup patterns
+    patterns = [
+        r'(?i)pickup.*?([A-Z][a-z]+(?:\s+[A-Z][a-z]*)*)',
+        r'(?i)origin.*?([A-Z][a-z]+(?:\s+[A-Z][a-z]*)*)',
+        r'(?i)shipper.*?([A-Z][a-z]+(?:\s+[A-Z][a-z]*)*)'
+    ]
     
-    if not pickup_section:
-        # Try alternative section names
-        pickup_section = extract_section(text, 'origin', 'destination')
-    
-    if not pickup_section:
-        # If no clear section, use the whole text
-        pickup_section = text
-    
-    # Extract address
-    address = extract_address(pickup_section)
-    
-    # Extract date and time
-    date_time = extract_date_time(pickup_section)
-    
-    # Get coordinates from address if found
-    coordinates = None
-    if address:
-        geocode_result = get_geocode(address)
-        if geocode_result:
-            coordinates = {
-                'lat': geocode_result['lat'],
-                'lng': geocode_result['lng']
-            }
+    facility_name = 'Pickup Location (Please Edit)'
+    for pattern in patterns:
+        match = re.search(pattern, text)
+        if match:
+            facility_name = match.group(1).strip()
+            break
     
     return {
-        'address': address,
-        'date_time': date_time,
-        'coordinates': coordinates
+        'facility_name': facility_name,
+        'address': 'Enter pickup address',
+        'scheduled_time': datetime.now().strftime('%Y-%m-%d %H:%M:%S')
     }
 
 def extract_delivery_info(text):
     """Extract delivery information from text"""
-    # Try to find delivery section
-    delivery_section = extract_section(text, 'delivery', None)
+    # Look for delivery patterns
+    patterns = [
+        r'(?i)delivery.*?([A-Z][a-z]+(?:\s+[A-Z][a-z]*)*)',
+        r'(?i)destination.*?([A-Z][a-z]+(?:\s+[A-Z][a-z]*)*)',
+        r'(?i)consignee.*?([A-Z][a-z]+(?:\s+[A-Z][a-z]*)*)'
+    ]
     
-    if not delivery_section:
-        # Try alternative section names
-        delivery_section = extract_section(text, 'destination', None)
-    
-    if not delivery_section:
-        # If no clear section, use the whole text
-        delivery_section = text
-    
-    # Extract address
-    address = extract_address(delivery_section)
-    
-    # Extract date and time
-    date_time = extract_date_time(delivery_section)
-    
-    # Get coordinates from address if found
-    coordinates = None
-    if address:
-        geocode_result = get_geocode(address)
-        if geocode_result:
-            coordinates = {
-                'lat': geocode_result['lat'],
-                'lng': geocode_result['lng']
-            }
+    facility_name = 'Delivery Location (Please Edit)'
+    for pattern in patterns:
+        match = re.search(pattern, text)
+        if match:
+            facility_name = match.group(1).strip()
+            break
     
     return {
-        'address': address,
-        'date_time': date_time,
-        'coordinates': coordinates
+        'facility_name': facility_name,
+        'address': 'Enter delivery address',
+        'scheduled_time': datetime.now().strftime('%Y-%m-%d %H:%M:%S')
     }
 
 def extract_client_info(text):
