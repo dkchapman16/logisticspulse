@@ -1,5 +1,4 @@
 from flask import Blueprint, render_template, jsonify
-from flask_login import login_required
 from datetime import datetime, timedelta
 from sqlalchemy import func
 from models import Load, Driver, DriverPerformance, Notification
@@ -7,12 +6,10 @@ from models import Load, Driver, DriverPerformance, Notification
 dashboard_bp = Blueprint('dashboard', __name__)
 
 @dashboard_bp.route('/')
-@login_required
 def index():
     return render_template('dashboard.html')
 
 @dashboard_bp.route('/api/dashboard/summary')
-@login_required
 def dashboard_summary():
     """API endpoint for dashboard summary data"""
     # Get today's date and dates for weekly/monthly ranges
@@ -87,7 +84,6 @@ def dashboard_summary():
     return jsonify(summary_data)
 
 @dashboard_bp.route('/api/dashboard/at_risk_loads')
-@login_required
 def at_risk_loads():
     """API endpoint for loads at risk of being late"""
     # Get loads that are in transit and have an ETA after the scheduled delivery time
@@ -112,7 +108,6 @@ def at_risk_loads():
     return jsonify(loads_data)
 
 @dashboard_bp.route('/api/dashboard/performance_trends')
-@login_required
 def performance_trends():
     """API endpoint for performance trend data over the past 30 days"""
     # Get today's date and date 30 days ago
