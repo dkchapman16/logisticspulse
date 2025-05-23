@@ -37,9 +37,9 @@
                                         </div>
                                         
                                         <div class="mb-3">
-                                            <label for="client_id" class="form-label">Client</label>
+                                            <label for="client_id" class="form-label">Customer</label>
                                             <select class="form-select" id="client_id" name="client_id" required>
-                                                <option value="">Select Client</option>
+                                                <option value="">Select Customer</option>
                                                 {% if clients %}
                                                     {% for client in clients %}
                                                     <option value="{{ client.id }}" {% if load and load.client_id == client.id %}selected{% endif %}>

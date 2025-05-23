@@ -152,18 +152,18 @@ function displayExtractedData(data) {
     }
     populateFormField('reference-number', data.reference_number);
     
-    // Populate client info
+    // Populate customer info
     if (data.client && data.client.name) {
-        const clientSelect = document.getElementById('client-id');
-        if (clientSelect) {
-            // Try to find a matching client by name
-            const clientOptions = Array.from(clientSelect.options);
-            const matchingOption = clientOptions.find(option => 
+        const customerSelect = document.getElementById('client-id');
+        if (customerSelect) {
+            // Try to find a matching customer by name
+            const customerOptions = Array.from(customerSelect.options);
+            const matchingOption = customerOptions.find(option => 
                 option.text.toLowerCase().includes(data.client.name.toLowerCase())
             );
             
             if (matchingOption) {
-                clientSelect.value = matchingOption.value;
+                customerSelect.value = matchingOption.value;
             }
         }
     }
