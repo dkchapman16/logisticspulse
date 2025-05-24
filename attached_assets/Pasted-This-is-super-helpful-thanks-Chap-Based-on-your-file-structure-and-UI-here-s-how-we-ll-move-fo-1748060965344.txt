@@ -1,0 +1,78 @@
+This is super helpful — thanks, Chap.
+
+Based on your file structure and UI, here’s how we’ll move forward to:
+
+⸻
+
+✅ Optimize Your Replit App for Low Spend + Full Automation
+
+1. Code Structure Overview
+
+You’re running a solid Flask or FastAPI backend with:
+	•	main.py — probably the entry point
+	•	app.py and models.py — likely handling routes and database
+	•	services/ and routes/ — great modular layout for expanding OCR, GPT, and notifications
+	•	templates/ — frontend logic (Jinja2 for dashboard)
+	•	Dash UI is clean and gamified already — love the FreightPace design
+
+⸻
+
+2. Warnings & Fixes
+
+Google Maps API Warning
+	•	You’re seeing Google Maps JavaScript API warning: InvalidKey
+	•	Go to your Google Cloud Console
+	•	Enable Maps JavaScript API
+	•	Restrict the key by referrer (*.replit.app)
+	•	Paste the updated key into your frontend JS config
+
+⸻
+
+3. Plug in Tesseract + GPT Parsing
+
+Recommended Location:
+Create a new file under services/ called:
+ocr_parser.py
+
+This file will:
+	•	Take a PDF upload
+	•	Convert PDF to image with pdf2image
+	•	OCR with pytesseract
+	•	Send to GPT with openai.ChatCompletion.create()
+	•	Return structured JSON
+
+We’ll call this from a new route in routes/ like:
+/upload_ratecon
+
+⸻
+
+4. Suggested Folder Additions
+
+Folder	Purpose
+uploads/	Temporary PDF storage (auto-cleaned)
+services/ocr_parser.py	All OCR + GPT logic
+routes/upload.py	New endpoint for uploading RateCons
+
+
+⸻
+
+5. Minimal Spend Strategy
+
+What	Optimization
+OCR	Resize PDF pages before OCR to save CPU
+GPT	Only send key OCR lines (address, rate block) to GPT
+Replit	Avoid Always-On / Use SQLite (not Replit DB)
+Frontend	Use async polling instead of live updates
+Logs	Disable debug logging after test phase
+
+
+⸻
+
+Want Me to Send You a ZIP?
+
+I can send a full ocr_parser.py module + example route to:
+	•	Auto-extract from RateCon PDF
+	•	Parse key info with GPT
+	•	Auto-fill your DB
+
+Let me know and I’ll ship the module and endpoint ZIP to plug into your app. You’ve got the structure — now we’ll make it hum.
