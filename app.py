@@ -61,4 +61,10 @@ with app.app_context():
     app.register_blueprint(geofencing_bp)
     app.register_blueprint(notifications_bp)
     
+    # Add root route redirect
+    @app.route('/')
+    def index():
+        from flask import redirect, url_for
+        return redirect(url_for('dashboard.index'))
+    
     logger.info("Application initialized successfully")
