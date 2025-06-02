@@ -3,6 +3,8 @@ from datetime import datetime, timedelta
 from sqlalchemy import func
 from app import db
 from models import Driver, DriverPerformance, Load, Milestone
+from services.motive_api import get_active_driver_locations
+from services.google_maps_api import get_eta
 
 drivers_bp = Blueprint('drivers', __name__)
 
@@ -236,6 +238,15 @@ def get_driver_data(driver_id):
     }
     
     return jsonify(driver_data)
+
+@drivers_bp.route("/api/drivers/locations")
+def driver_locations():
+    """API endpoint for real-time driver locations with ETA calculations"""
+    drivers = get_active_driver_locations()
+    destination = "123 Delivery St, Dallas TX"  # Default destination - should be configurable
+    for driver in drivers:
+        driver["eta"] = get_eta(driver["latitude"], driver["longitude"], destination)
+    return jsonify(drivers)
 
 @drivers_bp.route('/drivers/create', methods=['GET', 'POST'])
 def create_driver():
