@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>LogisticsPulse Dashboard</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+    <header class="top-nav">
+        <div class="logo">🚛 LogisticsPulse</div>
+        <nav>
+            <a href="/">Dashboard</a>
+            <a href="/assignments">Assignments</a>
+            <a href="/loads">Loads</a>
+            <a href="/drivers">Drivers</a>
+            <a href="/upload">Upload RateCon</a>
+            <a href="/scorecards">Scorecards</a>
+        </nav>
+    </header>
+
+    <main class="dashboard-grid">
+        <!-- Live Load Status -->
+        <section class="card">
+            <h2>📦 Active Loads</h2>
+            <div id="active-loads">
+                {% for load in loads %}
+                    <div class="load-card {{ load.status }}">
+                        <h3>{{ load.customer }}</h3>
+                        <p><strong>Pickup:</strong> {{ load.pickup_city }} → <strong>Drop:</strong> {{ load.dropoff_city }}</p>
+                        <p><strong>Driver:</strong> {{ load.driver or 'Unassigned' }}</p>
+                        <p><strong>Status:</strong> {{ load.status | capitalize }} <span class="eta">{{ load.eta }}</span></p>
+                    </div>
+                {% endfor %}
+            </div>
+        </section>
+
+        <!-- Driver Leaderboard -->
+        <section class="card">
+            <h2>🏁 Driver Leaderboard</h2>
+            <div id="driver-cards">
+                {% for driver in drivers %}
+                    <div class="driver-card">
+                        <h3>{{ driver.name }}</h3>
+                        <p>Loads Completed: {{ driver.loads_completed }}</p>
+                        <p>On-Time Rate: {{ driver.on_time_pct }}%</p>
+                        <p>Badges: 🏅{{ driver.badges | length }}</p>
+                    </div>
+                {% endfor %}
+            </div>
+        </section>
+
+        <!-- Unassigned RateCons -->
+        <section class="card">
+            <h2>📝 Unassigned RateCons</h2>
+            <ul>
+                {% for load in unassigned_loads %}
+                    <li>{{ load.customer }} – <a href="/assign/{{ load.id }}">Assign</a></li>
+                {% endfor %}
+            </ul>
+        </section>
+    </main>
+</body>
+</html>

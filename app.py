@@ -72,4 +72,26 @@ with app.app_context():
         from flask import redirect, url_for
         return redirect(url_for('dashboard.index'))
     
+    # Preview route for new dashboard design
+    @app.route('/preview')
+    def dashboard_preview():
+        from flask import render_template
+        # Sample data for preview
+        sample_loads = [
+            {'customer': 'ABC Corp', 'pickup_city': 'Atlanta', 'dropoff_city': 'Charlotte', 'driver': 'John Smith', 'status': 'in_transit', 'eta': '2 hrs'},
+            {'customer': 'XYZ Inc', 'pickup_city': 'Memphis', 'dropoff_city': 'Nashville', 'driver': None, 'status': 'scheduled', 'eta': '4 hrs'}
+        ]
+        sample_drivers = [
+            {'name': 'John Smith', 'loads_completed': 15, 'on_time_pct': 95, 'badges': ['⭐', '🏆']},
+            {'name': 'Maria Garcia', 'loads_completed': 12, 'on_time_pct': 92, 'badges': ['⭐']}
+        ]
+        sample_unassigned = [
+            {'customer': 'DEF Company', 'id': 'LOAD003'}
+        ]
+        
+        return render_template('dashboard_preview.html', 
+                             loads=sample_loads, 
+                             drivers=sample_drivers, 
+                             unassigned_loads=sample_unassigned)
+    
     logger.info("Application initialized successfully")
