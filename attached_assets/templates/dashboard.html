@@ -1,30 +1,64 @@
-<html>
-  <head>
-    <title>Driver Map</title>
-    <script>
-      async function loadDriverMap() {
-        const res = await fetch("/api/drivers/locations");
-        const data = await res.json();
 
-        const map = new google.maps.Map(document.getElementById("map"), {
-          zoom: 6,
-          center: { lat: data[0].latitude, lng: data[0].longitude }
-        });
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>LogisticsPulse Dashboard</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+    <header class="top-nav">
+        <div class="logo">🚛 LogisticsPulse</div>
+        <nav>
+            <a href="/">Dashboard</a>
+            <a href="/assignments">Assignments</a>
+            <a href="/loads">Loads</a>
+            <a href="/drivers">Drivers</a>
+            <a href="/upload">Upload RateCon</a>
+            <a href="/scorecards">Scorecards</a>
+        </nav>
+    </header>
 
-        data.forEach(driver => {
-          new google.maps.Marker({
-            position: { lat: driver.latitude, lng: driver.longitude },
-            map,
-            title: `${driver.name} - ETA: ${driver.eta}`
-          });
-        });
-      }
+    <main class="dashboard-grid">
+        <!-- Live Load Status -->
+        <section class="card">
+            <h2>📦 Active Loads</h2>
+            <div id="active-loads">
+                {% for load in loads %}
+                    <div class="load-card {{ load.status }}">
+                        <h3>{{ load.customer }}</h3>
+                        <p><strong>Pickup:</strong> {{ load.pickup_city }} → <strong>Drop:</strong> {{ load.dropoff_city }}</p>
+                        <p><strong>Driver:</strong> {{ load.driver or 'Unassigned' }}</p>
+                        <p><strong>Status:</strong> {{ load.status | capitalize }} <span class="eta">{{ load.eta }}</span></p>
+                    </div>
+                {% endfor %}
+            </div>
+        </section>
 
-      window.initMap = loadDriverMap;
-    </script>
-    <script src="https://maps.googleapis.com/maps/api/js?key=YOUR_API_KEY&callback=initMap" async defer></script>
-  </head>
-  <body>
-    <div id="map" style="width:100%; height:500px;"></div>
-  </body>
+        <!-- Driver Leaderboard -->
+        <section class="card">
+            <h2>🏁 Driver Leaderboard</h2>
+            <div id="driver-cards">
+                {% for driver in drivers %}
+                    <div class="driver-card">
+                        <h3>{{ driver.name }}</h3>
+                        <p>Loads Completed: {{ driver.loads_completed }}</p>
+                        <p>On-Time Rate: {{ driver.on_time_pct }}%</p>
+                        <p>Badges: 🏅{{ driver.badges | length }}</p>
+                    </div>
+                {% endfor %}
+            </div>
+        </section>
+
+        <!-- Unassigned RateCons -->
+        <section class="card">
+            <h2>📝 Unassigned RateCons</h2>
+            <ul>
+                {% for load in unassigned_loads %}
+                    <li>{{ load.customer }} – <a href="/assign/{{ load.id }}">Assign</a></li>
+                {% endfor %}
+            </ul>
+        </section>
+    </main>
+</body>
 </html>
