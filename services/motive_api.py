@@ -13,7 +13,8 @@ HEADERS = {
 
 def get_vehicle_locations():
     """Fetch vehicle locations and assigned drivers using Motive's /fleet/vehicles endpoint"""
-    logger.info(f"MOTIVE_API_KEY set: {'Yes' if MOTIVE_API_KEY else 'No'}")
+    logger.info(f"MOTIVE_API_KEY is set: {'Yes' if MOTIVE_API_KEY else 'No'}")
+    logger.info(f"Authorization Header: {HEADERS['Authorization']}")
     logger.info("Fetching vehicle data from Motive")
 
     url = f"{BASE_URL}/fleet/vehicles"
@@ -26,6 +27,9 @@ def get_vehicle_locations():
             params["starting_after"] = cursor
 
         response = requests.get(url, headers=HEADERS, params=params)
+        
+        logger.info(f"Response Status: {response.status_code}")
+        logger.info(f"Response Body: {response.text}")
 
         if response.status_code != 200:
             logger.error(f"Motive API Error: {response.status_code} - {response.text}")
