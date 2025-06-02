@@ -142,22 +142,41 @@ Document text:
         logger.info("Successfully parsed document with AI")
         return result
         
-    except Exception as e:
-        logger.error(f"Error in AI parsing: {str(e)}")
-        # Return structured fallback data
+    except openai.OpenAIError as e:
+        logger.error(f"❌ OpenAI API error: {e}")
+        print(f"❌ OpenAI API error: {e}")
         return {
             'reference_number': f"LOAD-{datetime.now().strftime('%Y%m%d-%H%M%S')}",
             'pickup': {
-                'facility_name': 'Edit Required - Pickup Company',
-                'address': 'Edit Required - Pickup Address',
+                'facility_name': 'Error: AI response failed - Edit Required',
+                'address': 'Error: AI response failed - Edit Required',
                 'scheduled_time': datetime.now().strftime('%Y-%m-%d %H:%M:%S')
             },
             'delivery': {
-                'facility_name': 'Edit Required - Delivery Company', 
-                'address': 'Edit Required - Delivery Address',
+                'facility_name': 'Error: AI response failed - Edit Required', 
+                'address': 'Error: AI response failed - Edit Required',
                 'scheduled_time': datetime.now().strftime('%Y-%m-%d %H:%M:%S')
             },
             'client': {
-                'name': 'Edit Required - Client Name'
+                'name': 'Error: AI response failed - Edit Required'
+            }
+        }
+    except Exception as e:
+        logger.error(f"❌ Unexpected error in AI parsing: {str(e)}")
+        print(f"❌ Unexpected error in AI parsing: {str(e)}")
+        return {
+            'reference_number': f"LOAD-{datetime.now().strftime('%Y%m%d-%H%M%S')}",
+            'pickup': {
+                'facility_name': 'Error: AI response failed - Edit Required',
+                'address': 'Error: AI response failed - Edit Required',
+                'scheduled_time': datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+            },
+            'delivery': {
+                'facility_name': 'Error: AI response failed - Edit Required', 
+                'address': 'Error: AI response failed - Edit Required',
+                'scheduled_time': datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+            },
+            'client': {
+                'name': 'Error: AI response failed - Edit Required'
             }
         }
