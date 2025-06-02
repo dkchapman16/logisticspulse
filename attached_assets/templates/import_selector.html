@@ -1,0 +1,23 @@
+<h2>Select Drivers & Vehicles to Import</h2>
+
+<form method="post">
+  <div>
+    <h3>Drivers</h3>
+    {% for driver in drivers %}
+      <label>
+        <input type="checkbox" name="drivers" value="{{ driver }}"> {{ driver }}
+      </label><br>
+    {% endfor %}
+  </div>
+
+  <div>
+    <h3>Vehicles</h3>
+    {% for vehicle in vehicles %}
+      <label>
+        <input type="checkbox" name="vehicles" value="{{ vehicle }}"> {{ vehicle }}
+      </label><br>
+    {% endfor %}
+  </div>
+
+  <button type="submit">Import Selected</button>
+</form>

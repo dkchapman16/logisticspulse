@@ -58,6 +58,7 @@ with app.app_context():
     from routes.geofencing import geofencing_bp
     from routes.notifications import notifications_bp
     from routes.assignments import assignments_bp
+    from routes.imports import imports_bp
     
     app.register_blueprint(dashboard_bp)
     app.register_blueprint(loads_bp)
@@ -65,6 +66,7 @@ with app.app_context():
     app.register_blueprint(geofencing_bp)
     app.register_blueprint(notifications_bp)
     app.register_blueprint(assignments_bp)
+    app.register_blueprint(imports_bp)
     
     # Add root route redirect
     @app.route('/')

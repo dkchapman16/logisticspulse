@@ -1,0 +1,122 @@
+{% extends "layout.html" %}
+
+{% block title %}Import Drivers & Vehicles{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2>Import Drivers & Vehicles from Motive</h2>
+                <a href="/" class="btn btn-secondary">Back to Dashboard</a>
+            </div>
+
+            {% if error_message %}
+                <div class="alert alert-warning">
+                    <i data-feather="alert-triangle"></i>
+                    {{ error_message }}
+                </div>
+            {% endif %}
+
+            {% if has_data %}
+                <form method="post" class="row">
+                    <div class="col-md-6">
+                        <div class="card">
+                            <div class="card-header">
+                                <h5><i data-feather="user"></i> Available Drivers</h5>
+                            </div>
+                            <div class="card-body" style="max-height: 400px; overflow-y: auto;">
+                                {% if drivers %}
+                                    <div class="form-check mb-3">
+                                        <input class="form-check-input" type="checkbox" id="selectAllDrivers">
+                                        <label class="form-check-label fw-bold" for="selectAllDrivers">
+                                            Select All Drivers
+                                        </label>
+                                    </div>
+                                    {% for driver in drivers %}
+                                        <div class="form-check">
+                                            <input class="form-check-input driver-checkbox" type="checkbox" name="drivers" value="{{ driver }}" id="driver-{{ loop.index }}">
+                                            <label class="form-check-label" for="driver-{{ loop.index }}">
+                                                {{ driver }}
+                                            </label>
+                                        </div>
+                                    {% endfor %}
+                                {% else %}
+                                    <p class="text-muted">No drivers found in Motive API</p>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <div class="card">
+                            <div class="card-header">
+                                <h5><i data-feather="truck"></i> Available Vehicles</h5>
+                            </div>
+                            <div class="card-body" style="max-height: 400px; overflow-y: auto;">
+                                {% if vehicles %}
+                                    <div class="form-check mb-3">
+                                        <input class="form-check-input" type="checkbox" id="selectAllVehicles">
+                                        <label class="form-check-label fw-bold" for="selectAllVehicles">
+                                            Select All Vehicles
+                                        </label>
+                                    </div>
+                                    {% for vehicle in vehicles %}
+                                        <div class="form-check">
+                                            <input class="form-check-input vehicle-checkbox" type="checkbox" name="vehicles" value="{{ vehicle }}" id="vehicle-{{ loop.index }}">
+                                            <label class="form-check-label" for="vehicle-{{ loop.index }}">
+                                                {{ vehicle }}
+                                            </label>
+                                        </div>
+                                    {% endfor %}
+                                {% else %}
+                                    <p class="text-muted">No vehicles found in Motive API</p>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-12 mt-4">
+                        <div class="d-flex justify-content-center">
+                            <button type="submit" class="btn btn-primary btn-lg">
+                                <i data-feather="download"></i>
+                                Import Selected Items
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            {% else %}
+                <div class="card">
+                    <div class="card-body text-center">
+                        <i data-feather="wifi-off" class="mb-3" style="width: 48px; height: 48px;"></i>
+                        <h5>Unable to Load Data</h5>
+                        <p class="text-muted">Cannot connect to Motive API to fetch drivers and vehicles.</p>
+                        <a href="{{ url_for('imports.import_drivers_vehicles') }}" class="btn btn-primary">
+                            <i data-feather="refresh-cw"></i>
+                            Try Again
+                        </a>
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<script>
+// Select all drivers functionality
+document.getElementById('selectAllDrivers')?.addEventListener('change', function() {
+    const checkboxes = document.querySelectorAll('.driver-checkbox');
+    checkboxes.forEach(checkbox => {
+        checkbox.checked = this.checked;
+    });
+});
+
+// Select all vehicles functionality
+document.getElementById('selectAllVehicles')?.addEventListener('change', function() {
+    const checkboxes = document.querySelectorAll('.vehicle-checkbox');
+    checkboxes.forEach(checkbox => {
+        checkbox.checked = this.checked;
+    });
+});
+</script>
+{% endblock %}
