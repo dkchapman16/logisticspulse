@@ -4,54 +4,52 @@ from .logger import setup_logger
 
 logger = setup_logger(__name__)
 
-MOTIVE_API_KEY = os.getenv("MOTIVE_API_KEY")
-BASE_URL = "https://api.gomotive.com/v1"
+TOKEN_URL = "https://api.gomotive.com/oauth/token"
+VEHICLE_LOC_URL = "https://api.gomotive.com/v3/vehicle_locations"
 
-HEADERS = {
-    "Authorization": f"Bearer {MOTIVE_API_KEY}"
-}
+CLIENT_ID = os.getenv("MOTIVE_CLIENT_ID")
+CLIENT_SECRET = os.getenv("MOTIVE_SECRET")
+
+def get_access_token():
+    logger.info("Getting Motive OAuth token")
+    payload = {
+        "grant_type": "client_credentials",
+        "client_id": CLIENT_ID,
+        "client_secret": CLIENT_SECRET
+    }
+    response = requests.post(TOKEN_URL, data=payload)
+    if response.status_code != 200:
+        logger.error(f"OAuth token error: {response.status_code} - {response.text}")
+        return None
+    return response.json().get("access_token")
 
 def get_vehicle_locations():
-    """Fetch vehicle locations and assigned drivers using Motive's /fleet/vehicles endpoint"""
-    logger.info(f"MOTIVE_API_KEY is set: {'Yes' if MOTIVE_API_KEY else 'No'}")
-    logger.info(f"Authorization Header: {HEADERS['Authorization']}")
-    logger.info("Fetching vehicle data from Motive")
+    """Fetch vehicle locations using OAuth authentication"""
+    token = get_access_token()
+    if not token:
+        return []
 
-    url = f"{BASE_URL}/fleet/vehicles"
+    headers = {"Authorization": f"Bearer {token}"}
+    response = requests.get(VEHICLE_LOC_URL, headers=headers)
+
+    logger.info(f"Response Status: {response.status_code}")
+    logger.info(f"Response Body: {response.text}")
+
+    if response.status_code != 200:
+        logger.error(f"Vehicle location error: {response.status_code} - {response.text}")
+        return []
+
+    data = response.json()
     vehicles = []
-    cursor = None
-
-    while True:
-        params = {"limit": 50}
-        if cursor:
-            params["starting_after"] = cursor
-
-        response = requests.get(url, headers=HEADERS, params=params)
-        
-        logger.info(f"Response Status: {response.status_code}")
-        logger.info(f"Response Body: {response.text}")
-
-        if response.status_code != 200:
-            logger.error(f"Motive API Error: {response.status_code} - {response.text}")
-            return []
-
-        data = response.json()
-        for v in data.get("data", []):
-            location = v.get("lastKnownLocation")
-            if location:
-                vehicles.append({
-                    "vehicle_name": v.get("name"),
-                    "vehicle_id": v.get("id"),
-                    "latitude": location.get("latitude"),
-                    "longitude": location.get("longitude"),
-                    "driver_name": v.get("driver", {}).get("name", "Unassigned")
-                })
-
-        cursor = data.get("pagination", {}).get("ending_before")
-        if not cursor:
-            break
-
-    logger.info(f"✅ Found {len(vehicles)} vehicles with location data")
+    for v in data.get("data", []):
+        vehicles.append({
+            "vehicle_name": v.get("vehicle", {}).get("name"),
+            "vehicle_id": v.get("vehicle", {}).get("id"),
+            "latitude": v.get("location", {}).get("latitude"),
+            "longitude": v.get("location", {}).get("longitude"),
+            "driver_name": v.get("driver", {}).get("name", "Unassigned")
+        })
+    logger.info(f"✅ Retrieved {len(vehicles)} vehicle locations from Motive")
     return vehicles
 
 def get_active_driver_locations():
