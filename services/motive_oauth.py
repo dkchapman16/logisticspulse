@@ -29,21 +29,27 @@ def get_driver_vehicle_list():
     headers = {"Authorization": f"Bearer {token}"}
     drivers, vehicles = [], []
 
-    # Try to get drivers from fleet endpoint
+    # Try to get drivers from the correct endpoint
     try:
-        d_resp = requests.get("https://api.gomotive.com/v1/fleet/drivers", headers=headers)
+        d_resp = requests.get("https://api.gomotive.com/v1/drivers", headers=headers)
         if d_resp.status_code == 200:
-            drivers = [d["name"] for d in d_resp.json().get("data", []) if d.get("name")]
+            data = d_resp.json()
+            drivers = [d.get("name", d.get("first_name", "") + " " + d.get("last_name", "")).strip() 
+                      for d in data.get("drivers", data.get("data", [])) 
+                      if d.get("name") or (d.get("first_name") or d.get("last_name"))]
         else:
             logger.warning(f"Drivers endpoint returned {d_resp.status_code}: {d_resp.text}")
     except Exception as e:
         logger.error(f"Error fetching drivers: {e}")
 
-    # Try to get vehicles from fleet endpoint
+    # Try to get vehicles from the correct endpoint
     try:
-        v_resp = requests.get("https://api.gomotive.com/v1/fleet/vehicles", headers=headers)
+        v_resp = requests.get("https://api.gomotive.com/v1/vehicles", headers=headers)
         if v_resp.status_code == 200:
-            vehicles = [v["name"] for v in v_resp.json().get("data", []) if v.get("name")]
+            data = v_resp.json()
+            vehicles = [v.get("number", v.get("license_plate", v.get("id", "Unknown"))) 
+                       for v in data.get("vehicles", data.get("data", [])) 
+                       if v.get("number") or v.get("license_plate") or v.get("id")]
         else:
             logger.warning(f"Vehicles endpoint returned {v_resp.status_code}: {v_resp.text}")
     except Exception as e:
