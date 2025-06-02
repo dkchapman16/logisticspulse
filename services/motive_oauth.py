@@ -5,8 +5,8 @@ from .logger import setup_logger
 logger = setup_logger(__name__)
 
 TOKEN_URL = "https://api.gomotive.com/oauth/token"
-CLIENT_ID = os.getenv("MOTIVE_API_KEY")
-CLIENT_SECRET = os.getenv("MOTIVE_API_SECRET")
+CLIENT_ID = os.getenv("MOTIVE_CLIENT_ID")
+CLIENT_SECRET = os.getenv("MOTIVE_SECRET")
 
 def get_access_token():
     logger.info("Getting Motive OAuth token")
