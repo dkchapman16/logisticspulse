@@ -13,6 +13,7 @@ HEADERS = {
 
 def get_active_driver_locations():
     """Get all drivers and extract real-time location if available"""
+    logger.info(f"MOTIVE_API_KEY set: {'Yes' if MOTIVE_API_KEY else 'No'}")
     logger.info("Fetching drivers from Motive")
     url = f"{BASE_URL}/fleet/drivers"
     driver_locations = []
@@ -27,7 +28,10 @@ def get_active_driver_locations():
 
         if response.status_code != 200:
             logger.error(f"Motive API Error: {response.status_code} - {response.text}")
-            break
+            return []
+        else:
+            logger.info(f"Motive API Success: {response.status_code}")
+            logger.info(f"Raw Response: {response.text}")
 
         data = response.json()
         drivers = data.get("data", [])
