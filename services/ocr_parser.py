@@ -12,8 +12,9 @@ from PIL import Image
 from pdf2image import convert_from_bytes
 from werkzeug.datastructures import FileStorage
 import openai
+from .logger import setup_logger
 
-logger = logging.getLogger(__name__)
+logger = setup_logger(__name__)
 
 def get_openai_client():
     """Initialize OpenAI client"""
