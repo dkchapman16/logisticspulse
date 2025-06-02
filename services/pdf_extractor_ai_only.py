@@ -35,6 +35,7 @@ def extract_from_pdf(file) -> Dict[str, Any]:
         else:
             file_data = file.read()
         
+        logging.info("Starting OCR process")
         logger.info(f"Starting AI extraction for PDF ({len(file_data)} bytes)")
         
         # Extract text using PyMuPDF (very reliable)
@@ -48,6 +49,7 @@ def extract_from_pdf(file) -> Dict[str, Any]:
         
         pdf_document.close()
         
+        logging.info(f"Extracted {len(full_text)} characters using PyMuPDF")
         logger.info(f"Extracted {len(full_text)} characters using PyMuPDF")
         
         # Use AI to intelligently parse the text
@@ -60,6 +62,7 @@ def extract_from_pdf(file) -> Dict[str, Any]:
         return extracted_data
         
     except Exception as e:
+        logging.error("Failed to extract text from image")
         logger.error(f"Error in PDF extraction: {str(e)}")
         return {
             'success': False,
