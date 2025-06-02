@@ -12,21 +12,39 @@ HEADERS = {
 }
 
 def get_active_driver_locations():
-    """Get real-time locations of active drivers"""
-    logger.info("Fetching active driver locations from Motive API")
+    """Get all drivers and extract real-time location if available"""
+    logger.info("Fetching drivers from Motive")
     url = f"{BASE_URL}/fleet/drivers"
-    response = requests.get(url, headers=HEADERS)
-    drivers = response.json().get('data', [])
-
     driver_locations = []
-    for driver in drivers:
-        if driver.get("currentStatus") == "DRIVING" and driver.get("vehicle"):
-            driver_locations.append({
-                "name": driver.get("name"),
-                "latitude": driver["vehicle"]["lastKnownLocation"]["latitude"],
-                "longitude": driver["vehicle"]["lastKnownLocation"]["longitude"],
-                "vehicle_id": driver["vehicle"]["id"]
-            })
-    
-    logger.info(f"Found {len(driver_locations)} active drivers")
+    cursor = None
+
+    while True:
+        params = {"limit": 50}
+        if cursor:
+            params["starting_after"] = cursor
+
+        response = requests.get(url, headers=HEADERS, params=params)
+
+        if response.status_code != 200:
+            logger.error(f"Motive API Error: {response.status_code} - {response.text}")
+            break
+
+        data = response.json()
+        drivers = data.get("data", [])
+
+        for driver in drivers:
+            vehicle = driver.get("vehicle")
+            if vehicle and vehicle.get("lastKnownLocation"):
+                driver_locations.append({
+                    "name": driver.get("name"),
+                    "latitude": vehicle["lastKnownLocation"]["latitude"],
+                    "longitude": vehicle["lastKnownLocation"]["longitude"],
+                    "vehicle_id": vehicle["id"]
+                })
+
+        cursor = data.get("pagination", {}).get("ending_before")
+        if not cursor:
+            break
+
+    logger.info(f"✅ Found {len(driver_locations)} drivers with live location")
     return driver_locations
