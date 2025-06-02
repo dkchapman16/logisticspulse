@@ -1,0 +1,23 @@
+<html>
+  <head><title>Assign Load</title></head>
+  <body>
+    <h2>Assign Load to Driver</h2>
+    <form method="POST">
+      <label>Load:</label>
+      <select name="load_id">
+        {% for load in loads %}
+          <option value="{{ load.id }}">{{ load.pickup_address }} → {{ load.dropoff_address }}</option>
+        {% endfor %}
+      </select><br><br>
+
+      <label>Driver:</label>
+      <select name="driver_name">
+        {% for driver in drivers %}
+          <option value="{{ driver.name }}">{{ driver.name }}</option>
+        {% endfor %}
+      </select><br><br>
+
+      <input type="submit" value="Assign">
+    </form>
+  </body>
+</html>
