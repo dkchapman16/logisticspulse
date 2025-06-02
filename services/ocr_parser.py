@@ -175,6 +175,27 @@ def parse_with_ai(text: str) -> Dict[str, Any]:
     """
     Use OpenAI GPT to intelligently parse RateCon text data
     """
+    # Check for Safe Mode
+    from flask import current_app
+    if current_app and current_app.config.get("SAFE_MODE", False):
+        logging.info("Safe mode enabled – no API calls will be made")
+        return {
+            'reference_number': f"SAFE-MODE-{datetime.now().strftime('%Y%m%d-%H%M%S')}",
+            'pickup': {
+                'facility_name': 'Safe Mode - Edit Required',
+                'address': 'Safe Mode - Edit Required',
+                'scheduled_time': datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+            },
+            'delivery': {
+                'facility_name': 'Safe Mode - Edit Required', 
+                'address': 'Safe Mode - Edit Required',
+                'scheduled_time': datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+            },
+            'client': {
+                'name': 'Safe Mode - Edit Required'
+            }
+        }
+    
     try:
         client = get_openai_client()
         

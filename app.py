@@ -39,6 +39,9 @@ db.init_app(app)
 app.config["GOOGLE_MAPS_API_KEY"] = os.environ.get("GOOGLE_MAPS_API_KEY", "")
 app.config["MOTIVE_API_KEY"] = os.environ.get("MOTIVE_API_KEY", "")
 
+# Safe Mode configuration - disable API calls for testing
+app.config["SAFE_MODE"] = os.environ.get("SAFE_MODE", "false").lower() == "true"
+
 with app.app_context():
     # Import models
     import models  # noqa: F401

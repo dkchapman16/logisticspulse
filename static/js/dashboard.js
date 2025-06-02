@@ -3,6 +3,9 @@ document.addEventListener('DOMContentLoaded', function() {
     // Check if we're on the dashboard page
     if (!document.getElementById('dashboard-content')) return;
     
+    // Initialize Safe Mode toggle
+    initializeSafeModeToggle();
+    
     // Load dashboard data
     loadDashboardSummary();
     loadAtRiskLoads();
@@ -30,6 +33,62 @@ document.addEventListener('DOMContentLoaded', function() {
     setInterval(loadDashboardSummary, 300000);
     setInterval(loadAtRiskLoads, 300000);
 });
+
+// Initialize Safe Mode toggle functionality
+function initializeSafeModeToggle() {
+    const safeModeToggle = document.getElementById('safe-mode-toggle');
+    if (safeModeToggle) {
+        // Load saved state from localStorage
+        const savedState = localStorage.getItem('freightpace-safe-mode');
+        if (savedState === 'true') {
+            safeModeToggle.checked = true;
+            showSafeModeNotification();
+        }
+        
+        // Handle toggle changes
+        safeModeToggle.addEventListener('change', function() {
+            const isEnabled = this.checked;
+            localStorage.setItem('freightpace-safe-mode', isEnabled.toString());
+            
+            if (isEnabled) {
+                showSafeModeNotification();
+            } else {
+                hideSafeModeNotification();
+            }
+        });
+    }
+}
+
+// Show safe mode notification
+function showSafeModeNotification() {
+    // Remove existing notification
+    const existing = document.getElementById('safe-mode-notification');
+    if (existing) existing.remove();
+    
+    // Create notification
+    const notification = document.createElement('div');
+    notification.id = 'safe-mode-notification';
+    notification.className = 'alert alert-warning d-flex align-items-center mb-3';
+    notification.innerHTML = `
+        <i data-feather="shield" class="me-2"></i>
+        <span>Safe mode enabled – no API calls will be made during PDF processing.</span>
+    `;
+    
+    // Insert after dashboard header
+    const dashboardHeader = document.querySelector('.d-flex.justify-content-between.align-items-center.mb-4');
+    if (dashboardHeader) {
+        dashboardHeader.insertAdjacentElement('afterend', notification);
+        feather.replace(); // Refresh feather icons
+    }
+}
+
+// Hide safe mode notification
+function hideSafeModeNotification() {
+    const notification = document.getElementById('safe-mode-notification');
+    if (notification) {
+        notification.remove();
+    }
+}
 
 // Load dashboard summary data
 function loadDashboardSummary() {
