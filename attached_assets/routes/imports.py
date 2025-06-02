@@ -1,5 +1,5 @@
 from flask import Blueprint, render_template, request, redirect, url_for
-from services.motive_oauth import get_vehicle_locations
+from services.motive_oauth import get_driver_vehicle_list
 from utils.storage import save_json, load_json
 
 imports_bp = Blueprint("imports", __name__)
@@ -18,7 +18,5 @@ def import_drivers_vehicles():
         save_json("drivers.json", existing)
         return redirect(url_for("imports.import_drivers_vehicles"))
 
-    motive_data = get_vehicle_locations()
-    driver_names = list({v["driver_name"] for v in motive_data if v.get("driver_name")})
-    vehicle_names = list({v["vehicle_name"] for v in motive_data if v.get("vehicle_name")})
+    driver_names, vehicle_names = get_driver_vehicle_list()
     return render_template("import_selector.html", drivers=driver_names, vehicles=vehicle_names)

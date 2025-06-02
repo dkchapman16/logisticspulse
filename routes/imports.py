@@ -1,8 +1,6 @@
 from flask import Blueprint, render_template, request, redirect, url_for, flash
-from services.motive_api import get_vehicle_locations
-from services.loads_service import load_all, save_all
-import json
-import os
+from services.motive_oauth import get_driver_vehicle_list
+from utils.storage import save_json, load_json
 
 imports_bp = Blueprint("imports", __name__)
 
@@ -12,44 +10,41 @@ def import_drivers_vehicles():
         selected_drivers = request.form.getlist("drivers")
         selected_vehicles = request.form.getlist("vehicles")
 
-        # Load existing drivers from JSON
-        drivers_file = "drivers.json"
-        if os.path.exists(drivers_file):
-            with open(drivers_file, 'r') as f:
-                existing_drivers = json.load(f)
-        else:
-            existing_drivers = []
-
-        # Add selected drivers if they don't already exist
-        existing_names = [d["name"] for d in existing_drivers]
+        # Load existing drivers and add selected ones
+        existing = load_json("drivers.json")
+        existing_names = [d["name"] for d in existing]
+        
+        new_drivers_count = 0
         for name in selected_drivers:
             if name not in existing_names:
-                existing_drivers.append({
+                existing.append({
                     "name": name, 
                     "loads_completed": 0, 
                     "on_time_pct": 100, 
                     "badges": []
                 })
+                new_drivers_count += 1
 
-        # Save updated drivers list
-        with open(drivers_file, 'w') as f:
-            json.dump(existing_drivers, f, indent=2)
-
-        flash(f"Successfully imported {len(selected_drivers)} drivers and {len(selected_vehicles)} vehicles", "success")
+        save_json("drivers.json", existing)
+        
+        if new_drivers_count > 0:
+            flash(f"Successfully imported {new_drivers_count} new drivers", "success")
+        else:
+            flash("No new drivers were imported (they may already exist)", "info")
+            
         return redirect(url_for("imports.import_drivers_vehicles"))
 
+    # Get driver and vehicle lists from Motive API
     try:
-        # Get data from Motive API
-        motive_data = get_vehicle_locations()
-        driver_names = list({v["driver_name"] for v in motive_data if v.get("driver_name")})
-        vehicle_names = list({v["vehicle_name"] for v in motive_data if v.get("vehicle_name")})
+        driver_names, vehicle_names = get_driver_vehicle_list()
+        has_data = len(driver_names) > 0 or len(vehicle_names) > 0
         
         return render_template("import_selector.html", 
                              drivers=driver_names, 
                              vehicles=vehicle_names,
-                             has_data=True)
+                             has_data=has_data,
+                             error_message=None if has_data else "No drivers or vehicles found in Motive API")
     except Exception as e:
-        # If Motive API fails, show empty form with error message
         return render_template("import_selector.html", 
                              drivers=[], 
                              vehicles=[],

@@ -5,8 +5,6 @@ from .logger import setup_logger
 logger = setup_logger(__name__)
 
 TOKEN_URL = "https://api.gomotive.com/oauth/token"
-VEHICLE_LOC_URL = "https://api.gomotive.com/v3/vehicle_locations"
-
 CLIENT_ID = os.getenv("MOTIVE_CLIENT_ID")
 CLIENT_SECRET = os.getenv("MOTIVE_SECRET")
 
@@ -23,26 +21,20 @@ def get_access_token():
         return None
     return response.json().get("access_token")
 
-def get_vehicle_locations():
+def get_driver_vehicle_list():
     token = get_access_token()
     if not token:
-        return []
+        return [], []
 
     headers = {"Authorization": f"Bearer {token}"}
-    response = requests.get(VEHICLE_LOC_URL, headers=headers)
+    drivers, vehicles = [], []
 
-    if response.status_code != 200:
-        logger.error(f"Vehicle location error: {response.status_code} - {response.text}")
-        return []
+    d_resp = requests.get("https://api.gomotive.com/v1/fleet/drivers", headers=headers)
+    if d_resp.status_code == 200:
+        drivers = [d["name"] for d in d_resp.json().get("data", []) if d.get("name")]
 
-    data = response.json()
-    vehicles = []
-    for v in data.get("data", []):
-        vehicles.append({
-            "vehicle_name": v.get("vehicle", {}).get("name"),
-            "latitude": v.get("location", {}).get("latitude"),
-            "longitude": v.get("location", {}).get("longitude"),
-            "driver_name": v.get("driver", {}).get("name", "Unassigned")
-        })
-    logger.info(f"✅ Retrieved {len(vehicles)} vehicle locations from Motive")
-    return vehicles
+    v_resp = requests.get("https://api.gomotive.com/v1/fleet/vehicles", headers=headers)
+    if v_resp.status_code == 200:
+        vehicles = [v["name"] for v in v_resp.json().get("data", []) if v.get("name")]
+
+    return drivers, vehicles
