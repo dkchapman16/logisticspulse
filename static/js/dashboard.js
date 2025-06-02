@@ -213,9 +213,9 @@ function loadDashboardSummary() {
                 }
             }
             
-            // Play a success sound if metrics are good
+            // Play a success sound if metrics are good (disabled)
             if (data.on_time.pickup_percentage >= 95 && data.on_time.delivery_percentage >= 95) {
-                playSuccessSound();
+                // playSuccessSound(); // Disabled audio notifications
                 showConfetti();
             }
         })
