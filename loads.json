@@ -1,0 +1,32 @@
+[
+  {
+    "id": "LOAD001",
+    "pickup_address": "1234 Warehouse Dr, Atlanta, GA",
+    "dropoff_address": "5678 Distribution Center, Charlotte, NC",
+    "pickup_time": "2025-06-02 08:00",
+    "delivery_time": "2025-06-02 14:00",
+    "priority": "high",
+    "weight": "24000 lbs",
+    "commodity": "Electronics"
+  },
+  {
+    "id": "LOAD002", 
+    "pickup_address": "9876 Industrial Blvd, Memphis, TN",
+    "dropoff_address": "3456 Commerce St, Nashville, TN",
+    "pickup_time": "2025-06-02 10:00",
+    "delivery_time": "2025-06-02 16:00",
+    "priority": "medium",
+    "weight": "18500 lbs",
+    "commodity": "Auto Parts"
+  },
+  {
+    "id": "LOAD003",
+    "pickup_address": "2468 Manufacturing Way, Birmingham, AL",
+    "dropoff_address": "1357 Retail Plaza, Jacksonville, FL",
+    "pickup_time": "2025-06-02 06:00",
+    "delivery_time": "2025-06-02 18:00",
+    "priority": "low",
+    "weight": "31000 lbs",
+    "commodity": "Furniture"
+  }
+]
