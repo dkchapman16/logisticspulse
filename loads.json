@@ -7,10 +7,11 @@
     "delivery_time": "2025-06-02 14:00",
     "priority": "high",
     "weight": "24000 lbs",
-    "commodity": "Electronics"
+    "commodity": "Electronics",
+    "assigned_driver": "John Smith"
   },
   {
-    "id": "LOAD002", 
+    "id": "LOAD002",
     "pickup_address": "9876 Industrial Blvd, Memphis, TN",
     "dropoff_address": "3456 Commerce St, Nashville, TN",
     "pickup_time": "2025-06-02 10:00",
