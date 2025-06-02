@@ -1,63 +1,83 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-bs-theme="dark">
 <head>
     <meta charset="UTF-8">
-    <title>LogisticsPulse Dashboard</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>LogisticsPulse Dashboard Preview</title>
+    <link href="https://cdn.replit.com/agent/bootstrap-agent-dark-theme.min.css" rel="stylesheet">
+    <link href="{{ url_for('static', filename='css/style.css') }}" rel="stylesheet">
+    <script src="https://unpkg.com/feather-icons"></script>
 </head>
 <body>
-    <header class="top-nav">
-        <div class="logo">🚛 LogisticsPulse</div>
-        <nav>
-            <a href="/">Dashboard</a>
-            <a href="/assignments">Assignments</a>
-            <a href="/loads">Loads</a>
-            <a href="/drivers">Drivers</a>
-            <a href="/upload">Upload RateCon</a>
-            <a href="/scorecards">Scorecards</a>
-        </nav>
-    </header>
-
-    <main class="dashboard-grid">
-        <!-- Live Load Status -->
-        <section class="card">
-            <h2>📦 Active Loads</h2>
-            <div id="active-loads">
-                {% for load in loads %}
-                    <div class="load-card {{ load.status }}">
-                        <h3>{{ load.customer }}</h3>
-                        <p><strong>Pickup:</strong> {{ load.pickup_city }} → <strong>Drop:</strong> {{ load.dropoff_city }}</p>
-                        <p><strong>Driver:</strong> {{ load.driver or 'Unassigned' }}</p>
-                        <p><strong>Status:</strong> {{ load.status | capitalize }} <span class="eta">{{ load.eta }}</span></p>
-                    </div>
-                {% endfor %}
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-12">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h2>🚛 LogisticsPulse Dashboard Preview</h2>
+                    <a href="/" class="btn btn-sm btn-secondary">Back to FreightPace</a>
+                </div>
             </div>
-        </section>
-
-        <!-- Driver Leaderboard -->
-        <section class="card">
-            <h2>🏁 Driver Leaderboard</h2>
-            <div id="driver-cards">
-                {% for driver in drivers %}
-                    <div class="driver-card">
-                        <h3>{{ driver.name }}</h3>
-                        <p>Loads Completed: {{ driver.loads_completed }}</p>
-                        <p>On-Time Rate: {{ driver.on_time_pct }}%</p>
-                        <p>Badges: 🏅{{ driver.badges | length }}</p>
+        </div>
+        
+            <!-- Live Load Status -->
+            <div class="col-md-6 mb-4">
+                <div class="card">
+                    <div class="card-header">
+                        <h5>📦 Active Loads</h5>
                     </div>
-                {% endfor %}
+                    <div class="card-body">
+                        {% for load in loads %}
+                            <div class="mb-3 p-3 border rounded">
+                                <h6>{{ load.customer }}</h6>
+                                <p class="mb-1"><strong>Route:</strong> {{ load.pickup_city }} → {{ load.dropoff_city }}</p>
+                                <p class="mb-1"><strong>Driver:</strong> {{ load.driver or 'Unassigned' }}</p>
+                                <p class="mb-0"><strong>Status:</strong> {{ load.status | capitalize }} <span class="text-muted">{{ load.eta }}</span></p>
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
             </div>
-        </section>
 
-        <!-- Unassigned RateCons -->
-        <section class="card">
-            <h2>📝 Unassigned RateCons</h2>
-            <ul>
-                {% for load in unassigned_loads %}
-                    <li>{{ load.customer }} – <a href="/assign/{{ load.id }}">Assign</a></li>
-                {% endfor %}
-            </ul>
-        </section>
-    </main>
+            <!-- Driver Leaderboard -->
+            <div class="col-md-6 mb-4">
+                <div class="card">
+                    <div class="card-header">
+                        <h5>🏁 Driver Leaderboard</h5>
+                    </div>
+                    <div class="card-body">
+                        {% for driver in drivers %}
+                            <div class="mb-3 p-3 border rounded">
+                                <h6>{{ driver.name }}</h6>
+                                <p class="mb-1">Loads Completed: {{ driver.loads_completed }}</p>
+                                <p class="mb-1">On-Time Rate: {{ driver.on_time_pct }}%</p>
+                                <p class="mb-0">Badges: 🏅{{ driver.badges | length }}</p>
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Unassigned RateCons -->
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h5>📝 Unassigned RateCons</h5>
+                    </div>
+                    <div class="card-body">
+                        <ul class="list-group list-group-flush">
+                            {% for load in unassigned_loads %}
+                                <li class="list-group-item d-flex justify-content-between align-items-center">
+                                    {{ load.customer }}
+                                    <a href="/assign/{{ load.id }}" class="btn btn-sm btn-primary">Assign</a>
+                                </li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>feather.replace();</script>
 </body>
 </html>
