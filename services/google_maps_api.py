@@ -3,8 +3,9 @@ import logging
 import requests
 from datetime import datetime, timedelta
 import json
+from .logger import setup_logger
 
-logger = logging.getLogger(__name__)
+logger = setup_logger(__name__)
 
 # API Configuration
 GOOGLE_MAPS_API_KEY = os.environ.get("GOOGLE_MAPS_API_KEY", "")

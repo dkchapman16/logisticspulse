@@ -2,8 +2,9 @@ import os
 import logging
 import requests
 from datetime import datetime
+from .logger import setup_logger
 
-logger = logging.getLogger(__name__)
+logger = setup_logger(__name__)
 
 # API Configuration
 MOTIVE_API_BASE_URL = "https://api.gomotive.com/v1"
