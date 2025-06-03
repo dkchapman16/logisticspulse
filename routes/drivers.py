@@ -297,6 +297,7 @@ def create_driver():
                 name=data['name'],
                 phone=data.get('phone', ''),
                 email=data.get('email', ''),
+                company=data.get('company', 'Hitched Logistics LLC'),
                 motive_driver_id=data.get('motive_driver_id', ''),
                 status='active'
             )
@@ -332,6 +333,9 @@ def update_driver(driver_id):
         
         if 'email' in data:
             driver.email = data['email']
+        
+        if 'company' in data:
+            driver.company = data['company']
         
         if 'motive_driver_id' in data:
             driver.motive_driver_id = data['motive_driver_id']
