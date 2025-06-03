@@ -101,11 +101,25 @@
         <!-- Late Shipments Metric -->
         <div class="dashboard-card">
             <div class="dashboard-card-header d-flex justify-content-between align-items-center">
-                <span>LATE SHIPMENTS</span>
+                <div class="d-flex align-items-center gap-3">
+                    <span id="late-shipments-title">LATE SHIPMENTS</span>
+                    <!-- Toggle Buttons for Late Shipments -->
+                    <div class="btn-group btn-group-sm late-shipments-toggle-group" role="group" aria-label="Late shipments type">
+                        <button type="button" class="btn late-shipments-toggle active" data-type="delivery" id="late-delivery-toggle">
+                            Delivery
+                        </button>
+                        <button type="button" class="btn late-shipments-toggle" data-type="pickup" id="late-pickup-toggle">
+                            Pickup
+                        </button>
+                        <button type="button" class="btn late-shipments-toggle" data-type="overall" id="late-overall-toggle">
+                            Overall
+                        </button>
+                    </div>
+                </div>
                 <div class="d-flex align-items-center gap-2">
                     <button type="button" class="info-btn" data-bs-toggle="modal" data-bs-target="#info-modal" 
                             data-title="Late Shipments Counter" 
-                            data-content="Counts the total number of loads with late deliveries that arrived after the scheduled delivery time. This metric focuses specifically on delivery performance and includes all loads where actual delivery arrival exceeded the promised delivery window.">
+                            data-content="Toggle between three lateness metrics: Delivery (late deliveries only), Pickup (late pickups only), and Overall (loads where either pickup OR delivery was late). Each metric counts loads where actual arrival times exceeded scheduled times.">
                         <i data-feather="info" style="width: 14px; height: 14px;"></i>
                     </button>
                     <i data-feather="alert-circle" style="color: var(--highlight-alert); opacity: 0.8;"></i>
@@ -457,6 +471,45 @@
             border-top-right-radius: 6px;
             border-bottom-right-radius: 6px;
         }
+        
+        /* Late shipments toggle button styles */
+        .late-shipments-toggle-group {
+            border-radius: 6px;
+            overflow: hidden;
+        }
+        
+        .late-shipments-toggle {
+            background-color: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: var(--neutral-text);
+            font-size: 11px;
+            padding: 4px 10px;
+            transition: all 0.2s ease;
+            border-radius: 0;
+        }
+        
+        .late-shipments-toggle:hover {
+            background-color: rgba(255, 87, 87, 0.1);
+            border-color: var(--highlight-alert);
+            color: var(--bright-text);
+        }
+        
+        .late-shipments-toggle.active {
+            background-color: var(--highlight-alert);
+            border-color: var(--highlight-alert);
+            color: #000;
+            font-weight: 600;
+        }
+        
+        .late-shipments-toggle:first-child {
+            border-top-left-radius: 6px;
+            border-bottom-left-radius: 6px;
+        }
+        
+        .late-shipments-toggle:last-child {
+            border-top-right-radius: 6px;
+            border-bottom-right-radius: 6px;
+        }
     </style>
 </div>
 
@@ -514,8 +567,19 @@ document.addEventListener('DOMContentLoaded', function() {
     const onTimeCircularMetric = document.getElementById('on-time-circular-metric');
     const onTimeRateTitle = document.getElementById('on-time-rate-title');
     
+    // Handle late shipments toggle buttons
+    const lateShipmentsToggles = document.querySelectorAll('.late-shipments-toggle');
+    const lateShipmentsCountElement = document.getElementById('late-loads-count');
+    const lateShipmentsTitle = document.getElementById('late-shipments-title');
+    
     // Store the data for different metrics
     let onTimeData = {
+        delivery: 0,
+        pickup: 0,
+        overall: 0
+    };
+    
+    let lateShipmentsData = {
         delivery: 0,
         pickup: 0,
         overall: 0
@@ -533,6 +597,21 @@ document.addEventListener('DOMContentLoaded', function() {
             
             const type = this.getAttribute('data-type');
             updateOnTimeDisplay(type);
+        });
+    });
+    
+    lateShipmentsToggles.forEach(button => {
+        button.addEventListener('click', function() {
+            // Remove active class from all buttons
+            lateShipmentsToggles.forEach(btn => {
+                btn.classList.remove('active');
+            });
+            
+            // Add active class to clicked button
+            this.classList.add('active');
+            
+            const type = this.getAttribute('data-type');
+            updateLateShipmentsDisplay(type);
         });
     });
     
@@ -557,6 +636,26 @@ document.addEventListener('DOMContentLoaded', function() {
         onTimeCircularMetric.style.setProperty('--percent', percentage);
     }
     
+    function updateLateShipmentsDisplay(type) {
+        let count = lateShipmentsData[type];
+        let title = '';
+        
+        switch(type) {
+            case 'delivery':
+                title = 'LATE DELIVERIES';
+                break;
+            case 'pickup':
+                title = 'LATE PICKUPS';
+                break;
+            case 'overall':
+                title = 'LATE SHIPMENTS';
+                break;
+        }
+        
+        lateShipmentsTitle.textContent = title;
+        lateShipmentsCountElement.textContent = count;
+    }
+    
     // Function to update on-time data from dashboard data
     window.updateOnTimeData = function(dashboardData) {
         if (dashboardData && dashboardData.on_time) {
@@ -568,6 +667,18 @@ document.addEventListener('DOMContentLoaded', function() {
             const activeToggle = document.querySelector('.on-time-toggle.active');
             if (activeToggle) {
                 updateOnTimeDisplay(activeToggle.getAttribute('data-type'));
+            }
+        }
+        
+        if (dashboardData && dashboardData.late_shipments) {
+            lateShipmentsData.delivery = dashboardData.late_shipments.delivery_count || 0;
+            lateShipmentsData.pickup = dashboardData.late_shipments.pickup_count || 0;
+            lateShipmentsData.overall = dashboardData.late_shipments.overall_count || 0;
+            
+            // Update display based on current active toggle
+            const activeLateToggle = document.querySelector('.late-shipments-toggle.active');
+            if (activeLateToggle) {
+                updateLateShipmentsDisplay(activeLateToggle.getAttribute('data-type'));
             }
         }
     };
