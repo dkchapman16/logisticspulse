@@ -60,6 +60,7 @@
                                 <label for="pickup_facility" class="form-label">Pickup Facility</label>
                                 <input type="text" class="form-control" id="pickup_facility" name="pickup_facility" 
                                        value="{{ data['pickup']['facility_name'] }}" readonly>
+                                <div class="form-text text-muted">{{ data['pickup']['address'] }}</div>
                             </div>
 
                             <div class="mb-3">
@@ -79,6 +80,7 @@
                                 <label for="delivery_facility" class="form-label">Delivery Facility</label>
                                 <input type="text" class="form-control" id="delivery_facility" name="delivery_facility" 
                                        value="{{ data['delivery']['facility_name'] }}" readonly>
+                                <div class="form-text text-muted">{{ data['delivery']['address'] }}</div>
                             </div>
 
                             <div class="mb-3">
