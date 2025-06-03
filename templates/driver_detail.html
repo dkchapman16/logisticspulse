@@ -436,6 +436,8 @@
                                                             <tr>
                                                                 <th>Reference #</th>
                                                                 <th>Pickup</th>
+                                                                <th>Scheduled Pickup</th>
+                                                                <th>Actual Pickup</th>
                                                                 <th>Delivery</th>
                                                                 <th>Scheduled Delivery</th>
                                                                 <th>Actual Delivery</th>
@@ -445,7 +447,7 @@
                                                         </thead>
                                                         <tbody id="completed-loads-body">
                                                             <tr>
-                                                                <td colspan="7" class="text-center">
+                                                                <td colspan="9" class="text-center">
                                                                     <div class="spinner-border spinner-border-sm" role="status">
                                                                         <span class="visually-hidden">Loading...</span>
                                                                     </div>
@@ -679,6 +681,8 @@
                             </a>
                         </td>
                         <td>${load.pickup}</td>
+                        <td>${formatDateTime(load.scheduled_pickup)}</td>
+                        <td>${formatDateTime(load.actual_pickup) || 'N/A'}</td>
                         <td>${load.delivery}</td>
                         <td>${formatDateTime(load.scheduled_delivery)}</td>
                         <td>${formatDateTime(load.actual_delivery) || 'N/A'}</td>

@@ -121,9 +121,11 @@ def get_driver_data(driver_id):
         'reference': load.reference_number,
         'pickup': load.pickup_facility.name if load.pickup_facility else 'Unknown',
         'delivery': load.delivery_facility.name if load.delivery_facility else 'Unknown',
+        'scheduled_pickup': load.scheduled_pickup_time.strftime('%Y-%m-%d %H:%M') if load.scheduled_pickup_time else None,
+        'actual_pickup': load.actual_pickup_arrival.strftime('%Y-%m-%d %H:%M') if load.actual_pickup_arrival else None,
         'scheduled_delivery': load.scheduled_delivery_time.strftime('%Y-%m-%d %H:%M'),
         'actual_delivery': load.actual_delivery_arrival.strftime('%Y-%m-%d %H:%M') if load.actual_delivery_arrival else None,
-        'on_time': load.delivery_on_time
+        'on_time': load.pickup_on_time == True and load.delivery_on_time == True
     } for load in completed_loads]
     
     upcoming_loads_data = [{
