@@ -387,11 +387,18 @@ def scorecards():
 def get_scorecards_data():
     """API endpoint to get driver scorecard data"""
     period = request.args.get('period', 30, type=int)
+    start_date_param = request.args.get('start_date')
+    end_date_param = request.args.get('end_date')
     
     try:
-        # Calculate date range - for demo purposes, use May 2025 data
-        end_date = datetime(2025, 5, 31).date()
-        start_date = datetime(2025, 5, 1).date()
+        # Handle custom date range if provided
+        if start_date_param and end_date_param:
+            start_date = datetime.strptime(start_date_param, '%Y-%m-%d').date()
+            end_date = datetime.strptime(end_date_param, '%Y-%m-%d').date()
+        else:
+            # Calculate date range - for demo purposes, use May 2025 data
+            end_date = datetime(2025, 5, 31).date()
+            start_date = datetime(2025, 5, 1).date()
         
         # Get all drivers with their performance data
         drivers = db.session.query(Driver).all()

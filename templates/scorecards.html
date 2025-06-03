@@ -9,12 +9,20 @@
                     <h5 class="mb-0">
                         <i data-feather="award"></i> Driver Scorecards
                     </h5>
-                    <div>
-                        <select class="form-select" id="period-filter">
+                    <div class="d-flex gap-2">
+                        <select class="form-select" id="period-filter" style="width: 150px;">
                             <option value="30">Last 30 Days</option>
                             <option value="90">Last 90 Days</option>
                             <option value="365">Last Year</option>
+                            <option value="custom">Custom Range</option>
                         </select>
+                        <div id="custom-date-range" class="d-none">
+                            <div class="d-flex gap-2">
+                                <input type="date" class="form-control" id="start-date" value="2025-05-01" style="width: 150px;">
+                                <input type="date" class="form-control" id="end-date" value="2025-05-31" style="width: 150px;">
+                                <button class="btn btn-primary" id="apply-date-range">Apply</button>
+                            </div>
+                        </div>
                     </div>
                 </div>
                 <div class="card-body">
@@ -52,8 +60,24 @@
         
         // Set up period filter
         document.getElementById('period-filter').addEventListener('change', function() {
-            currentPeriod = this.value;
-            loadScorecards();
+            const customDateRange = document.getElementById('custom-date-range');
+            if (this.value === 'custom') {
+                customDateRange.classList.remove('d-none');
+            } else {
+                customDateRange.classList.add('d-none');
+                currentPeriod = this.value;
+                loadScorecards();
+            }
+        });
+        
+        // Set up custom date range apply button
+        document.getElementById('apply-date-range').addEventListener('click', function() {
+            const startDate = document.getElementById('start-date').value;
+            const endDate = document.getElementById('end-date').value;
+            
+            if (startDate && endDate) {
+                loadScorecardsWithDateRange(startDate, endDate);
+            }
         });
     });
     
@@ -68,6 +92,36 @@
         scorecardsGrid.classList.add('d-none');
         
         fetch(`/drivers/scorecards/data?period=${currentPeriod}`)
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.json();
+            })
+            .then(data => {
+                loadingState.classList.add('d-none');
+                scorecardsGrid.classList.remove('d-none');
+                renderScorecards(data);
+                feather.replace();
+            })
+            .catch(error => {
+                console.error('Error loading scorecards:', error);
+                loadingState.classList.add('d-none');
+                errorState.classList.remove('d-none');
+            });
+    }
+    
+    function loadScorecardsWithDateRange(startDate, endDate) {
+        const loadingState = document.getElementById('loading-state');
+        const errorState = document.getElementById('error-state');
+        const scorecardsGrid = document.getElementById('scorecards-grid');
+        
+        // Show loading state
+        loadingState.classList.remove('d-none');
+        errorState.classList.add('d-none');
+        scorecardsGrid.classList.add('d-none');
+        
+        fetch(`/drivers/scorecards/data?start_date=${startDate}&end_date=${endDate}`)
             .then(response => {
                 if (!response.ok) {
                     throw new Error('Network response was not ok');
