@@ -154,17 +154,26 @@ def dashboard_summary():
 def at_risk_loads():
     """API endpoint for loads at risk of being late"""
     from datetime import datetime, timedelta
+    from flask import request
     
     # Get current time
     current_time = datetime.utcnow()
     
-    # Find loads that are scheduled for delivery soon but haven't been delivered yet
-    # and might be at risk based on their current status
-    at_risk_loads = Load.query.filter(
+    # Check if filtering by specific driver
+    driver_id = request.args.get('driver_id', type=int)
+    
+    # Build base query
+    query = Load.query.filter(
         Load.status.in_(['scheduled', 'in_transit']),
         Load.actual_delivery_arrival == None,
         Load.scheduled_delivery_time <= current_time + timedelta(hours=24)  # Due within 24 hours
-    ).join(Driver, Load.driver_id == Driver.id, isouter=True).all()
+    ).join(Driver, Load.driver_id == Driver.id, isouter=True)
+    
+    # Apply driver filter if specified
+    if driver_id:
+        query = query.filter(Load.driver_id == driver_id)
+    
+    at_risk_loads = query.all()
     
     # Filter for loads that are actually at risk (overdue or close to being overdue)
     filtered_loads = []

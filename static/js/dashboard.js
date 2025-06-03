@@ -5,6 +5,11 @@ let selectedDriverId = null;
 let customStartDate = '2025-05-01';
 let customEndDate = '2025-05-31';
 
+// Get current driver ID if viewing individual driver
+function getCurrentDriverId() {
+    return selectedDriverId;
+}
+
 document.addEventListener('DOMContentLoaded', function() {
     // Check if we're on the dashboard page
     if (!document.getElementById('dashboard-content')) return;
@@ -389,7 +394,13 @@ function loadDashboardSummary() {
 
 // Load at-risk loads
 function loadAtRiskLoads() {
-    fetch('/api/dashboard/at_risk_loads')
+    // Get current driver ID if viewing individual driver
+    const currentDriverId = getCurrentDriverId();
+    const url = currentDriverId ? 
+        `/api/dashboard/at_risk_loads?driver_id=${currentDriverId}` : 
+        '/api/dashboard/at_risk_loads';
+    
+    fetch(url)
         .then(response => response.json())
         .then(loads => {
             const atRiskContent = document.getElementById('at-risk-loads-content');
