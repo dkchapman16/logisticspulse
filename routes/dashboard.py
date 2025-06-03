@@ -1,7 +1,8 @@
 from flask import Blueprint, render_template, jsonify
 from datetime import datetime, timedelta
-from sqlalchemy import func
+from sqlalchemy import func, case
 from models import Load, Driver, DriverPerformance, Notification
+from app import db
 
 dashboard_bp = Blueprint('dashboard', __name__)
 
@@ -127,13 +128,7 @@ def dashboard_summary():
             'pickup_percentage': round(pickup_percentage, 1),
             'delivery_percentage': round(delivery_percentage, 1)
         },
-        'top_drivers': [
-            {
-                'id': driver.id,
-                'name': driver.name,
-                'on_time_percentage': round(driver.on_time_percentage, 1)
-            } for driver in top_drivers
-        ],
+        'top_drivers': top_drivers,
         'notifications': [
             {
                 'id': notification.id,
