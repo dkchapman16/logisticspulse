@@ -414,7 +414,7 @@ function loadAtRiskLoads() {
                         
                         loadDiv.innerHTML = `
                             <div class="d-flex justify-content-between align-items-center mb-2">
-                                <a href="/loads/${load.id}" style="color: var(--bright-text); font-weight: 600; text-decoration: none;">${load.reference_number}</a>
+                                <a href="/loads/${load.id}" class="clickable-ref" style="color: var(--bright-text); font-weight: 600; text-decoration: none; cursor: pointer; transition: color 0.2s;">${load.reference_number}</a>
                                 <span class="badge" style="background-color: ${badgeColor}; color: ${badgeTextColor};">${load.risk_label}</span>
                             </div>
                             <div class="d-flex justify-content-between mb-2">
@@ -424,7 +424,7 @@ function loadAtRiskLoads() {
                                 </div>
                                 <div class="text-end">
                                     <div style="color: var(--neutral-text); font-size: 0.8rem;">DRIVER</div>
-                                    <a href="/drivers/${load.driver_id}" style="color: var(--bright-text); text-decoration: none;">${load.driver_name}</a>
+                                    <a href="/drivers/${load.driver_id}" class="clickable-driver" style="color: var(--bright-text); text-decoration: none; cursor: pointer; transition: color 0.2s;">${load.driver_name}</a>
                                 </div>
                             </div>
                             <div class="progress" style="height: 4px; background-color: rgba(255, 255, 255, 0.1);">

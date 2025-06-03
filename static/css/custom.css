@@ -1,5 +1,16 @@
 /* Custom styles for FreightPace - On-Time Delivery Tracker */
 
+/* Clickable elements styling */
+.clickable-ref:hover {
+    color: var(--primary-action) !important;
+    text-decoration: underline !important;
+}
+
+.clickable-driver:hover {
+    color: var(--primary-action) !important;
+    text-decoration: underline !important;
+}
+
 /* Color variables based on creative vision - Tesla dark mode inspired */
 :root {
     --primary-action: #00C48C; /* Mint Green - used for buttons, on-time badges, positive feedback */
