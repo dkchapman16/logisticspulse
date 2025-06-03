@@ -68,17 +68,24 @@ function handlePdfUpload(event) {
         
         if (data.success) {
             // Show success message
-            statusElement.innerHTML = 'Data extracted successfully!';
+            statusElement.innerHTML = 'Data extracted successfully! Redirecting to form...';
             statusElement.className = 'alert alert-success';
             
-            // Display the extracted data
-            displayExtractedData(data.data);
-            
-            // Reset form
-            form.reset();
-            const fileLabel = document.querySelector('.custom-file-label');
-            if (fileLabel) {
-                fileLabel.textContent = 'Choose file...';
+            // Redirect to the create load form if redirect URL is provided
+            if (data.redirect_url) {
+                setTimeout(() => {
+                    window.location.href = data.redirect_url;
+                }, 1000);
+            } else {
+                // Fallback: Display the extracted data
+                displayExtractedData(data.data);
+                
+                // Reset form
+                form.reset();
+                const fileLabel = document.querySelector('.custom-file-label');
+                if (fileLabel) {
+                    fileLabel.textContent = 'Choose file...';
+                }
             }
         } else {
             showUploadError(data.error || 'Failed to process PDF.');
