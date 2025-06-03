@@ -1,9 +1,16 @@
 // Dashboard functionality
+let currentViewMode = 'company'; // 'company' or 'driver'
+let currentDateRange = '30'; // days or 'custom'
+let selectedDriverId = null;
+let customStartDate = '2025-05-01';
+let customEndDate = '2025-05-31';
+
 document.addEventListener('DOMContentLoaded', function() {
     // Check if we're on the dashboard page
     if (!document.getElementById('dashboard-content')) return;
     
-    // Initialize Safe Mode toggle
+    // Initialize dashboard controls
+    initializeDashboardControls();
     initializeSafeModeToggle();
     
     // Load dashboard data
@@ -32,6 +39,117 @@ document.addEventListener('DOMContentLoaded', function() {
     setInterval(loadDashboardSummary, 300000);
     setInterval(loadAtRiskLoads, 300000);
 });
+
+// Initialize dashboard controls
+function initializeDashboardControls() {
+    // Load available drivers for dropdown
+    loadDriverOptions();
+    
+    // View toggle (Company vs Individual)
+    const companyViewBtn = document.getElementById('company-view');
+    const driverViewBtn = document.getElementById('driver-view');
+    const driverSelect = document.getElementById('driver-select');
+    
+    if (companyViewBtn && driverViewBtn) {
+        companyViewBtn.addEventListener('change', function() {
+            if (this.checked) {
+                currentViewMode = 'company';
+                selectedDriverId = null;
+                driverSelect.classList.add('d-none');
+                refreshDashboard();
+            }
+        });
+        
+        driverViewBtn.addEventListener('change', function() {
+            if (this.checked) {
+                currentViewMode = 'driver';
+                driverSelect.classList.remove('d-none');
+                // Don't refresh until driver is selected
+            }
+        });
+    }
+    
+    // Driver selection
+    if (driverSelect) {
+        driverSelect.addEventListener('change', function() {
+            selectedDriverId = this.value;
+            if (selectedDriverId && currentViewMode === 'driver') {
+                refreshDashboard();
+            }
+        });
+    }
+    
+    // Date range selection
+    const dateRangeSelect = document.getElementById('date-range-select');
+    const customDateControls = document.getElementById('custom-date-controls');
+    
+    if (dateRangeSelect) {
+        dateRangeSelect.addEventListener('change', function() {
+            currentDateRange = this.value;
+            
+            if (this.value === 'custom') {
+                customDateControls.classList.remove('d-none');
+            } else {
+                customDateControls.classList.add('d-none');
+                refreshDashboard();
+            }
+        });
+    }
+    
+    // Custom date range apply
+    const applyCustomRange = document.getElementById('apply-custom-range');
+    const startDate = document.getElementById('start-date');
+    const endDate = document.getElementById('end-date');
+    
+    if (applyCustomRange) {
+        applyCustomRange.addEventListener('click', function() {
+            customStartDate = startDate.value;
+            customEndDate = endDate.value;
+            
+            if (customStartDate && customEndDate) {
+                refreshDashboard();
+            }
+        });
+    }
+    
+    // Refresh button
+    const refreshBtn = document.getElementById('refresh-dashboard');
+    if (refreshBtn) {
+        refreshBtn.addEventListener('click', function() {
+            refreshDashboard();
+        });
+    }
+}
+
+// Load driver options for dropdown
+function loadDriverOptions() {
+    fetch('/drivers/api/drivers')
+        .then(response => response.json())
+        .then(data => {
+            const driverSelect = document.getElementById('driver-select');
+            if (driverSelect && data.drivers) {
+                // Clear existing options except first
+                driverSelect.innerHTML = '<option value="">Select Driver...</option>';
+                
+                data.drivers.forEach(driver => {
+                    const option = document.createElement('option');
+                    option.value = driver.id;
+                    option.textContent = driver.name;
+                    driverSelect.appendChild(option);
+                });
+            }
+        })
+        .catch(error => {
+            console.error('Error loading drivers:', error);
+        });
+}
+
+// Refresh dashboard with current settings
+function refreshDashboard() {
+    loadDashboardSummary();
+    loadAtRiskLoads();
+    loadPerformanceTrends();
+}
 
 // Initialize Safe Mode toggle functionality
 function initializeSafeModeToggle() {
@@ -91,7 +209,23 @@ function hideSafeModeNotification() {
 
 // Load dashboard summary data
 function loadDashboardSummary() {
-    fetch('/api/dashboard/summary')
+    // Build query parameters based on current settings
+    const params = new URLSearchParams();
+    
+    // Add date range parameters
+    if (currentDateRange === 'custom') {
+        params.append('start_date', customStartDate);
+        params.append('end_date', customEndDate);
+    } else {
+        params.append('period', currentDateRange);
+    }
+    
+    // Add driver filter if in individual view mode
+    if (currentViewMode === 'driver' && selectedDriverId) {
+        params.append('driver_id', selectedDriverId);
+    }
+    
+    fetch(`/api/dashboard/summary?${params.toString()}`)
         .then(response => response.json())
         .then(data => {
             // Update active loads count with slot machine effect

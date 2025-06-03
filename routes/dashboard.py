@@ -12,45 +12,108 @@ def index():
 @dashboard_bp.route('/api/dashboard/summary')
 def dashboard_summary():
     """API endpoint for dashboard summary data"""
-    # Get today's date and dates for weekly/monthly ranges
-    today = datetime.utcnow().date()
-    week_ago = today - timedelta(days=7)
-    month_ago = today - timedelta(days=30)
+    from flask import request
+    
+    # Get parameters from request
+    period = request.args.get('period', '30')
+    start_date = request.args.get('start_date')
+    end_date = request.args.get('end_date')
+    driver_id = request.args.get('driver_id')
+    
+    # Calculate date range
+    if start_date and end_date:
+        try:
+            date_start = datetime.strptime(start_date, '%Y-%m-%d').date()
+            date_end = datetime.strptime(end_date, '%Y-%m-%d').date()
+        except ValueError:
+            date_start = datetime.utcnow().date() - timedelta(days=30)
+            date_end = datetime.utcnow().date()
+    else:
+        try:
+            days = int(period)
+        except ValueError:
+            days = 30
+        date_end = datetime.utcnow().date()
+        date_start = date_end - timedelta(days=days)
+    
+    # Build base query
+    base_query = Load.query
+    if driver_id:
+        base_query = base_query.filter(Load.driver_id == driver_id)
     
     # Get active loads count
-    active_loads = Load.query.filter(Load.status.in_(['scheduled', 'in_transit'])).count()
+    active_loads = base_query.filter(Load.status.in_(['scheduled', 'in_transit'])).count()
     
-    # Get on-time statistics
-    on_time_pickups_today = Load.query.filter(
-        func.date(Load.actual_pickup_arrival) == today,
+    # Get on-time statistics for the date range
+    on_time_pickups = base_query.filter(
+        func.date(Load.actual_pickup_arrival) >= date_start,
+        func.date(Load.actual_pickup_arrival) <= date_end,
         Load.actual_pickup_arrival <= Load.scheduled_pickup_time
     ).count()
     
-    on_time_deliveries_today = Load.query.filter(
-        func.date(Load.actual_delivery_arrival) == today,
+    on_time_deliveries = base_query.filter(
+        func.date(Load.actual_delivery_arrival) >= date_start,
+        func.date(Load.actual_delivery_arrival) <= date_end,
         Load.actual_delivery_arrival <= Load.scheduled_delivery_time
     ).count()
     
-    total_pickups_today = Load.query.filter(
-        func.date(Load.actual_pickup_arrival) == today
+    total_pickups = base_query.filter(
+        func.date(Load.actual_pickup_arrival) >= date_start,
+        func.date(Load.actual_pickup_arrival) <= date_end
     ).count()
     
-    total_deliveries_today = Load.query.filter(
-        func.date(Load.actual_delivery_arrival) == today
+    total_deliveries = base_query.filter(
+        func.date(Load.actual_delivery_arrival) >= date_start,
+        func.date(Load.actual_delivery_arrival) <= date_end
     ).count()
     
     # Calculate percentages
-    pickup_percentage = (on_time_pickups_today / total_pickups_today * 100) if total_pickups_today > 0 else 0
-    delivery_percentage = (on_time_deliveries_today / total_deliveries_today * 100) if total_deliveries_today > 0 else 0
+    pickup_percentage = (on_time_pickups / total_pickups * 100) if total_pickups > 0 else 0
+    delivery_percentage = (on_time_deliveries / total_deliveries * 100) if total_deliveries > 0 else 0
     
-    # Get drivers with the best on-time performance
-    top_drivers = DriverPerformance.query.filter(
-        DriverPerformance.date >= month_ago
-    ).join(Driver).with_entities(
-        Driver.id,
-        Driver.name,
-        func.avg(DriverPerformance.on_time_deliveries / DriverPerformance.loads_completed * 100).label('on_time_percentage')
-    ).group_by(Driver.id).order_by(func.avg(DriverPerformance.on_time_deliveries / DriverPerformance.loads_completed * 100).desc()).limit(5).all()
+    # Get drivers with the best on-time performance using Load data directly
+    if driver_id:
+        # For individual driver view, get the specific driver's info
+        selected_driver = Driver.query.get(driver_id)
+        top_drivers = []
+        if selected_driver:
+            driver_loads = base_query.filter(
+                func.date(Load.actual_delivery_arrival) >= date_start,
+                func.date(Load.actual_delivery_arrival) <= date_end
+            ).count()
+            driver_on_time = base_query.filter(
+                func.date(Load.actual_delivery_arrival) >= date_start,
+                func.date(Load.actual_delivery_arrival) <= date_end,
+                Load.actual_delivery_arrival <= Load.scheduled_delivery_time
+            ).count()
+            on_time_pct = (driver_on_time / driver_loads * 100) if driver_loads > 0 else 0
+            top_drivers = [{'id': selected_driver.id, 'name': selected_driver.name, 'on_time_percentage': on_time_pct}]
+    else:
+        # For company view, get top performing drivers
+        subquery = db.session.query(
+            Load.driver_id,
+            func.count(Load.id).label('total_loads'),
+            func.sum(
+                case(
+                    (Load.actual_delivery_arrival <= Load.scheduled_delivery_time, 1),
+                    else_=0
+                )
+            ).label('on_time_loads')
+        ).filter(
+            func.date(Load.actual_delivery_arrival) >= date_start,
+            func.date(Load.actual_delivery_arrival) <= date_end,
+            Load.driver_id.isnot(None)
+        ).group_by(Load.driver_id).subquery()
+        
+        top_drivers_query = db.session.query(
+            Driver.id,
+            Driver.name,
+            (subquery.c.on_time_loads * 100.0 / subquery.c.total_loads).label('on_time_percentage')
+        ).join(subquery, Driver.id == subquery.c.driver_id).filter(
+            subquery.c.total_loads >= 3  # Only drivers with at least 3 loads
+        ).order_by((subquery.c.on_time_loads * 100.0 / subquery.c.total_loads).desc()).limit(5).all()
+        
+        top_drivers = [{'id': d.id, 'name': d.name, 'on_time_percentage': round(d.on_time_percentage, 1)} for d in top_drivers_query]
     
     # Get recent notifications
     recent_notifications = Notification.query.filter(
