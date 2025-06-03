@@ -159,8 +159,8 @@
         
         drivers.forEach((driver, index) => {
             const rankBadge = getRankBadge(index + 1);
-            const onTimePickupPct = driver.on_time_pickup_percentage || 0;
-            const onTimeDeliveryPct = driver.on_time_delivery_percentage || 0;
+            const onTimePickupPct = Math.round(driver.on_time_pickup_percentage || 0);
+            const onTimeDeliveryPct = Math.round(driver.on_time_delivery_percentage || 0);
             const overallScore = Math.round((onTimePickupPct + onTimeDeliveryPct) / 2);
             
             const scoreColor = getScoreColor(overallScore);

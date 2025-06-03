@@ -197,7 +197,7 @@
                 data.drivers.forEach(driver => {
                     // Create card for each driver
                     const driverCol = document.createElement('div');
-                    driverCol.className = 'col-md-4 col-lg-3 mb-4';
+                    driverCol.className = 'col-md-6 col-lg-4 col-xl-3 mb-4 px-3';
                     
                     let activeLoadHtml = '';
                     if (driver.active_load) {
@@ -242,7 +242,7 @@
                                     ${driver.status}
                                 </span>
                             </div>
-                            <div class="card-body">
+                            <div class="card-body p-3">
                                 <div class="mb-2">
                                     <i data-feather="phone"></i> ${driver.phone || 'N/A'}
                                 </div>
@@ -254,7 +254,7 @@
                                     <div class="mb-1">
                                         <div class="d-flex justify-content-between">
                                             <span>On-Time Delivery:</span>
-                                            <span class="fw-bold">${driver.on_time_delivery_percentage}%</span>
+                                            <span class="fw-bold">${Math.round(driver.on_time_delivery_percentage || 0)}%</span>
                                         </div>
                                         <div class="progress" style="height: 6px;">
                                             <div class="progress-bar ${getProgressBarClass(driver.on_time_delivery_percentage)}" 
@@ -268,7 +268,7 @@
                                     <div class="mb-1">
                                         <div class="d-flex justify-content-between">
                                             <span>On-Time Pickup:</span>
-                                            <span class="fw-bold">${driver.on_time_pickup_percentage}%</span>
+                                            <span class="fw-bold">${Math.round(driver.on_time_pickup_percentage || 0)}%</span>
                                         </div>
                                         <div class="progress" style="height: 6px;">
                                             <div class="progress-bar ${getProgressBarClass(driver.on_time_pickup_percentage)}" 
