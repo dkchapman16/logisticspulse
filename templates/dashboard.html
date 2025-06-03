@@ -149,14 +149,31 @@
             </div>
         </div>
 
-        <!-- Total Deliveries Metric -->
+        <!-- Active Loads Metric -->
         <div class="dashboard-card">
             <div class="dashboard-card-header d-flex justify-content-between align-items-center">
-                <span>DELIVERIES</span>
+                <div class="d-flex align-items-center gap-3">
+                    <span id="loads-section-title">LOADS</span>
+                    <!-- Toggle Buttons for Load Status -->
+                    <div class="btn-group btn-group-sm loads-toggle-group" role="group" aria-label="Load status type">
+                        <button type="button" class="btn loads-toggle active" data-type="active" id="active-loads-toggle">
+                            Active
+                        </button>
+                        <button type="button" class="btn loads-toggle" data-type="all" id="all-loads-toggle">
+                            All
+                        </button>
+                        <button type="button" class="btn loads-toggle" data-type="delivered" id="delivered-loads-toggle">
+                            Delivered
+                        </button>
+                        <button type="button" class="btn loads-toggle" data-type="scheduled" id="scheduled-loads-toggle">
+                            Scheduled
+                        </button>
+                    </div>
+                </div>
                 <div class="d-flex align-items-center gap-2">
                     <button type="button" class="info-btn" data-bs-toggle="modal" data-bs-target="#info-modal" 
-                            data-title="Active Loads Counter" 
-                            data-content="Shows the total number of loads currently active in the system (scheduled or in-transit). This includes all loads that have been dispatched but not yet delivered. Driver and top performer stats are shown below.">
+                            data-title="Loads Counter" 
+                            data-content="Toggle between load status views: Active (scheduled or in-transit), All (complete system overview), Delivered (completed loads), and Scheduled (awaiting pickup). Each view shows the total count for that status category.">
                         <i data-feather="info" style="width: 14px; height: 14px;"></i>
                     </button>
                     <i data-feather="package" style="color: var(--primary-action); opacity: 0.8;"></i>
@@ -164,7 +181,7 @@
             </div>
             <div class="dashboard-card-body text-center">
                 <div class="d-flex justify-content-center align-items-center" style="height: 120px;">
-                    <h2 id="active-loads-count" class="mb-0 display-4 fw-bold slot-machine-effect" style="font-size: 4rem; color: var(--primary-action); text-shadow: 0 0 15px var(--primary-glow);">120</h2>
+                    <h2 id="loads-count" class="mb-0 display-4 fw-bold slot-machine-effect" style="font-size: 4rem; color: var(--primary-action); text-shadow: 0 0 15px var(--primary-glow);">120</h2>
                 </div>
                 <div id="company-stats" class="mt-3 d-flex justify-content-between">
                     <div class="text-start">
@@ -510,6 +527,45 @@
             border-top-right-radius: 6px;
             border-bottom-right-radius: 6px;
         }
+        
+        /* Loads toggle button styles */
+        .loads-toggle-group {
+            border-radius: 6px;
+            overflow: hidden;
+        }
+        
+        .loads-toggle {
+            background-color: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: var(--neutral-text);
+            font-size: 11px;
+            padding: 4px 8px;
+            transition: all 0.2s ease;
+            border-radius: 0;
+        }
+        
+        .loads-toggle:hover {
+            background-color: rgba(76, 175, 80, 0.1);
+            border-color: var(--primary-action);
+            color: var(--bright-text);
+        }
+        
+        .loads-toggle.active {
+            background-color: var(--primary-action);
+            border-color: var(--primary-action);
+            color: #000;
+            font-weight: 600;
+        }
+        
+        .loads-toggle:first-child {
+            border-top-left-radius: 6px;
+            border-bottom-left-radius: 6px;
+        }
+        
+        .loads-toggle:last-child {
+            border-top-right-radius: 6px;
+            border-bottom-right-radius: 6px;
+        }
     </style>
 </div>
 
@@ -572,6 +628,11 @@ document.addEventListener('DOMContentLoaded', function() {
     const lateShipmentsCountElement = document.getElementById('late-loads-count');
     const lateShipmentsTitle = document.getElementById('late-shipments-title');
     
+    // Handle loads toggle buttons
+    const loadsToggles = document.querySelectorAll('.loads-toggle');
+    const loadsCountElement = document.getElementById('loads-count');
+    const loadsSectionTitle = document.getElementById('loads-section-title');
+    
     // Store the data for different metrics
     let onTimeData = {
         delivery: 0,
@@ -583,6 +644,13 @@ document.addEventListener('DOMContentLoaded', function() {
         delivery: 0,
         pickup: 0,
         overall: 0
+    };
+    
+    let loadsData = {
+        active: 0,
+        all: 0,
+        delivered: 0,
+        scheduled: 0
     };
     
     onTimeToggles.forEach(button => {
@@ -612,6 +680,21 @@ document.addEventListener('DOMContentLoaded', function() {
             
             const type = this.getAttribute('data-type');
             updateLateShipmentsDisplay(type);
+        });
+    });
+    
+    loadsToggles.forEach(button => {
+        button.addEventListener('click', function() {
+            // Remove active class from all buttons
+            loadsToggles.forEach(btn => {
+                btn.classList.remove('active');
+            });
+            
+            // Add active class to clicked button
+            this.classList.add('active');
+            
+            const type = this.getAttribute('data-type');
+            updateLoadsDisplay(type);
         });
     });
     
@@ -656,6 +739,29 @@ document.addEventListener('DOMContentLoaded', function() {
         lateShipmentsCountElement.textContent = count;
     }
     
+    function updateLoadsDisplay(type) {
+        let count = loadsData[type];
+        let title = '';
+        
+        switch(type) {
+            case 'active':
+                title = 'ACTIVE LOADS';
+                break;
+            case 'all':
+                title = 'ALL LOADS';
+                break;
+            case 'delivered':
+                title = 'DELIVERED LOADS';
+                break;
+            case 'scheduled':
+                title = 'SCHEDULED LOADS';
+                break;
+        }
+        
+        loadsSectionTitle.textContent = title;
+        loadsCountElement.textContent = count;
+    }
+    
     // Function to update on-time data from dashboard data
     window.updateOnTimeData = function(dashboardData) {
         if (dashboardData && dashboardData.on_time) {
@@ -679,6 +785,19 @@ document.addEventListener('DOMContentLoaded', function() {
             const activeLateToggle = document.querySelector('.late-shipments-toggle.active');
             if (activeLateToggle) {
                 updateLateShipmentsDisplay(activeLateToggle.getAttribute('data-type'));
+            }
+        }
+        
+        if (dashboardData && dashboardData.loads_count) {
+            loadsData.active = dashboardData.loads_count.active_count || 0;
+            loadsData.all = dashboardData.loads_count.all_count || 0;
+            loadsData.delivered = dashboardData.loads_count.delivered_count || 0;
+            loadsData.scheduled = dashboardData.loads_count.scheduled_count || 0;
+            
+            // Update display based on current active toggle
+            const activeLoadsToggle = document.querySelector('.loads-toggle.active');
+            if (activeLoadsToggle) {
+                updateLoadsDisplay(activeLoadsToggle.getAttribute('data-type'));
             }
         }
     };
