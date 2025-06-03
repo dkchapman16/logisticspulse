@@ -48,8 +48,10 @@ def get_loads():
             'driver': driver_name,
             'pickup': pickup_facility,
             'scheduled_pickup': load.scheduled_pickup_time.strftime('%Y-%m-%d %H:%M') if load.scheduled_pickup_time else None,
+            'actual_pickup_arrival': load.actual_pickup_arrival.strftime('%Y-%m-%d %H:%M') if load.actual_pickup_arrival else None,
             'delivery': delivery_facility,
             'scheduled_delivery': load.scheduled_delivery_time.strftime('%Y-%m-%d %H:%M') if load.scheduled_delivery_time else None,
+            'actual_delivery_arrival': load.actual_delivery_arrival.strftime('%Y-%m-%d %H:%M') if load.actual_delivery_arrival else None,
             'on_time_pickup': load.pickup_on_time,
             'on_time_delivery': load.delivery_on_time,
             'current_eta': load.current_eta.strftime('%Y-%m-%d %H:%M') if load.current_eta else None

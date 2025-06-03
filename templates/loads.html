@@ -74,16 +74,17 @@
                                     <th>Driver</th>
                                     <th>Pickup</th>
                                     <th>Scheduled Pickup</th>
+                                    <th>Actual Pickup</th>
                                     <th>Delivery</th>
                                     <th>Scheduled Delivery</th>
-                                    <th>ETA</th>
+                                    <th>Actual Delivery</th>
                                     <th>On Time</th>
                                     <th>Actions</th>
                                 </tr>
                             </thead>
                             <tbody id="loads-table-body">
                                 <tr>
-                                    <td colspan="10" class="text-center">
+                                    <td colspan="11" class="text-center">
                                         <div class="spinner-border text-primary" role="status">
                                             <span class="visually-hidden">Loading...</span>
                                         </div>
@@ -268,7 +269,7 @@
         const loadsTableBody = document.getElementById('loads-table-body');
         loadsTableBody.innerHTML = `
             <tr>
-                <td colspan="10" class="text-center">
+                <td colspan="11" class="text-center">
                     <div class="spinner-border text-primary" role="status">
                         <span class="visually-hidden">Loading...</span>
                     </div>
@@ -292,7 +293,7 @@
                 if (data.loads.length === 0) {
                     loadsTableBody.innerHTML = `
                         <tr>
-                            <td colspan="10" class="text-center">No loads found</td>
+                            <td colspan="11" class="text-center">No loads found</td>
                         </tr>
                     `;
                     return;
@@ -344,9 +345,10 @@
                         <td class="small">${load.driver}</td>
                         <td class="small">${load.pickup}</td>
                         <td class="small">${formatDateTime(load.scheduled_pickup)}</td>
+                        <td class="small">${formatDateTime(load.actual_pickup_arrival)}</td>
                         <td class="small">${load.delivery}</td>
                         <td class="small">${formatDateTime(load.scheduled_delivery)}</td>
-                        <td class="small">${formatDateTime(load.current_eta)}</td>
+                        <td class="small">${formatDateTime(load.actual_delivery_arrival)}</td>
                         <td class="small">${onTimeBadge}</td>
                         <td class="small">
                             <a href="/loads/${load.id}" class="btn btn-sm btn-outline-primary">
