@@ -239,16 +239,13 @@ function loadDashboardSummary() {
             // Show/hide company stats based on view mode
             const companyStatsElement = document.getElementById('company-stats');
             if (companyStatsElement) {
-                console.log('View mode check:', currentViewMode, 'Driver ID:', selectedDriverId);
                 if (currentViewMode === 'driver' && selectedDriverId) {
                     // Hide company stats in individual driver view
-                    console.log('Hiding company stats for individual driver view');
                     companyStatsElement.style.display = 'none';
                     companyStatsElement.style.visibility = 'hidden';
                     companyStatsElement.classList.add('d-none');
                 } else {
                     // Show company stats in company view
-                    console.log('Showing company stats for company view');
                     companyStatsElement.style.display = 'flex';
                     companyStatsElement.style.visibility = 'visible';
                     companyStatsElement.classList.remove('d-none');
@@ -280,16 +277,24 @@ function loadDashboardSummary() {
                     circularMetric.style.setProperty('--percent', percentValue);
                 }
                 
-                // Apply glowing effect based on percentage
-                if (percentValue >= 90) {
-                    onTimeDeliveryElement.style.color = 'var(--primary-action)';
-                    onTimeDeliveryElement.style.textShadow = '0 0 15px var(--primary-glow)';
-                } else if (percentValue >= 75) {
-                    onTimeDeliveryElement.style.color = 'var(--celebration-gold)';
-                    onTimeDeliveryElement.style.textShadow = '0 0 15px rgba(255, 215, 0, 0.4)';
+                // Apply colors and effects based on performance
+                const progressCircle = circularMetric?.querySelector('.progress-circle');
+                
+                if (percentValue >= 85) {
+                    // Excellent performance - Green
+                    onTimeDeliveryElement.style.color = '#00c48c';
+                    onTimeDeliveryElement.style.textShadow = '0 0 15px rgba(0, 196, 140, 0.6)';
+                    if (progressCircle) progressCircle.style.stroke = '#00c48c';
+                } else if (percentValue >= 70) {
+                    // Warning performance - Yellow/Gold
+                    onTimeDeliveryElement.style.color = '#FFD700';
+                    onTimeDeliveryElement.style.textShadow = '0 0 15px rgba(255, 215, 0, 0.6)';
+                    if (progressCircle) progressCircle.style.stroke = '#FFD700';
                 } else {
-                    onTimeDeliveryElement.style.color = 'var(--highlight-alert)';
-                    onTimeDeliveryElement.style.textShadow = '0 0 15px rgba(255, 87, 87, 0.4)';
+                    // Poor performance - Red
+                    onTimeDeliveryElement.style.color = '#ff5757';
+                    onTimeDeliveryElement.style.textShadow = '0 0 15px rgba(255, 87, 87, 0.6)';
+                    if (progressCircle) progressCircle.style.stroke = '#ff5757';
                 }
             }
             
