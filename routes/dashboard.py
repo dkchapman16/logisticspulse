@@ -121,9 +121,14 @@ def dashboard_summary():
         Notification.read == False
     ).order_by(Notification.created_at.desc()).limit(5).all()
     
+    # Calculate late shipments and total deliveries
+    late_deliveries = total_deliveries - on_time_deliveries
+    
     # Format the data for the response
     summary_data = {
         'active_loads': active_loads,
+        'total_deliveries': total_deliveries,
+        'late_deliveries': late_deliveries,
         'on_time': {
             'pickup_percentage': round(pickup_percentage, 1),
             'delivery_percentage': round(delivery_percentage, 1)

@@ -228,10 +228,12 @@ function loadDashboardSummary() {
     fetch(`/api/dashboard/summary?${params.toString()}`)
         .then(response => response.json())
         .then(data => {
-            // Update active loads count with slot machine effect
-            const activeLoadsElement = document.getElementById('active-loads-count');
-            if (activeLoadsElement) {
-                showSlotMachineEffect(activeLoadsElement, data.active_loads);
+            console.log('Dashboard data loaded:', data);
+            
+            // Update total deliveries count (using the DELIVERIES card)
+            const totalDeliveriesElement = document.getElementById('active-loads-count');
+            if (totalDeliveriesElement && data.total_deliveries !== undefined) {
+                showSlotMachineEffect(totalDeliveriesElement, data.total_deliveries);
             }
             
             // Update on-time percentages with Tesla-style circular progress
@@ -259,27 +261,16 @@ function loadDashboardSummary() {
                 }
             }
             
-            // Set appropriate colors based on percentages
-            if (data.on_time.pickup_percentage >= 90) {
-                pickupProgressBar.classList.remove('bg-warning', 'bg-danger');
-                pickupProgressBar.classList.add('bg-success');
-            } else if (data.on_time.pickup_percentage >= 75) {
-                pickupProgressBar.classList.remove('bg-success', 'bg-danger');
-                pickupProgressBar.classList.add('bg-warning');
-            } else {
-                pickupProgressBar.classList.remove('bg-success', 'bg-warning');
-                pickupProgressBar.classList.add('bg-danger');
+            // Update late loads count using actual data
+            const lateLoadsElement = document.getElementById('late-loads-count');
+            if (lateLoadsElement && data.late_deliveries !== undefined) {
+                showSlotMachineEffect(lateLoadsElement, data.late_deliveries);
             }
             
-            if (data.on_time.delivery_percentage >= 90) {
-                deliveryProgressBar.classList.remove('bg-warning', 'bg-danger');
-                deliveryProgressBar.classList.add('bg-success');
-            } else if (data.on_time.delivery_percentage >= 75) {
-                deliveryProgressBar.classList.remove('bg-success', 'bg-danger');
-                deliveryProgressBar.classList.add('bg-warning');
-            } else {
-                deliveryProgressBar.classList.remove('bg-success', 'bg-warning');
-                deliveryProgressBar.classList.add('bg-danger');
+            // Update total deliveries count
+            const totalDeliveriesElement = document.getElementById('active-loads-count');
+            if (totalDeliveriesElement && data.total_deliveries !== undefined) {
+                showSlotMachineEffect(totalDeliveriesElement, data.total_deliveries);
             }
             
             // Update top drivers list
