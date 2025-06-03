@@ -385,7 +385,44 @@
             font-weight: 600;
             letter-spacing: 0.5px;
         }
+        
+        /* Info button styles */
+        .info-btn {
+            background: none;
+            border: none;
+            color: var(--neutral-text);
+            padding: 4px;
+            border-radius: 50%;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .info-btn:hover {
+            background-color: rgba(0, 196, 140, 0.1);
+            color: var(--primary-action);
+            transform: scale(1.1);
+        }
     </style>
+</div>
+
+<!-- Info Modal -->
+<div class="modal fade" id="info-modal" tabindex="-1" aria-labelledby="info-modal-label" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content" style="background-color: var(--card-bg); border: 1px solid var(--border-color);">
+            <div class="modal-header" style="border-bottom: 1px solid var(--border-color);">
+                <h5 class="modal-title" id="info-modal-label" style="color: var(--bright-text);">Section Information</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body" id="info-modal-body" style="color: var(--neutral-text);">
+                <!-- Content will be populated by JavaScript -->
+            </div>
+            <div class="modal-footer" style="border-top: 1px solid var(--border-color);">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
 </div>
 
 <!-- Hidden success alert for milestones -->
@@ -398,6 +435,27 @@
 <script src="{{ url_for('static', filename='js/maps.js') }}"></script>
 <script src="{{ url_for('static', filename='js/tracking.js') }}"></script>
 <script src="{{ url_for('static', filename='js/animations.js') }}"></script>
+
+<!-- Info Modal JavaScript -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Handle info button clicks
+    const infoButtons = document.querySelectorAll('.info-btn');
+    const infoModal = document.getElementById('info-modal');
+    const infoModalLabel = document.getElementById('info-modal-label');
+    const infoModalBody = document.getElementById('info-modal-body');
+    
+    infoButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            const title = this.getAttribute('data-title');
+            const content = this.getAttribute('data-content');
+            
+            infoModalLabel.textContent = title;
+            infoModalBody.textContent = content;
+        });
+    });
+});
+</script>
 <script>
     document.addEventListener('DOMContentLoaded', function() {
         // Set up refresh button
