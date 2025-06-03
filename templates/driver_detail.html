@@ -122,7 +122,7 @@
                                                         <div class="card bg-light mb-3">
                                                             <div class="card-body text-center">
                                                                 <h2 id="today-pickup-pct" class="mb-1">...</h2>
-                                                                <p class="mb-0">On-Time Pickup</p>
+                                                                <p class="mb-0">On-Time Performance</p>
                                                             </div>
                                                         </div>
                                                     </div>
@@ -130,7 +130,7 @@
                                                         <div class="card bg-light mb-3">
                                                             <div class="card-body text-center">
                                                                 <h2 id="today-delivery-pct" class="mb-1">...</h2>
-                                                                <p class="mb-0">On-Time Delivery</p>
+                                                                <p class="mb-0">Total Loads</p>
                                                             </div>
                                                         </div>
                                                     </div>
@@ -575,32 +575,32 @@
     function updateMetricsDisplay(metrics) {
         // Update today's metrics
         document.getElementById('today-loads').textContent = metrics.today.loads;
-        document.getElementById('today-pickup-pct').textContent = metrics.today.pickup_percentage + '%';
-        document.getElementById('today-delivery-pct').textContent = metrics.today.delivery_percentage + '%';
+        document.getElementById('today-pickup-pct').textContent = metrics.today.on_time_percentage + '%';
+        document.getElementById('today-delivery-pct').textContent = metrics.today.on_time_percentage + '%';
         document.getElementById('today-delay').textContent = metrics.today.avg_delay;
         
         // Update weekly metrics
         document.getElementById('weekly-loads').textContent = metrics.weekly.loads;
-        document.getElementById('weekly-pickup-pct').textContent = metrics.weekly.pickup_percentage + '%';
-        document.getElementById('weekly-delivery-pct').textContent = metrics.weekly.delivery_percentage + '%';
+        document.getElementById('weekly-pickup-pct').textContent = metrics.weekly.on_time_percentage + '%';
+        document.getElementById('weekly-delivery-pct').textContent = metrics.weekly.on_time_percentage + '%';
         document.getElementById('weekly-delay').textContent = metrics.weekly.avg_delay;
         
         // Update monthly metrics
         document.getElementById('monthly-loads').textContent = metrics.monthly.loads;
-        document.getElementById('monthly-pickup-pct').textContent = metrics.monthly.pickup_percentage + '%';
-        document.getElementById('monthly-delivery-pct').textContent = metrics.monthly.delivery_percentage + '%';
+        document.getElementById('monthly-pickup-pct').textContent = metrics.monthly.on_time_percentage + '%';
+        document.getElementById('monthly-delivery-pct').textContent = metrics.monthly.on_time_percentage + '%';
         document.getElementById('monthly-delay').textContent = metrics.monthly.avg_delay;
         
         // Apply color classes based on percentages
-        applyPercentageColors('today-pickup-pct', metrics.today.pickup_percentage);
-        applyPercentageColors('today-delivery-pct', metrics.today.delivery_percentage);
-        applyPercentageColors('weekly-pickup-pct', metrics.weekly.pickup_percentage);
-        applyPercentageColors('weekly-delivery-pct', metrics.weekly.delivery_percentage);
-        applyPercentageColors('monthly-pickup-pct', metrics.monthly.pickup_percentage);
-        applyPercentageColors('monthly-delivery-pct', metrics.monthly.delivery_percentage);
+        applyPercentageColors('today-pickup-pct', metrics.today.on_time_percentage);
+        applyPercentageColors('today-delivery-pct', metrics.today.on_time_percentage);
+        applyPercentageColors('weekly-pickup-pct', metrics.weekly.on_time_percentage);
+        applyPercentageColors('weekly-delivery-pct', metrics.weekly.on_time_percentage);
+        applyPercentageColors('monthly-pickup-pct', metrics.monthly.on_time_percentage);
+        applyPercentageColors('monthly-delivery-pct', metrics.monthly.on_time_percentage);
         
         // If monthly metrics are very good (>=95%), show celebration
-        if (metrics.monthly.delivery_percentage >= 95 && metrics.monthly.loads >= 10) {
+        if (metrics.monthly.on_time_percentage >= 95 && metrics.monthly.loads >= 10) {
             setTimeout(() => {
                 showConfetti();
                 celebrateMilestone('monthly_perfect', 1, '{{ driver.name }}');
@@ -774,15 +774,13 @@
         
         // Prepare chart data
         const dates = [];
-        const pickupPercentages = [];
-        const deliveryPercentages = [];
+        const onTimePercentages = [];
         const loadCounts = [];
         
         performanceData.forEach(entry => {
             // Use week labels for better readability
             dates.push(entry.week || formatDate(entry.date));
-            pickupPercentages.push(entry.pickup_percentage);
-            deliveryPercentages.push(entry.delivery_percentage);
+            onTimePercentages.push(entry.on_time_percentage);
             loadCounts.push(entry.loads);
         });
         
@@ -798,20 +796,13 @@
                 labels: dates,
                 datasets: [
                     {
-                        label: 'On-Time Pickup %',
-                        data: pickupPercentages,
-                        borderColor: 'rgba(54, 162, 235, 1)',
-                        backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                        label: 'On-Time Load %',
+                        data: onTimePercentages,
+                        borderColor: 'rgba(34, 197, 94, 1)',
+                        backgroundColor: 'rgba(34, 197, 94, 0.1)',
                         tension: 0.1,
-                        yAxisID: 'y'
-                    },
-                    {
-                        label: 'On-Time Delivery %',
-                        data: deliveryPercentages,
-                        borderColor: 'rgba(255, 99, 132, 1)',
-                        backgroundColor: 'rgba(255, 99, 132, 0.2)',
-                        tension: 0.1,
-                        yAxisID: 'y'
+                        yAxisID: 'y',
+                        fill: true
                     },
                     {
                         label: 'Loads',

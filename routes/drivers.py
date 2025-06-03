@@ -163,26 +163,29 @@ def get_driver_data(driver_id):
         if not loads:
             return {
                 'loads': 0,
-                'on_time_pickups': 0,
-                'on_time_deliveries': 0,
-                'pickup_percentage': 0,
-                'delivery_percentage': 0,
+                'on_time_loads': 0,
+                'on_time_percentage': 0,
                 'avg_delay': 0
             }
         
         total_loads = len(loads)
-        on_time_pickups = sum(1 for load in loads if load.pickup_on_time == True)
-        on_time_deliveries = sum(1 for load in loads if load.delivery_on_time == True)
         
-        # Calculate average delay
+        # A load is considered on-time only if BOTH pickup AND delivery are on-time
+        on_time_loads = sum(1 for load in loads 
+                           if load.pickup_on_time == True and load.delivery_on_time == True)
+        
+        # Calculate average delay for late loads
         total_delay = 0
         delay_count = 0
         for load in loads:
+            # Check pickup delay
             if load.actual_pickup_arrival and load.scheduled_pickup_time:
                 delay = (load.actual_pickup_arrival - load.scheduled_pickup_time).total_seconds() / 60
                 if delay > 0:
                     total_delay += delay
                     delay_count += 1
+            
+            # Check delivery delay  
             if load.actual_delivery_arrival and load.scheduled_delivery_time:
                 delay = (load.actual_delivery_arrival - load.scheduled_delivery_time).total_seconds() / 60
                 if delay > 0:
@@ -193,10 +196,8 @@ def get_driver_data(driver_id):
         
         return {
             'loads': total_loads,
-            'on_time_pickups': on_time_pickups,
-            'on_time_deliveries': on_time_deliveries,
-            'pickup_percentage': round((on_time_pickups / total_loads * 100), 1) if total_loads > 0 else 0,
-            'delivery_percentage': round((on_time_deliveries / total_loads * 100), 1) if total_loads > 0 else 0,
+            'on_time_loads': on_time_loads,
+            'on_time_percentage': round((on_time_loads / total_loads * 100), 1) if total_loads > 0 else 0,
             'avg_delay': round(avg_delay, 1)
         }
     
@@ -236,8 +237,7 @@ def get_driver_data(driver_id):
                 'date': week_start.strftime('%Y-%m-%d'),
                 'week': f"Week {week + 1}",
                 'loads': metrics['loads'],
-                'pickup_percentage': metrics['pickup_percentage'],
-                'delivery_percentage': metrics['delivery_percentage'],
+                'on_time_percentage': metrics['on_time_percentage'],
                 'avg_delay': metrics['avg_delay']
             })
     
