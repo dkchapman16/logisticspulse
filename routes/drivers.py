@@ -5,7 +5,9 @@ from app import db
 from models import Driver, DriverPerformance, Load, Milestone
 from services.motive_api import get_active_driver_locations
 from services.google_maps_api import get_eta
+import logging
 
+logger = logging.getLogger(__name__)
 drivers_bp = Blueprint('drivers', __name__)
 
 @drivers_bp.route('/drivers')
@@ -408,8 +410,8 @@ def get_scorecards_data():
             
             # Calculate performance metrics
             total_loads = len(loads)
-            on_time_pickups = sum(1 for load in loads if load.pickup_on_time())
-            on_time_deliveries = sum(1 for load in loads if load.delivery_on_time())
+            on_time_pickups = sum(1 for load in loads if load.pickup_on_time == True)
+            on_time_deliveries = sum(1 for load in loads if load.delivery_on_time == True)
             
             # Calculate average delay
             total_delay_minutes = 0
