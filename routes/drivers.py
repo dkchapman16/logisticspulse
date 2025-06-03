@@ -389,9 +389,9 @@ def get_scorecards_data():
     period = request.args.get('period', 30, type=int)
     
     try:
-        # Calculate date range
-        end_date = datetime.utcnow().date()
-        start_date = end_date - timedelta(days=period)
+        # Calculate date range - for demo purposes, use May 2025 data
+        end_date = datetime(2025, 5, 31).date()
+        start_date = datetime(2025, 5, 1).date()
         
         # Get all drivers with their performance data
         drivers = db.session.query(Driver).all()

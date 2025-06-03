@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timedelta
 from app import db
 from flask_login import UserMixin
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -111,13 +111,17 @@ class Load(db.Model):
     def pickup_on_time(self):
         if not self.actual_pickup_arrival or not self.scheduled_pickup_time:
             return None
-        return self.actual_pickup_arrival <= self.scheduled_pickup_time
+        # Industry standard: 30-minute grace period for on-time pickup
+        grace_period = timedelta(minutes=30)
+        return self.actual_pickup_arrival <= self.scheduled_pickup_time + grace_period
     
     @property
     def delivery_on_time(self):
         if not self.actual_delivery_arrival or not self.scheduled_delivery_time:
             return None
-        return self.actual_delivery_arrival <= self.scheduled_delivery_time
+        # Industry standard: 30-minute grace period for on-time delivery
+        grace_period = timedelta(minutes=30)
+        return self.actual_delivery_arrival <= self.scheduled_delivery_time + grace_period
 
 class LocationUpdate(db.Model):
     id = db.Column(db.Integer, primary_key=True)
