@@ -337,7 +337,7 @@
                     row.innerHTML = `
                         <td>
                             <a href="/loads/${load.id}" class="text-decoration-none">
-                                ${load.reference_number}
+                                ${load.status.toUpperCase()} #${load.reference_number} - ${load.client || 'No Customer'}
                             </a>
                         </td>
                         <td>${statusBadge}</td>
