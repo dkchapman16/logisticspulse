@@ -3,6 +3,23 @@ let driverScorecardsData = [];
 let selectedPeriod = 'month';
 let leaderboardChart = null;
 
+// Format minutes to hours and minutes display
+function formatMinutesToHours(minutes) {
+    if (!minutes || minutes === 0) return '0m';
+    
+    const totalMinutes = Math.round(minutes);
+    const hours = Math.floor(totalMinutes / 60);
+    const remainingMinutes = totalMinutes % 60;
+    
+    if (hours === 0) {
+        return `${remainingMinutes}m`;
+    } else if (remainingMinutes === 0) {
+        return `${hours}h`;
+    } else {
+        return `${hours}h ${remainingMinutes}m`;
+    }
+}
+
 document.addEventListener('DOMContentLoaded', function() {
     // Check if we're on the scorecards page
     const scorecardsContainer = document.getElementById('scorecards-container');

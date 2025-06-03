@@ -54,6 +54,23 @@
 <script>
     let currentPeriod = 30;
     
+    // Format minutes to hours and minutes display
+    function formatMinutesToHours(minutes) {
+        if (!minutes || minutes === 0) return '0m';
+        
+        const totalMinutes = Math.round(minutes);
+        const hours = Math.floor(totalMinutes / 60);
+        const remainingMinutes = totalMinutes % 60;
+        
+        if (hours === 0) {
+            return `${remainingMinutes}m`;
+        } else if (remainingMinutes === 0) {
+            return `${hours}h`;
+        } else {
+            return `${hours}h ${remainingMinutes}m`;
+        }
+    }
+    
     document.addEventListener('DOMContentLoaded', function() {
         // Load initial scorecards
         loadScorecards();
@@ -189,8 +206,8 @@
                                 </div>
                                 <div class="col-6">
                                     <div class="text-center">
-                                        <div class="h4 mb-1 text-warning">${Math.round(driver.average_delay_minutes || 0)}</div>
-                                        <small class="text-muted">Avg Delay (min)</small>
+                                        <div class="h4 mb-1 text-warning">${formatMinutesToHours(driver.average_delay_minutes || 0)}</div>
+                                        <small class="text-muted">Avg Delay</small>
                                     </div>
                                 </div>
                             </div>
