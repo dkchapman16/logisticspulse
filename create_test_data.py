@@ -45,6 +45,7 @@ def create_test_data():
                 motive_driver_id=f"DRV{1000 + i}",
                 phone=f"555-{1000 + i}",
                 email=f"{name.lower().replace(' ', '.')}@company.com",
+                company='Hitched Logistics LLC',
                 status='active'
             )
             drivers.append(driver)

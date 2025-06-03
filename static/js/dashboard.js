@@ -123,7 +123,7 @@ function initializeDashboardControls() {
 
 // Load driver options for dropdown
 function loadDriverOptions() {
-    fetch('/drivers/api/drivers')
+    fetch('/drivers/data')
         .then(response => response.json())
         .then(data => {
             const driverSelect = document.getElementById('driver-select');

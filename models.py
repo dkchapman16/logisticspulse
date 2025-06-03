@@ -23,6 +23,7 @@ class Driver(db.Model):
     motive_driver_id = db.Column(db.String(100), unique=True)
     phone = db.Column(db.String(20))
     email = db.Column(db.String(120))
+    company = db.Column(db.String(200), default='Hitched Logistics LLC')
     status = db.Column(db.String(20), default='active')
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     
