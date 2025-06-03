@@ -67,7 +67,19 @@ def get_loads():
 def load_detail(load_id):
     """Show load details"""
     load = Load.query.get_or_404(load_id)
-    return render_template('load_detail.html', load=load)
+    
+    # Get all data needed for the form dropdowns
+    clients = Client.query.all()
+    drivers = Driver.query.all()
+    vehicles = Vehicle.query.all()
+    facilities = Facility.query.all()
+    
+    return render_template('load_detail.html', 
+                          load=load,
+                          clients=clients,
+                          drivers=drivers,
+                          vehicles=vehicles,
+                          facilities=facilities)
 
 @loads_bp.route('/loads/<int:load_id>/data')
 def get_load_data(load_id):
