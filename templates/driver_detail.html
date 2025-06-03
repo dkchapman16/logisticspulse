@@ -503,6 +503,27 @@
         
         // Set up event listener for performance update
         document.getElementById('update-performance-btn').addEventListener('click', updatePerformance);
+        
+        // Set up period filter
+        document.getElementById('period-filter').addEventListener('change', function() {
+            const customDateRange = document.getElementById('custom-date-range');
+            if (this.value === 'custom') {
+                customDateRange.classList.remove('d-none');
+            } else {
+                customDateRange.classList.add('d-none');
+                loadDriverData();
+            }
+        });
+        
+        // Set up custom date range apply button
+        document.getElementById('apply-date-range').addEventListener('click', function() {
+            const startDate = document.getElementById('start-date').value;
+            const endDate = document.getElementById('end-date').value;
+            
+            if (startDate && endDate) {
+                loadDriverDataWithDateRange(startDate, endDate);
+            }
+        });
         {% endif %}
     });
     
@@ -520,8 +541,30 @@
                 // Update milestones
                 updateMilestonesDisplay(data.milestones);
                 
-                // Create performance trend chart
-                createPerformanceTrendChart(data.daily_performance);
+                // Create performance trend chart with weekly data
+                createPerformanceTrendChart(data.weekly_performance);
+            })
+            .catch(error => {
+                console.error('Error loading driver data:', error);
+                alert('Error loading driver data. Please try again.');
+            });
+    }
+    
+    function loadDriverDataWithDateRange(startDate, endDate) {
+        fetch(`/drivers/{{ driver.id }}/data?start_date=${startDate}&end_date=${endDate}`)
+            .then(response => response.json())
+            .then(data => {
+                // Update metrics display
+                updateMetricsDisplay(data.metrics);
+                
+                // Update loads
+                updateLoadsDisplay(data.loads);
+                
+                // Update milestones
+                updateMilestonesDisplay(data.milestones);
+                
+                // Create performance trend chart with weekly data
+                createPerformanceTrendChart(data.weekly_performance);
             })
             .catch(error => {
                 console.error('Error loading driver data:', error);
@@ -736,7 +779,8 @@
         const loadCounts = [];
         
         performanceData.forEach(entry => {
-            dates.push(formatDate(entry.date));
+            // Use week labels for better readability
+            dates.push(entry.week || formatDate(entry.date));
             pickupPercentages.push(entry.pickup_percentage);
             deliveryPercentages.push(entry.delivery_percentage);
             loadCounts.push(entry.loads);

@@ -264,7 +264,7 @@ def get_driver_data(driver_id):
         },
         
         'milestones': milestone_data,
-        'daily_performance': daily_data
+        'weekly_performance': weekly_data
     }
     
     return jsonify(driver_data)
