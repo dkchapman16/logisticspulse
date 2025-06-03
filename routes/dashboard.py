@@ -169,24 +169,41 @@ def at_risk_loads():
     # Filter for loads that are actually at risk (overdue or close to being overdue)
     filtered_loads = []
     for load in at_risk_loads:
+        time_until_pickup = (load.scheduled_pickup_time - current_time).total_seconds() / 3600  # hours
         time_until_delivery = (load.scheduled_delivery_time - current_time).total_seconds() / 3600  # hours
         
-        # Consider at risk if:
-        # 1. Already overdue (negative time)
-        # 2. Due within 2 hours and status is still 'scheduled'
-        # 3. Due within 4 hours and status is 'in_transit' but no recent progress
-        if (time_until_delivery < 0 or 
-            (time_until_delivery < 2 and load.status == 'scheduled') or
-            (time_until_delivery < 4 and load.status == 'in_transit')):
+        risk_info = None
+        
+        # Check pickup risk first
+        if load.status == 'scheduled' and time_until_pickup < 0:
+            # Pickup is overdue
+            risk_info = {'type': 'pickup', 'delay_hours': abs(time_until_pickup)}
+        elif load.status == 'scheduled' and time_until_pickup < 1:
+            # Pickup is at risk (due within 1 hour)
+            risk_info = {'type': 'pickup', 'delay_hours': time_until_pickup}
+        # Check delivery risk
+        elif time_until_delivery < 0:
+            # Delivery is overdue
+            risk_info = {'type': 'delivery', 'delay_hours': abs(time_until_delivery)}
+        elif time_until_delivery < 2 and load.status == 'scheduled':
+            # Delivery at risk and not even picked up
+            risk_info = {'type': 'delivery', 'delay_hours': time_until_delivery}
+        elif time_until_delivery < 4 and load.status == 'in_transit':
+            # Delivery at risk while in transit
+            risk_info = {'type': 'delivery', 'delay_hours': time_until_delivery}
+        
+        if risk_info:
+            load.risk_info = risk_info
             filtered_loads.append(load)
     
     # Format the data for the response
     loads_data = []
     for load in filtered_loads[:10]:  # Limit to 10 most urgent
-        time_until_delivery = (load.scheduled_delivery_time - current_time).total_seconds() / 60  # minutes
+        risk_info = load.risk_info
+        delay_minutes = int(risk_info['delay_hours'] * 60)
+        abs_minutes = abs(delay_minutes)
         
-        # Determine risk level and format time
-        abs_minutes = abs(int(time_until_delivery))
+        # Format time display
         if abs_minutes >= 60:
             hours = abs_minutes // 60
             minutes = abs_minutes % 60
@@ -197,11 +214,14 @@ def at_risk_loads():
         else:
             time_str = f"{abs_minutes}m"
         
-        if time_until_delivery < 0:
-            risk_label = f"Delayed {time_str}"
+        # Create specific risk labels
+        milestone_type = risk_info['type'].title()  # "Pickup" or "Delivery"
+        
+        if delay_minutes < 0:
+            risk_label = f"{milestone_type} Delayed {time_str}"
             risk_class = "danger"
         else:
-            risk_label = f"At Risk {time_str}"
+            risk_label = f"{milestone_type} At Risk {time_str}"
             risk_class = "warning"
         
         pickup_facility = load.pickup_facility
@@ -217,7 +237,7 @@ def at_risk_loads():
             'scheduled_delivery': load.scheduled_delivery_time.strftime('%Y-%m-%d %H:%M'),
             'risk_label': risk_label,
             'risk_class': risk_class,
-            'delay_minutes': abs(int(time_until_delivery)) if time_until_delivery < 0 else int(time_until_delivery)
+            'delay_minutes': abs_minutes
         })
     
     return jsonify(loads_data)
