@@ -4,6 +4,7 @@ let currentDateRange = '30'; // days or 'custom'
 let selectedDriverId = null;
 let customStartDate = '2025-05-01';
 let customEndDate = '2025-05-31';
+let performanceChart = null; // Global chart instance
 
 // Get current driver ID if viewing individual driver
 function getCurrentDriverId() {
@@ -487,6 +488,12 @@ function loadPerformanceTrends() {
             // Create the Tesla-style performance chart
             const ctx = document.getElementById('performance-chart');
             if (ctx) {
+                // Destroy existing chart if it exists
+                if (performanceChart) {
+                    performanceChart.destroy();
+                    performanceChart = null;
+                }
+                
                 // Define chart gradient fills
                 const chartContext = ctx.getContext('2d');
                 
@@ -504,7 +511,7 @@ function loadPerformanceTrends() {
                 Chart.defaults.color = 'rgba(255, 255, 255, 0.7)';
                 Chart.defaults.borderColor = 'rgba(255, 255, 255, 0.1)';
                 
-                new Chart(ctx, {
+                performanceChart = new Chart(ctx, {
                     type: 'line',
                     data: {
                         labels: dates,
