@@ -568,10 +568,10 @@ function loadPerformanceTrends() {
                         maintainAspectRatio: false,
                         layout: {
                             padding: {
-                                top: 30,
-                                bottom: 20,
-                                left: 20,
-                                right: 20
+                                top: 40,
+                                bottom: 30,
+                                left: 30,
+                                right: 30
                             }
                         },
                         interaction: {
@@ -618,7 +618,8 @@ function loadPerformanceTrends() {
                                     font: {
                                         family: "'Inter', sans-serif",
                                         size: 10
-                                    }
+                                    },
+                                    padding: 10
                                 }
                             },
                             y: {
@@ -646,7 +647,8 @@ function loadPerformanceTrends() {
                                     font: {
                                         family: "'Inter', sans-serif",
                                         size: 10
-                                    }
+                                    },
+                                    padding: 10
                                 }
                             },
                             y1: {
@@ -674,7 +676,8 @@ function loadPerformanceTrends() {
                                     font: {
                                         family: "'Inter', sans-serif",
                                         size: 10
-                                    }
+                                    },
+                                    padding: 10
                                 }
                             }
                         }
