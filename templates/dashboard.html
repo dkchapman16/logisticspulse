@@ -81,7 +81,7 @@
                 <div class="d-flex align-items-center gap-2">
                     <button type="button" class="info-btn" data-bs-toggle="modal" data-bs-target="#info-modal" 
                             data-title="On-Time Rate Calculation" 
-                            data-content="Shows the percentage of deliveries completed on or before the scheduled delivery time. This metric is calculated from actual delivery arrivals compared to scheduled delivery times across all completed loads.">
+                            data-content="Toggle between three performance metrics: Delivery Rate (on-time deliveries only), Pickup Rate (on-time pickups only), and Overall Rate (loads where both pickup AND delivery occurred on or before scheduled times). Each metric uses actual arrival times compared to scheduled times.">
                         <i data-feather="info" style="width: 14px; height: 14px;"></i>
                     </button>
                     <i data-feather="clock" style="color: var(--primary-action); opacity: 0.8;"></i>
@@ -105,7 +105,7 @@
                 <div class="d-flex align-items-center gap-2">
                     <button type="button" class="info-btn" data-bs-toggle="modal" data-bs-target="#info-modal" 
                             data-title="Late Shipments Counter" 
-                            data-content="Counts the total number of deliveries that arrived after the scheduled delivery time. This includes all loads where actual delivery arrival exceeded the promised delivery window.">
+                            data-content="Counts the total number of loads with late deliveries that arrived after the scheduled delivery time. This metric focuses specifically on delivery performance and includes all loads where actual delivery arrival exceeded the promised delivery window.">
                         <i data-feather="info" style="width: 14px; height: 14px;"></i>
                     </button>
                     <i data-feather="alert-circle" style="color: var(--highlight-alert); opacity: 0.8;"></i>
@@ -198,7 +198,7 @@
                 <div class="d-flex align-items-center gap-2">
                     <button type="button" class="info-btn" data-bs-toggle="modal" data-bs-target="#info-modal" 
                             data-title="Loads At Risk Analysis" 
-                            data-content="Lists loads that are at risk of missing their scheduled pickup or delivery times based on current location, traffic conditions, and estimated travel time. Includes both pickup delays and delivery delays with time remaining until deadline.">
+                            data-content="Lists loads at risk of missing scheduled times for either pickup or delivery events. Uses current vehicle location, traffic conditions, and estimated travel time to identify potential delays. Shows separate indicators for pickup risk vs delivery risk with time remaining until each deadline.">
                         <i data-feather="info" style="width: 14px; height: 14px;"></i>
                     </button>
                     <i data-feather="alert-triangle" style="color: var(--highlight-alert); opacity: 0.8;"></i>
