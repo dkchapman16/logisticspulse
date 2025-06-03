@@ -455,7 +455,13 @@ function loadAtRiskLoads() {
 
 // Load performance trends
 function loadPerformanceTrends() {
-    fetch('/api/dashboard/performance_trends')
+    // Get current driver ID if viewing individual driver
+    const currentDriverId = getCurrentDriverId();
+    const url = currentDriverId ? 
+        `/api/dashboard/performance_trends?driver_id=${currentDriverId}` : 
+        '/api/dashboard/performance_trends';
+    
+    fetch(url)
         .then(response => response.json())
         .then(data => {
             if (!data || data.length === 0) return;

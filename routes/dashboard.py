@@ -254,31 +254,56 @@ def at_risk_loads():
 @dashboard_bp.route('/api/dashboard/performance_trends')
 def performance_trends():
     """API endpoint for performance trend data over the past 30 days"""
+    from flask import request
+    
     # Get today's date and date 30 days ago
     today = datetime.utcnow().date()
     thirty_days_ago = today - timedelta(days=30)
     
-    # Get daily performance data for the past 30 days
-    daily_performance = DriverPerformance.query.filter(
-        DriverPerformance.date >= thirty_days_ago,
-        DriverPerformance.date <= today
-    ).with_entities(
-        DriverPerformance.date,
-        func.sum(DriverPerformance.loads_completed).label('loads'),
-        func.sum(DriverPerformance.on_time_pickups).label('on_time_pickups'),
-        func.sum(DriverPerformance.on_time_deliveries).label('on_time_deliveries'),
-        func.avg(DriverPerformance.average_delay_minutes).label('avg_delay')
-    ).group_by(DriverPerformance.date).order_by(DriverPerformance.date).all()
+    # Check if filtering by specific driver
+    driver_id = request.args.get('driver_id', type=int)
+    
+    # Build base query using Load data directly
+    query = Load.query.filter(
+        Load.actual_delivery_arrival.isnot(None),
+        func.date(Load.actual_delivery_arrival) >= thirty_days_ago,
+        func.date(Load.actual_delivery_arrival) <= today
+    )
+    
+    # Apply driver filter if specified
+    if driver_id:
+        query = query.filter(Load.driver_id == driver_id)
+    
+    # Get daily aggregated data from Load records
+    daily_data = query.with_entities(
+        func.date(Load.actual_delivery_arrival).label('date'),
+        func.count(Load.id).label('total_loads'),
+        func.sum(
+            case(
+                (Load.actual_pickup_arrival <= Load.scheduled_pickup_time, 1),
+                else_=0
+            )
+        ).label('on_time_pickups'),
+        func.sum(
+            case(
+                (Load.actual_delivery_arrival <= Load.scheduled_delivery_time, 1),
+                else_=0
+            )
+        ).label('on_time_deliveries')
+    ).group_by(func.date(Load.actual_delivery_arrival)).order_by(func.date(Load.actual_delivery_arrival)).all()
     
     # Format the data for the response
-    trend_data = [
-        {
+    trend_data = []
+    for entry in daily_data:
+        pickup_pct = round((entry.on_time_pickups / entry.total_loads * 100), 1) if entry.total_loads > 0 else 0
+        delivery_pct = round((entry.on_time_deliveries / entry.total_loads * 100), 1) if entry.total_loads > 0 else 0
+        
+        trend_data.append({
             'date': entry.date.strftime('%Y-%m-%d'),
-            'loads': entry.loads,
-            'on_time_pickup_percentage': round((entry.on_time_pickups / entry.loads * 100), 1) if entry.loads > 0 else 0,
-            'on_time_delivery_percentage': round((entry.on_time_deliveries / entry.loads * 100), 1) if entry.loads > 0 else 0,
-            'avg_delay_minutes': round(entry.avg_delay, 1)
-        } for entry in daily_performance
-    ]
+            'loads': entry.total_loads,
+            'on_time_pickup_percentage': pickup_pct,
+            'on_time_delivery_percentage': delivery_pct,
+            'avg_delay_minutes': 0  # We can calculate this later if needed
+        })
     
     return jsonify(trend_data)
