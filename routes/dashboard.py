@@ -43,8 +43,11 @@ def dashboard_summary():
     if driver_id:
         base_query = base_query.filter(Load.driver_id == driver_id)
     
-    # Get active loads count
+    # Get loads counts for all status types
     active_loads = base_query.filter(Load.status.in_(['scheduled', 'in_transit'])).count()
+    all_loads = base_query.count()
+    delivered_loads = base_query.filter(Load.status == 'delivered').count()
+    scheduled_loads = base_query.filter(Load.status == 'scheduled').count()
     
     # Get on-time statistics for the date range
     on_time_pickups = base_query.filter(
@@ -174,6 +177,12 @@ def dashboard_summary():
             'delivery_count': late_deliveries,
             'pickup_count': late_pickups,
             'overall_count': late_overall
+        },
+        'loads_count': {
+            'active_count': active_loads,
+            'all_count': all_loads,
+            'delivered_count': delivered_loads,
+            'scheduled_count': scheduled_loads
         },
         'top_drivers': top_drivers,
         'notifications': [
