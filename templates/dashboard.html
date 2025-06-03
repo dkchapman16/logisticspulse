@@ -63,7 +63,21 @@
         <!-- On-Time Percentage Metric -->
         <div class="dashboard-card">
             <div class="dashboard-card-header d-flex justify-content-between align-items-center">
-                <span id="on-time-rate-title">ON-TIME RATE</span>
+                <div class="d-flex align-items-center gap-3">
+                    <span id="on-time-rate-title">ON-TIME RATE</span>
+                    <!-- Toggle Buttons in Header -->
+                    <div class="btn-group btn-group-sm on-time-toggle-group" role="group" aria-label="On-time rate type">
+                        <button type="button" class="btn on-time-toggle" data-type="delivery" id="delivery-toggle">
+                            Delivery
+                        </button>
+                        <button type="button" class="btn on-time-toggle" data-type="pickup" id="pickup-toggle">
+                            Pickup
+                        </button>
+                        <button type="button" class="btn on-time-toggle active" data-type="overall" id="overall-toggle">
+                            Overall
+                        </button>
+                    </div>
+                </div>
                 <div class="d-flex align-items-center gap-2">
                     <button type="button" class="info-btn" data-bs-toggle="modal" data-bs-target="#info-modal" 
                             data-title="On-Time Rate Calculation" 
@@ -74,19 +88,6 @@
                 </div>
             </div>
             <div class="dashboard-card-body">
-                <!-- Toggle Buttons -->
-                <div class="btn-group w-100 mb-3" role="group" aria-label="On-time rate type">
-                    <button type="button" class="btn btn-outline-primary btn-sm on-time-toggle" data-type="delivery" id="delivery-toggle">
-                        Delivery
-                    </button>
-                    <button type="button" class="btn btn-outline-primary btn-sm on-time-toggle" data-type="pickup" id="pickup-toggle">
-                        Pickup
-                    </button>
-                    <button type="button" class="btn btn-primary btn-sm on-time-toggle active" data-type="overall" id="overall-toggle">
-                        Overall
-                    </button>
-                </div>
-                
                 <div class="circular-metric" style="--percent: 87;" id="on-time-circular-metric">
                     <div class="circular-metric-value"><span id="on-time-percentage">87</span>%</div>
                     <svg viewBox="0 0 160 160" width="160" height="160">
@@ -417,6 +418,45 @@
             color: var(--primary-action);
             transform: scale(1.1);
         }
+        
+        /* On-time toggle button styles */
+        .on-time-toggle-group {
+            border-radius: 6px;
+            overflow: hidden;
+        }
+        
+        .on-time-toggle {
+            background-color: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: var(--neutral-text);
+            font-size: 11px;
+            padding: 4px 10px;
+            transition: all 0.2s ease;
+            border-radius: 0;
+        }
+        
+        .on-time-toggle:hover {
+            background-color: rgba(0, 196, 140, 0.1);
+            border-color: var(--primary-action);
+            color: var(--bright-text);
+        }
+        
+        .on-time-toggle.active {
+            background-color: var(--primary-action);
+            border-color: var(--primary-action);
+            color: #000;
+            font-weight: 600;
+        }
+        
+        .on-time-toggle:first-child {
+            border-top-left-radius: 6px;
+            border-bottom-left-radius: 6px;
+        }
+        
+        .on-time-toggle:last-child {
+            border-top-right-radius: 6px;
+            border-bottom-right-radius: 6px;
+        }
     </style>
 </div>
 
@@ -485,13 +525,11 @@ document.addEventListener('DOMContentLoaded', function() {
         button.addEventListener('click', function() {
             // Remove active class from all buttons
             onTimeToggles.forEach(btn => {
-                btn.classList.remove('btn-primary', 'active');
-                btn.classList.add('btn-outline-primary');
+                btn.classList.remove('active');
             });
             
             // Add active class to clicked button
-            this.classList.remove('btn-outline-primary');
-            this.classList.add('btn-primary', 'active');
+            this.classList.add('active');
             
             const type = this.getAttribute('data-type');
             updateOnTimeDisplay(type);
