@@ -1,0 +1,256 @@
+{% extends 'layout.html' %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">
+                        <i data-feather="award"></i> Driver Scorecards
+                    </h5>
+                    <div>
+                        <select class="form-select" id="period-filter">
+                            <option value="30">Last 30 Days</option>
+                            <option value="90">Last 90 Days</option>
+                            <option value="365">Last Year</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <!-- Loading State -->
+                    <div id="loading-state" class="text-center py-5">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                        <p class="mt-2">Loading driver scorecards...</p>
+                    </div>
+                    
+                    <!-- Error State -->
+                    <div id="error-state" class="alert alert-danger d-none">
+                        <i data-feather="alert-circle"></i> Error loading scorecards. Please try again.
+                    </div>
+                    
+                    <!-- Scorecards Grid -->
+                    <div id="scorecards-grid" class="row d-none">
+                        <!-- Driver scorecards will be populated here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    let currentPeriod = 30;
+    
+    document.addEventListener('DOMContentLoaded', function() {
+        // Load initial scorecards
+        loadScorecards();
+        
+        // Set up period filter
+        document.getElementById('period-filter').addEventListener('change', function() {
+            currentPeriod = this.value;
+            loadScorecards();
+        });
+    });
+    
+    function loadScorecards() {
+        const loadingState = document.getElementById('loading-state');
+        const errorState = document.getElementById('error-state');
+        const scorecardsGrid = document.getElementById('scorecards-grid');
+        
+        // Show loading state
+        loadingState.classList.remove('d-none');
+        errorState.classList.add('d-none');
+        scorecardsGrid.classList.add('d-none');
+        
+        fetch(`/drivers/scorecards/data?period=${currentPeriod}`)
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.json();
+            })
+            .then(data => {
+                loadingState.classList.add('d-none');
+                scorecardsGrid.classList.remove('d-none');
+                renderScorecards(data);
+                feather.replace();
+            })
+            .catch(error => {
+                console.error('Error loading scorecards:', error);
+                loadingState.classList.add('d-none');
+                errorState.classList.remove('d-none');
+            });
+    }
+    
+    function renderScorecards(drivers) {
+        const scorecardsGrid = document.getElementById('scorecards-grid');
+        scorecardsGrid.innerHTML = '';
+        
+        if (!drivers || drivers.length === 0) {
+            scorecardsGrid.innerHTML = `
+                <div class="col-12">
+                    <div class="text-center py-4">
+                        <i data-feather="users" class="text-muted mb-2" style="width: 48px; height: 48px;"></i>
+                        <p class="text-muted">No driver data available for the selected period.</p>
+                    </div>
+                </div>
+            `;
+            return;
+        }
+        
+        drivers.forEach((driver, index) => {
+            const rankBadge = getRankBadge(index + 1);
+            const onTimePickupPct = driver.on_time_pickup_percentage || 0;
+            const onTimeDeliveryPct = driver.on_time_delivery_percentage || 0;
+            const overallScore = Math.round((onTimePickupPct + onTimeDeliveryPct) / 2);
+            
+            const scoreColor = getScoreColor(overallScore);
+            const performanceClass = getPerformanceClass(overallScore);
+            
+            const cardHtml = `
+                <div class="col-lg-4 col-md-6 mb-4">
+                    <div class="card h-100 ${performanceClass}">
+                        <div class="card-header d-flex justify-content-between align-items-center">
+                            <div class="d-flex align-items-center">
+                                ${rankBadge}
+                                <h6 class="mb-0 ms-2">${driver.name}</h6>
+                            </div>
+                            <div class="badge ${scoreColor} fs-6">
+                                ${overallScore}%
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <!-- Performance Metrics -->
+                            <div class="row mb-3">
+                                <div class="col-6">
+                                    <div class="text-center">
+                                        <div class="h4 mb-1 text-primary">${driver.loads_completed || 0}</div>
+                                        <small class="text-muted">Loads</small>
+                                    </div>
+                                </div>
+                                <div class="col-6">
+                                    <div class="text-center">
+                                        <div class="h4 mb-1 text-warning">${Math.round(driver.average_delay_minutes || 0)}</div>
+                                        <small class="text-muted">Avg Delay (min)</small>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- On-Time Percentages -->
+                            <div class="mb-3">
+                                <div class="d-flex justify-content-between align-items-center mb-1">
+                                    <small>Pickup On-Time</small>
+                                    <small>${onTimePickupPct}%</small>
+                                </div>
+                                <div class="progress mb-2" style="height: 6px;">
+                                    <div class="progress-bar ${getProgressColor(onTimePickupPct)}" 
+                                         style="width: ${onTimePickupPct}%"></div>
+                                </div>
+                                
+                                <div class="d-flex justify-content-between align-items-center mb-1">
+                                    <small>Delivery On-Time</small>
+                                    <small>${onTimeDeliveryPct}%</small>
+                                </div>
+                                <div class="progress" style="height: 6px;">
+                                    <div class="progress-bar ${getProgressColor(onTimeDeliveryPct)}" 
+                                         style="width: ${onTimeDeliveryPct}%"></div>
+                                </div>
+                            </div>
+                            
+                            <!-- Performance Badges -->
+                            <div class="d-flex justify-content-center gap-2">
+                                ${getPerformanceBadges(driver)}
+                            </div>
+                        </div>
+                        <div class="card-footer">
+                            <a href="/drivers/${driver.id}" class="btn btn-sm btn-outline-primary w-100">
+                                <i data-feather="eye"></i> View Details
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            scorecardsGrid.insertAdjacentHTML('beforeend', cardHtml);
+        });
+    }
+    
+    function getRankBadge(rank) {
+        if (rank === 1) {
+            return '<span class="badge bg-warning">🥇</span>';
+        } else if (rank === 2) {
+            return '<span class="badge bg-secondary">🥈</span>';
+        } else if (rank === 3) {
+            return '<span class="badge bg-info">🥉</span>';
+        } else {
+            return `<span class="badge bg-light text-dark">#${rank}</span>`;
+        }
+    }
+    
+    function getScoreColor(score) {
+        if (score >= 95) return 'bg-success';
+        if (score >= 85) return 'bg-primary';
+        if (score >= 75) return 'bg-warning';
+        return 'bg-danger';
+    }
+    
+    function getPerformanceClass(score) {
+        if (score >= 95) return 'border-success';
+        if (score >= 85) return 'border-primary';
+        if (score >= 75) return 'border-warning';
+        return 'border-danger';
+    }
+    
+    function getProgressColor(percentage) {
+        if (percentage >= 95) return 'bg-success';
+        if (percentage >= 85) return 'bg-primary';
+        if (percentage >= 75) return 'bg-warning';
+        return 'bg-danger';
+    }
+    
+    function getPerformanceBadges(driver) {
+        const badges = [];
+        const onTimePickupPct = driver.on_time_pickup_percentage || 0;
+        const onTimeDeliveryPct = driver.on_time_delivery_percentage || 0;
+        const loads = driver.loads_completed || 0;
+        
+        // Perfect performance badges
+        if (onTimePickupPct === 100 && onTimeDeliveryPct === 100) {
+            badges.push('<span class="badge bg-success">Perfect</span>');
+        }
+        
+        // High performance badges
+        if (onTimePickupPct >= 95) {
+            badges.push('<span class="badge bg-primary">Pickup Star</span>');
+        }
+        
+        if (onTimeDeliveryPct >= 95) {
+            badges.push('<span class="badge bg-primary">Delivery Star</span>');
+        }
+        
+        // Volume badges
+        if (loads >= 10) {
+            badges.push('<span class="badge bg-info">High Volume</span>');
+        }
+        
+        // Consistent performer
+        if (onTimePickupPct >= 90 && onTimeDeliveryPct >= 90) {
+            badges.push('<span class="badge bg-secondary">Consistent</span>');
+        }
+        
+        return badges.length > 0 ? badges.join(' ') : '<span class="badge bg-light text-muted">-</span>';
+    }
+    
+    function formatDateTime(dateTimeStr) {
+        if (!dateTimeStr) return 'N/A';
+        
+        const date = new Date(dateTimeStr);
+        return date.toLocaleDateString() + ' ' + date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    }
+</script>
+{% endblock %}

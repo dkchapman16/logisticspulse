@@ -384,69 +384,73 @@ def scorecards():
 @drivers_bp.route('/drivers/scorecards/data')
 def get_scorecards_data():
     """API endpoint to get driver scorecard data"""
-    # Get time range (default to last 30 days)
-    period = request.args.get('period', 'month')
+    period = request.args.get('period', 30, type=int)
     
-    today = datetime.utcnow().date()
-    
-    if period == 'week':
-        start_date = today - timedelta(days=7)
-    elif period == 'month':
-        start_date = today - timedelta(days=30)
-    elif period == 'quarter':
-        start_date = today - timedelta(days=90)
-    elif period == 'year':
-        start_date = today - timedelta(days=365)
-    else:
-        start_date = today - timedelta(days=30)  # Default to month
-    
-    # Get driver performance data for the period
-    driver_performance = db.session.query(
-        Driver.id,
-        Driver.name,
-        func.sum(DriverPerformance.loads_completed).label('total_loads'),
-        func.sum(DriverPerformance.on_time_pickups).label('on_time_pickups'),
-        func.sum(DriverPerformance.on_time_deliveries).label('on_time_deliveries'),
-        func.avg(DriverPerformance.average_delay_minutes).label('avg_delay')
-    ).join(
-        DriverPerformance, Driver.id == DriverPerformance.driver_id
-    ).filter(
-        DriverPerformance.date >= start_date,
-        Driver.status == 'active'
-    ).group_by(
-        Driver.id
-    ).all()
-    
-    # Calculate metrics and format response
-    scorecard_data = []
-    
-    for dp in driver_performance:
-        if dp.total_loads > 0:
-            pickup_percentage = (dp.on_time_pickups / dp.total_loads) * 100
-            delivery_percentage = (dp.on_time_deliveries / dp.total_loads) * 100
-        else:
-            pickup_percentage = 0
-            delivery_percentage = 0
+    try:
+        # Calculate date range
+        end_date = datetime.utcnow().date()
+        start_date = end_date - timedelta(days=period)
         
-        scorecard_data.append({
-            'driver_id': dp.id,
-            'name': dp.name,
-            'total_loads': dp.total_loads,
-            'on_time_pickup_percentage': round(pickup_percentage, 1),
-            'on_time_delivery_percentage': round(delivery_percentage, 1),
-            'average_delay_minutes': round(dp.avg_delay, 1) if dp.avg_delay else 0
-        })
-    
-    # Sort by on-time delivery percentage (descending)
-    scorecard_data.sort(key=lambda x: x['on_time_delivery_percentage'], reverse=True)
-    
-    # Add rank
-    for i, driver in enumerate(scorecard_data):
-        driver['rank'] = i + 1
-    
-    return jsonify({
-        'period': period,
-        'start_date': start_date.strftime('%Y-%m-%d'),
-        'end_date': today.strftime('%Y-%m-%d'),
-        'scorecards': scorecard_data
-    })
+        # Get all drivers with their performance data
+        drivers = db.session.query(Driver).all()
+        scorecard_data = []
+        
+        for driver in drivers:
+            # Get loads for this driver in the period
+            loads = db.session.query(Load).filter(
+                Load.driver_id == driver.id,
+                Load.scheduled_pickup_time >= start_date,
+                Load.scheduled_pickup_time <= end_date
+            ).all()
+            
+            if not loads:
+                continue  # Skip drivers with no loads in this period
+            
+            # Calculate performance metrics
+            total_loads = len(loads)
+            on_time_pickups = sum(1 for load in loads if load.pickup_on_time())
+            on_time_deliveries = sum(1 for load in loads if load.delivery_on_time())
+            
+            # Calculate average delay
+            total_delay_minutes = 0
+            delayed_loads = 0
+            
+            for load in loads:
+                if load.actual_pickup_arrival and load.scheduled_pickup_time:
+                    pickup_delay = (load.actual_pickup_arrival - load.scheduled_pickup_time).total_seconds() / 60
+                    if pickup_delay > 30:  # More than 30 minutes late
+                        total_delay_minutes += pickup_delay
+                        delayed_loads += 1
+                
+                if load.actual_delivery_arrival and load.scheduled_delivery_time:
+                    delivery_delay = (load.actual_delivery_arrival - load.scheduled_delivery_time).total_seconds() / 60
+                    if delivery_delay > 30:  # More than 30 minutes late
+                        total_delay_minutes += delivery_delay
+                        delayed_loads += 1
+            
+            avg_delay = total_delay_minutes / max(delayed_loads, 1) if delayed_loads > 0 else 0
+            
+            # Calculate percentages
+            on_time_pickup_pct = round((on_time_pickups / total_loads * 100), 1) if total_loads > 0 else 0
+            on_time_delivery_pct = round((on_time_deliveries / total_loads * 100), 1) if total_loads > 0 else 0
+            
+            scorecard_data.append({
+                'id': driver.id,
+                'name': driver.name,
+                'loads_completed': total_loads,
+                'on_time_pickup_percentage': on_time_pickup_pct,
+                'on_time_delivery_percentage': on_time_delivery_pct,
+                'average_delay_minutes': round(avg_delay, 1),
+                'overall_score': round((on_time_pickup_pct + on_time_delivery_pct) / 2, 1)
+            })
+        
+        # Sort by overall score (descending) then by loads completed
+        scorecard_data.sort(key=lambda x: (x['overall_score'], x['loads_completed']), reverse=True)
+        
+        return jsonify(scorecard_data)
+        
+    except Exception as e:
+        logger.error(f"Error getting scorecard data: {e}")
+        return jsonify({'error': 'Failed to load scorecard data'}), 500
+
+
