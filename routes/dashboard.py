@@ -211,6 +211,7 @@ def at_risk_loads():
             'id': load.id,
             'reference_number': load.reference_number,
             'driver_name': load.driver.name if load.driver else 'Unassigned',
+            'driver_id': load.driver.id if load.driver else None,
             'origin': f"{pickup_facility.city}, {pickup_facility.state}" if pickup_facility else "Unknown",
             'destination': f"{delivery_facility.city}, {delivery_facility.state}" if delivery_facility else "Unknown",
             'scheduled_delivery': load.scheduled_delivery_time.strftime('%Y-%m-%d %H:%M'),
