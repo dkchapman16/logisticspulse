@@ -68,9 +68,28 @@ def dashboard_summary():
         func.date(Load.actual_delivery_arrival) <= date_end
     ).count()
     
+    # Calculate overall on-time (both pickup AND delivery on time)
+    overall_on_time = base_query.filter(
+        func.date(Load.actual_pickup_arrival) >= date_start,
+        func.date(Load.actual_pickup_arrival) <= date_end,
+        func.date(Load.actual_delivery_arrival) >= date_start,
+        func.date(Load.actual_delivery_arrival) <= date_end,
+        Load.actual_pickup_arrival <= Load.scheduled_pickup_time,
+        Load.actual_delivery_arrival <= Load.scheduled_delivery_time
+    ).count()
+    
+    # Get total completed loads (both pickup and delivery completed)
+    total_completed = base_query.filter(
+        func.date(Load.actual_pickup_arrival) >= date_start,
+        func.date(Load.actual_pickup_arrival) <= date_end,
+        func.date(Load.actual_delivery_arrival) >= date_start,
+        func.date(Load.actual_delivery_arrival) <= date_end
+    ).count()
+    
     # Calculate percentages
     pickup_percentage = (on_time_pickups / total_pickups * 100) if total_pickups > 0 else 0
     delivery_percentage = (on_time_deliveries / total_deliveries * 100) if total_deliveries > 0 else 0
+    overall_percentage = (overall_on_time / total_completed * 100) if total_completed > 0 else 0
     
     # Get drivers with the best on-time performance using Load data directly
     if driver_id:
@@ -135,7 +154,8 @@ def dashboard_summary():
         'total_drivers': total_drivers,
         'on_time': {
             'pickup_percentage': round(pickup_percentage, 1),
-            'delivery_percentage': round(delivery_percentage, 1)
+            'delivery_percentage': round(delivery_percentage, 1),
+            'overall_percentage': round(overall_percentage, 1)
         },
         'top_drivers': top_drivers,
         'notifications': [

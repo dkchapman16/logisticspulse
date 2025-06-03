@@ -270,7 +270,12 @@ function loadDashboardSummary() {
                 }
             }
             
-            // Update on-time percentages with Tesla-style circular progress
+            // Update on-time data for toggle functionality
+            if (typeof window.updateOnTimeData === 'function') {
+                window.updateOnTimeData(data);
+            }
+            
+            // Legacy support - update old element if it exists (for backward compatibility)
             const onTimeDeliveryElement = document.getElementById('on-time-delivery-percentage');
             if (onTimeDeliveryElement) {
                 const percentValue = Math.ceil(data.on_time.delivery_percentage);

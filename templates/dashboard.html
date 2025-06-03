@@ -63,7 +63,7 @@
         <!-- On-Time Percentage Metric -->
         <div class="dashboard-card">
             <div class="dashboard-card-header d-flex justify-content-between align-items-center">
-                <span>ON-TIME RATE</span>
+                <span id="on-time-rate-title">ON-TIME RATE</span>
                 <div class="d-flex align-items-center gap-2">
                     <button type="button" class="info-btn" data-bs-toggle="modal" data-bs-target="#info-modal" 
                             data-title="On-Time Rate Calculation" 
@@ -74,8 +74,21 @@
                 </div>
             </div>
             <div class="dashboard-card-body">
-                <div class="circular-metric" style="--percent: 87;">
-                    <div class="circular-metric-value"><span id="on-time-delivery-percentage">87</span>%</div>
+                <!-- Toggle Buttons -->
+                <div class="btn-group w-100 mb-3" role="group" aria-label="On-time rate type">
+                    <button type="button" class="btn btn-outline-primary btn-sm on-time-toggle" data-type="delivery" id="delivery-toggle">
+                        Delivery
+                    </button>
+                    <button type="button" class="btn btn-outline-primary btn-sm on-time-toggle" data-type="pickup" id="pickup-toggle">
+                        Pickup
+                    </button>
+                    <button type="button" class="btn btn-primary btn-sm on-time-toggle active" data-type="overall" id="overall-toggle">
+                        Overall
+                    </button>
+                </div>
+                
+                <div class="circular-metric" style="--percent: 87;" id="on-time-circular-metric">
+                    <div class="circular-metric-value"><span id="on-time-percentage">87</span>%</div>
                     <svg viewBox="0 0 160 160" width="160" height="160">
                         <circle r="70" cx="80" cy="80" class="bg-circle" />
                         <circle r="70" cx="80" cy="80" class="progress-circle" />
@@ -454,6 +467,72 @@ document.addEventListener('DOMContentLoaded', function() {
             infoModalBody.textContent = content;
         });
     });
+    
+    // Handle on-time rate toggle buttons
+    const onTimeToggles = document.querySelectorAll('.on-time-toggle');
+    const onTimePercentageElement = document.getElementById('on-time-percentage');
+    const onTimeCircularMetric = document.getElementById('on-time-circular-metric');
+    const onTimeRateTitle = document.getElementById('on-time-rate-title');
+    
+    // Store the data for different metrics
+    let onTimeData = {
+        delivery: 0,
+        pickup: 0,
+        overall: 0
+    };
+    
+    onTimeToggles.forEach(button => {
+        button.addEventListener('click', function() {
+            // Remove active class from all buttons
+            onTimeToggles.forEach(btn => {
+                btn.classList.remove('btn-primary', 'active');
+                btn.classList.add('btn-outline-primary');
+            });
+            
+            // Add active class to clicked button
+            this.classList.remove('btn-outline-primary');
+            this.classList.add('btn-primary', 'active');
+            
+            const type = this.getAttribute('data-type');
+            updateOnTimeDisplay(type);
+        });
+    });
+    
+    function updateOnTimeDisplay(type) {
+        let percentage = onTimeData[type];
+        let title = '';
+        
+        switch(type) {
+            case 'delivery':
+                title = 'DELIVERY RATE';
+                break;
+            case 'pickup':
+                title = 'PICKUP RATE';
+                break;
+            case 'overall':
+                title = 'ON-TIME RATE';
+                break;
+        }
+        
+        onTimeRateTitle.textContent = title;
+        onTimePercentageElement.textContent = Math.round(percentage);
+        onTimeCircularMetric.style.setProperty('--percent', percentage);
+    }
+    
+    // Function to update on-time data from dashboard data
+    window.updateOnTimeData = function(dashboardData) {
+        if (dashboardData && dashboardData.on_time) {
+            onTimeData.delivery = dashboardData.on_time.delivery_percentage || 0;
+            onTimeData.pickup = dashboardData.on_time.pickup_percentage || 0;
+            onTimeData.overall = dashboardData.on_time.overall_percentage || 0;
+            
+            // Update display based on current active toggle
+            const activeToggle = document.querySelector('.on-time-toggle.active');
+            if (activeToggle) {
+                updateOnTimeDisplay(activeToggle.getAttribute('data-type'));
+            }
+        }
+    };
 });
 </script>
 <script>
