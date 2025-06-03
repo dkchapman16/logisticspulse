@@ -239,11 +239,14 @@ function loadDashboardSummary() {
             // Show/hide company stats based on view mode
             const companyStatsElement = document.getElementById('company-stats');
             if (companyStatsElement) {
+                console.log('View mode check:', currentViewMode, 'Driver ID:', selectedDriverId);
                 if (currentViewMode === 'driver' && selectedDriverId) {
                     // Hide company stats in individual driver view
+                    console.log('Hiding company stats for individual driver view');
                     companyStatsElement.style.display = 'none';
                 } else {
                     // Show company stats in company view
+                    console.log('Showing company stats for company view');
                     companyStatsElement.style.display = 'flex';
                     
                     // Update driver count and top driver info if available
