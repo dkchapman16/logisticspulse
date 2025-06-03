@@ -576,28 +576,25 @@
         // Update today's metrics
         document.getElementById('today-loads').textContent = metrics.today.loads;
         document.getElementById('today-pickup-pct').textContent = metrics.today.on_time_percentage + '%';
-        document.getElementById('today-delivery-pct').textContent = metrics.today.on_time_percentage + '%';
+        document.getElementById('today-delivery-pct').textContent = metrics.today.loads;
         document.getElementById('today-delay').textContent = metrics.today.avg_delay;
         
         // Update weekly metrics
         document.getElementById('weekly-loads').textContent = metrics.weekly.loads;
         document.getElementById('weekly-pickup-pct').textContent = metrics.weekly.on_time_percentage + '%';
-        document.getElementById('weekly-delivery-pct').textContent = metrics.weekly.on_time_percentage + '%';
+        document.getElementById('weekly-delivery-pct').textContent = metrics.weekly.loads;
         document.getElementById('weekly-delay').textContent = metrics.weekly.avg_delay;
         
         // Update monthly metrics
         document.getElementById('monthly-loads').textContent = metrics.monthly.loads;
         document.getElementById('monthly-pickup-pct').textContent = metrics.monthly.on_time_percentage + '%';
-        document.getElementById('monthly-delivery-pct').textContent = metrics.monthly.on_time_percentage + '%';
+        document.getElementById('monthly-delivery-pct').textContent = metrics.monthly.loads;
         document.getElementById('monthly-delay').textContent = metrics.monthly.avg_delay;
         
         // Apply color classes based on percentages
         applyPercentageColors('today-pickup-pct', metrics.today.on_time_percentage);
-        applyPercentageColors('today-delivery-pct', metrics.today.on_time_percentage);
         applyPercentageColors('weekly-pickup-pct', metrics.weekly.on_time_percentage);
-        applyPercentageColors('weekly-delivery-pct', metrics.weekly.on_time_percentage);
         applyPercentageColors('monthly-pickup-pct', metrics.monthly.on_time_percentage);
-        applyPercentageColors('monthly-delivery-pct', metrics.monthly.on_time_percentage);
         
         // If monthly metrics are very good (>=95%), show celebration
         if (metrics.monthly.on_time_percentage >= 95 && metrics.monthly.loads >= 10) {
