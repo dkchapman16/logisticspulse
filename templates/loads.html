@@ -336,19 +336,19 @@
                     
                     row.innerHTML = `
                         <td>
-                            <a href="/loads/${load.id}" class="text-decoration-none">
-                                ${load.status.toUpperCase()} #${load.reference_number} - ${load.client || 'No Customer'}
+                            <a href="/loads/${load.id}" class="text-decoration-none small">
+                                ${load.reference_number}
                             </a>
                         </td>
-                        <td>${statusBadge}</td>
-                        <td>${load.driver}</td>
-                        <td>${load.pickup}</td>
-                        <td>${formatDateTime(load.scheduled_pickup)}</td>
-                        <td>${load.delivery}</td>
-                        <td>${formatDateTime(load.scheduled_delivery)}</td>
-                        <td>${formatDateTime(load.current_eta)}</td>
-                        <td>${onTimeBadge}</td>
-                        <td>
+                        <td class="small">${statusBadge}</td>
+                        <td class="small">${load.driver}</td>
+                        <td class="small">${load.pickup}</td>
+                        <td class="small">${formatDateTime(load.scheduled_pickup)}</td>
+                        <td class="small">${load.delivery}</td>
+                        <td class="small">${formatDateTime(load.scheduled_delivery)}</td>
+                        <td class="small">${formatDateTime(load.current_eta)}</td>
+                        <td class="small">${onTimeBadge}</td>
+                        <td class="small">
                             <a href="/loads/${load.id}" class="btn btn-sm btn-outline-primary">
                                 <i data-feather="eye"></i>
                             </a>
