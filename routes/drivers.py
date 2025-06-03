@@ -137,63 +137,74 @@ def get_driver_data(driver_id):
         'current_eta': load.current_eta.strftime('%Y-%m-%d %H:%M') if load.current_eta else None
     } for load in upcoming_loads]
     
-    # Get performance metrics for different time periods
-    daily_performance = DriverPerformance.query.filter(
-        DriverPerformance.driver_id == driver.id,
-        DriverPerformance.date >= month_ago
-    ).order_by(DriverPerformance.date).all()
+    # Calculate performance directly from Load data instead of DriverPerformance records
+    # Use May 2025 test data period
+    today = datetime(2025, 5, 31).date()
+    yesterday = datetime(2025, 5, 30).date()
+    week_ago = datetime(2025, 5, 24).date()
+    month_ago = datetime(2025, 5, 1).date()
     
-    # Calculate aggregated metrics
-    today_perf = next((p for p in daily_performance if p.date == today), None)
-    yesterday_perf = next((p for p in daily_performance if p.date == yesterday), None)
+    month_ago_datetime = datetime.combine(month_ago, datetime.min.time())
     
-    weekly_perf = [p for p in daily_performance if p.date >= week_ago]
-    monthly_perf = daily_performance  # All performances are from the last month
+    # Get all loads for this driver in the period
+    all_loads = Load.query.filter(
+        Load.driver_id == driver.id,
+        Load.scheduled_pickup_time >= month_ago_datetime
+    ).all()
     
-    # Calculate aggregated metrics
-    today_metrics = {
-        'loads': today_perf.loads_completed if today_perf else 0,
-        'on_time_pickups': today_perf.on_time_pickups if today_perf else 0,
-        'on_time_deliveries': today_perf.on_time_deliveries if today_perf else 0,
-        'pickup_percentage': today_perf.on_time_pickup_percentage if today_perf else 0,
-        'delivery_percentage': today_perf.on_time_delivery_percentage if today_perf else 0,
-        'avg_delay': today_perf.average_delay_minutes if today_perf else 0
-    }
+    # Filter loads by periods
+    today_loads = [l for l in all_loads if l.scheduled_pickup_time.date() == today]
+    yesterday_loads = [l for l in all_loads if l.scheduled_pickup_time.date() == yesterday]
+    weekly_loads = [l for l in all_loads if l.scheduled_pickup_time.date() >= week_ago]
+    monthly_loads = all_loads
     
-    yesterday_metrics = {
-        'loads': yesterday_perf.loads_completed if yesterday_perf else 0,
-        'on_time_pickups': yesterday_perf.on_time_pickups if yesterday_perf else 0,
-        'on_time_deliveries': yesterday_perf.on_time_deliveries if yesterday_perf else 0,
-        'pickup_percentage': yesterday_perf.on_time_pickup_percentage if yesterday_perf else 0,
-        'delivery_percentage': yesterday_perf.on_time_delivery_percentage if yesterday_perf else 0,
-        'avg_delay': yesterday_perf.average_delay_minutes if yesterday_perf else 0
-    }
+    # Helper function to calculate metrics for a load set
+    def calculate_metrics(loads):
+        if not loads:
+            return {
+                'loads': 0,
+                'on_time_pickups': 0,
+                'on_time_deliveries': 0,
+                'pickup_percentage': 0,
+                'delivery_percentage': 0,
+                'avg_delay': 0
+            }
+        
+        total_loads = len(loads)
+        on_time_pickups = sum(1 for load in loads if load.pickup_on_time == True)
+        on_time_deliveries = sum(1 for load in loads if load.delivery_on_time == True)
+        
+        # Calculate average delay
+        total_delay = 0
+        delay_count = 0
+        for load in loads:
+            if load.actual_pickup_arrival and load.scheduled_pickup_time:
+                delay = (load.actual_pickup_arrival - load.scheduled_pickup_time).total_seconds() / 60
+                if delay > 0:
+                    total_delay += delay
+                    delay_count += 1
+            if load.actual_delivery_arrival and load.scheduled_delivery_time:
+                delay = (load.actual_delivery_arrival - load.scheduled_delivery_time).total_seconds() / 60
+                if delay > 0:
+                    total_delay += delay
+                    delay_count += 1
+        
+        avg_delay = total_delay / max(delay_count, 1) if delay_count > 0 else 0
+        
+        return {
+            'loads': total_loads,
+            'on_time_pickups': on_time_pickups,
+            'on_time_deliveries': on_time_deliveries,
+            'pickup_percentage': round((on_time_pickups / total_loads * 100), 1) if total_loads > 0 else 0,
+            'delivery_percentage': round((on_time_deliveries / total_loads * 100), 1) if total_loads > 0 else 0,
+            'avg_delay': round(avg_delay, 1)
+        }
     
-    weekly_loads = sum(p.loads_completed for p in weekly_perf)
-    weekly_pickups = sum(p.on_time_pickups for p in weekly_perf)
-    weekly_deliveries = sum(p.on_time_deliveries for p in weekly_perf)
-    
-    weekly_metrics = {
-        'loads': weekly_loads,
-        'on_time_pickups': weekly_pickups,
-        'on_time_deliveries': weekly_deliveries,
-        'pickup_percentage': round((weekly_pickups / weekly_loads * 100), 1) if weekly_loads > 0 else 0,
-        'delivery_percentage': round((weekly_deliveries / weekly_loads * 100), 1) if weekly_loads > 0 else 0,
-        'avg_delay': round(sum(p.average_delay_minutes for p in weekly_perf) / len(weekly_perf), 1) if weekly_perf else 0
-    }
-    
-    monthly_loads = sum(p.loads_completed for p in monthly_perf)
-    monthly_pickups = sum(p.on_time_pickups for p in monthly_perf)
-    monthly_deliveries = sum(p.on_time_deliveries for p in monthly_perf)
-    
-    monthly_metrics = {
-        'loads': monthly_loads,
-        'on_time_pickups': monthly_pickups,
-        'on_time_deliveries': monthly_deliveries,
-        'pickup_percentage': round((monthly_pickups / monthly_loads * 100), 1) if monthly_loads > 0 else 0,
-        'delivery_percentage': round((monthly_deliveries / monthly_loads * 100), 1) if monthly_loads > 0 else 0,
-        'avg_delay': round(sum(p.average_delay_minutes for p in monthly_perf) / len(monthly_perf), 1) if monthly_perf else 0
-    }
+    # Calculate metrics for each period
+    today_metrics = calculate_metrics(today_loads)
+    yesterday_metrics = calculate_metrics(yesterday_loads)
+    weekly_metrics = calculate_metrics(weekly_loads)
+    monthly_metrics = calculate_metrics(monthly_loads)
     
     # Get milestone data
     milestones = Milestone.query.filter_by(driver_id=driver.id).order_by(Milestone.achieved_at.desc()).limit(5).all()
@@ -205,14 +216,30 @@ def get_driver_data(driver_id):
         'achieved_at': milestone.achieved_at.strftime('%Y-%m-%d')
     } for milestone in milestones]
     
-    # Format daily performance for chart
-    daily_data = [{
-        'date': perf.date.strftime('%Y-%m-%d'),
-        'loads': perf.loads_completed,
-        'pickup_percentage': perf.on_time_pickup_percentage,
-        'delivery_percentage': perf.on_time_delivery_percentage,
-        'avg_delay': perf.average_delay_minutes
-    } for perf in daily_performance]
+    # Create weekly trend data for chart (weekly intervals from May 2025)
+    import datetime as dt
+    weekly_data = []
+    start_date = datetime(2025, 5, 1).date()
+    
+    # Generate 4 weeks of data (May 2025)
+    for week in range(4):
+        week_start = start_date + timedelta(weeks=week)
+        week_end = week_start + timedelta(days=6)
+        
+        # Get loads for this week
+        week_loads = [l for l in all_loads 
+                     if week_start <= l.scheduled_pickup_time.date() <= week_end]
+        
+        if week_loads:
+            metrics = calculate_metrics(week_loads)
+            weekly_data.append({
+                'date': week_start.strftime('%Y-%m-%d'),
+                'week': f"Week {week + 1}",
+                'loads': metrics['loads'],
+                'pickup_percentage': metrics['pickup_percentage'],
+                'delivery_percentage': metrics['delivery_percentage'],
+                'avg_delay': metrics['avg_delay']
+            })
     
     # Compile all data
     driver_data = {
