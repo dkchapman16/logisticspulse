@@ -390,6 +390,11 @@ def create_from_ai():
             if data.get('driver'):
                 driver = Driver.query.filter_by(name=data['driver']).first()
             
+            # Find vehicle if selected
+            vehicle = None
+            if data.get('vehicle'):
+                vehicle = Vehicle.query.get(data['vehicle'])
+            
             # Create new load
             new_load = Load(
                 reference_number=data['reference_number'],
@@ -399,6 +404,7 @@ def create_from_ai():
                 delivery_facility_id=delivery_facility.id,
                 scheduled_delivery_time=scheduled_delivery,
                 driver_id=driver.id if driver else None,
+                vehicle_id=vehicle.id if vehicle else None,
                 status='scheduled'
             )
             
@@ -422,12 +428,14 @@ def create_from_ai():
         flash('No extracted data found. Please upload a PDF first.', 'warning')
         return redirect(url_for('loads.index'))
     
-    # Get available drivers (fallback to sample data if API fails)
+    # Get available drivers and vehicles
     drivers = ["Sydney Chapman", "Bryan Chapman"]
+    vehicles = Vehicle.query.all()
     
     return render_template('create_load_from_ai.html', 
                           data=extracted_data, 
-                          drivers=drivers)
+                          drivers=drivers,
+                          vehicles=vehicles)
 
 @loads_bp.route('/loads/<int:load_id>/update-location', methods=['POST'])
 def update_location(load_id):

@@ -46,6 +46,16 @@
                                     {% endfor %}
                                 </select>
                             </div>
+
+                            <div class="mb-3">
+                                <label for="vehicle" class="form-label">Vehicle</label>
+                                <select class="form-select" id="vehicle" name="vehicle">
+                                    <option value="">Select Vehicle (Optional)</option>
+                                    {% for vehicle in vehicles %}
+                                        <option value="{{ vehicle.id }}">{{ vehicle.make }} {{ vehicle.model }} - {{ vehicle.license_plate }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
                         </div>
                     </div>
                 </div>
