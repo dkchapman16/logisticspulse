@@ -267,11 +267,7 @@ function loadDashboardSummary() {
                 showSlotMachineEffect(lateLoadsElement, data.late_deliveries);
             }
             
-            // Update total deliveries count
-            const totalDeliveriesElement = document.getElementById('active-loads-count');
-            if (totalDeliveriesElement && data.total_deliveries !== undefined) {
-                showSlotMachineEffect(totalDeliveriesElement, data.total_deliveries);
-            }
+
             
             // Update top drivers list
             const topDriversList = document.getElementById('top-drivers-list');
