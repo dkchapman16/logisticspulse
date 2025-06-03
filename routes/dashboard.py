@@ -185,16 +185,23 @@ def at_risk_loads():
     for load in filtered_loads[:10]:  # Limit to 10 most urgent
         time_until_delivery = (load.scheduled_delivery_time - current_time).total_seconds() / 60  # minutes
         
-        # Determine risk level
-        if time_until_delivery < 0:
-            risk_label = f"Delayed {abs(int(time_until_delivery))}m"
-            risk_class = "danger"
-        elif time_until_delivery < 60:
-            risk_label = f"At Risk {int(time_until_delivery)}m"
-            risk_class = "warning"
+        # Determine risk level and format time
+        abs_minutes = abs(int(time_until_delivery))
+        if abs_minutes >= 60:
+            hours = abs_minutes // 60
+            minutes = abs_minutes % 60
+            if minutes > 0:
+                time_str = f"{hours}h {minutes}m"
+            else:
+                time_str = f"{hours}h"
         else:
-            hours = int(time_until_delivery / 60)
-            risk_label = f"At Risk {hours}h"
+            time_str = f"{abs_minutes}m"
+        
+        if time_until_delivery < 0:
+            risk_label = f"Delayed {time_str}"
+            risk_class = "danger"
+        else:
+            risk_label = f"At Risk {time_str}"
             risk_class = "warning"
         
         pickup_facility = load.pickup_facility
