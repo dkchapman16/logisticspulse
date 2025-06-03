@@ -78,13 +78,13 @@
                             <div class="mb-3">
                                 <label for="delivery_facility" class="form-label">Delivery Facility</label>
                                 <input type="text" class="form-control" id="delivery_facility" name="delivery_facility" 
-                                       value="{{ data.delivery.facility_name if data and data.delivery else '' }}" readonly>
+                                       value="{{ data['delivery']['facility_name'] if data and data.get('delivery') else '' }}" readonly>
                             </div>
 
                             <div class="mb-3">
                                 <label for="scheduled_delivery_time" class="form-label">Scheduled Delivery Time</label>
                                 <input type="datetime-local" class="form-control" id="scheduled_delivery_time" name="scheduled_delivery_time" 
-                                       value="{{ data.delivery.scheduled_time if data and data.delivery else '' }}">
+                                       value="{{ data['delivery']['scheduled_time'] if data and data.get('delivery') else '' }}">
                             </div>
                         </div>
                     </div>
