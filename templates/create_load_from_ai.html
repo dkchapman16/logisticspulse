@@ -1,0 +1,109 @@
+{% extends "layout.html" %}
+
+{% block title %}Create Load (From AI){% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2>📄 Extracted Data from RateCon</h2>
+                <a href="{{ url_for('loads.index') }}" class="btn btn-secondary">Back to Loads</a>
+            </div>
+
+            {% if data %}
+                <div class="alert alert-success">
+                    <i data-feather="check-circle"></i>
+                    Data successfully extracted from the PDF. You can now create a new load with this information.
+                </div>
+            {% endif %}
+
+            <form method="post" action="/create-load" class="row">
+                <div class="col-md-6">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5>Load Information</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="mb-3">
+                                <label for="reference_number" class="form-label">Reference Number</label>
+                                <input type="text" class="form-control" id="reference_number" name="reference_number" 
+                                       value="{{ data['reference_number'] }}" readonly>
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="customer" class="form-label">Customer</label>
+                                <input type="text" class="form-control" id="customer" name="customer" 
+                                       value="{{ data['client']['name'] }}" readonly>
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="driver" class="form-label">Driver</label>
+                                <select class="form-select" id="driver" name="driver" required>
+                                    <option disabled selected>Select Driver</option>
+                                    {% for driver in drivers %}
+                                        <option value="{{ driver }}">{{ driver }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5>Pickup Information</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="mb-3">
+                                <label for="pickup_facility" class="form-label">Pickup Facility</label>
+                                <input type="text" class="form-control" id="pickup_facility" name="pickup_facility" 
+                                       value="{{ data['pickup']['facility_name'] }}" readonly>
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="scheduled_pickup_time" class="form-label">Scheduled Pickup Time</label>
+                                <input type="datetime-local" class="form-control" id="scheduled_pickup_time" name="scheduled_pickup_time" 
+                                       value="{{ data['pickup']['scheduled_time'] }}">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card mt-3">
+                        <div class="card-header">
+                            <h5>Delivery Information</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="mb-3">
+                                <label for="delivery_facility" class="form-label">Delivery Facility</label>
+                                <input type="text" class="form-control" id="delivery_facility" name="delivery_facility" 
+                                       value="{{ data['delivery']['facility_name'] }}" readonly>
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="scheduled_delivery_time" class="form-label">Scheduled Delivery Time</label>
+                                <input type="datetime-local" class="form-control" id="scheduled_delivery_time" name="scheduled_delivery_time" 
+                                       value="{{ data['delivery']['scheduled_time'] }}">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-12 mt-4">
+                    <div class="d-flex justify-content-end gap-2">
+                        <a href="{{ url_for('loads.index') }}" class="btn btn-secondary">
+                            <i data-feather="x"></i>
+                            Cancel
+                        </a>
+                        <button type="submit" class="btn btn-primary">
+                            <i data-feather="package"></i>
+                            Create Load
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

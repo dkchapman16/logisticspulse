@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Create Load (From AI)</title>
+</head>
+<body>
+    <div class="form-container">
+        <h2>📄 Extracted Data from RateCon</h2>
+        <p class="success-msg">✅ Data successfully extracted from the PDF. You can now create a new load with this information.</p>
+
+        <form method="post" action="/create-load">
+            <div class="form-group">
+                <label>Reference Number</label>
+                <input type="text" name="reference_number" value="{{ data['reference_number'] }}" readonly>
+            </div>
+
+            <div class="form-group">
+                <label>Customer</label>
+                <input type="text" name="customer" value="{{ data['client']['name'] }}" readonly>
+            </div>
+
+            <div class="form-group">
+                <label>Driver</label>
+                <select name="driver" required>
+                    <option disabled selected>Select Driver</option>
+                    {% for driver in drivers %}
+                        <option value="{{ driver }}">{{ driver }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label>Pickup Facility</label>
+                <input type="text" name="pickup_facility" value="{{ data['pickup']['facility_name'] }}" readonly>
+            </div>
+
+            <div class="form-group">
+                <label>Scheduled Pickup Time</label>
+                <input type="datetime-local" name="scheduled_pickup_time" value="{{ data['pickup']['scheduled_time'] }}">
+            </div>
+
+            <div class="form-group">
+                <label>Delivery Facility</label>
+                <input type="text" name="delivery_facility" value="{{ data['delivery']['facility_name'] }}" readonly>
+            </div>
+
+            <div class="form-group">
+                <label>Scheduled Delivery Time</label>
+                <input type="datetime-local" name="scheduled_delivery_time" value="{{ data['delivery']['scheduled_time'] }}">
+            </div>
+
+            <div class="button-group">
+                <button type="submit" class="btn-primary">📦 Create Load</button>
+                <a href="/" class="btn-secondary">✖ Cancel</a>
+            </div>
+        </form>
+    </div>
+</body>
+</html>
