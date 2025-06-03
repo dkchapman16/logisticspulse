@@ -18,7 +18,7 @@
                 </div>
             {% endif %}
 
-            <form method="post" action="/create-load" class="row">
+            <form method="post" action="{{ url_for('loads.create_from_ai') }}" class="row">
                 <div class="col-md-6">
                     <div class="card">
                         <div class="card-header">
@@ -109,8 +109,8 @@
                             Cancel
                         </a>
                         <button type="submit" class="btn btn-primary">
-                            <i data-feather="package"></i>
-                            Create Load
+                            <i data-feather="check"></i>
+                            Submit
                         </button>
                     </div>
                 </div>

@@ -326,12 +326,85 @@ def upload_ratecon():
             'error': f'Error processing PDF: {str(e)}'
         }), 500
 
-@loads_bp.route('/loads/create-from-ai')
+@loads_bp.route('/loads/create-from-ai', methods=['GET', 'POST'])
 def create_from_ai():
-    """Display form with AI-extracted data"""
+    """Display form with AI-extracted data or process the submission"""
     from flask import session
     
-    # Get extracted data from session
+    if request.method == 'POST':
+        try:
+            data = request.form
+            
+            # Create or find client
+            client_name = data.get('customer')
+            client = Client.query.filter_by(name=client_name).first()
+            if not client:
+                client = Client(name=client_name)
+                db.session.add(client)
+                db.session.flush()  # Get the ID
+            
+            # Create or find pickup facility
+            pickup_name = data.get('pickup_facility')
+            pickup_address = data.get('pickup_address')
+            pickup_facility = Facility.query.filter_by(name=pickup_name).first()
+            if not pickup_facility:
+                pickup_facility = Facility(
+                    name=pickup_name,
+                    address=pickup_address,
+                    client_id=client.id
+                )
+                db.session.add(pickup_facility)
+                db.session.flush()
+            
+            # Create or find delivery facility
+            delivery_name = data.get('delivery_facility')
+            delivery_address = data.get('delivery_address')
+            delivery_facility = Facility.query.filter_by(name=delivery_name).first()
+            if not delivery_facility:
+                delivery_facility = Facility(
+                    name=delivery_name,
+                    address=delivery_address,
+                    client_id=client.id
+                )
+                db.session.add(delivery_facility)
+                db.session.flush()
+            
+            # Parse datetime fields
+            scheduled_pickup = datetime.strptime(data['scheduled_pickup_time'], '%Y-%m-%dT%H:%M')
+            scheduled_delivery = datetime.strptime(data['scheduled_delivery_time'], '%Y-%m-%dT%H:%M')
+            
+            # Find driver if selected
+            driver = None
+            if data.get('driver'):
+                driver = Driver.query.filter_by(name=data['driver']).first()
+            
+            # Create new load
+            new_load = Load(
+                reference_number=data['reference_number'],
+                client_id=client.id,
+                pickup_facility_id=pickup_facility.id,
+                scheduled_pickup_time=scheduled_pickup,
+                delivery_facility_id=delivery_facility.id,
+                scheduled_delivery_time=scheduled_delivery,
+                driver_id=driver.id if driver else None,
+                status='scheduled'
+            )
+            
+            db.session.add(new_load)
+            db.session.commit()
+            
+            # Clear extracted data from session
+            session.pop('extracted_data', None)
+            
+            flash('Load created successfully!', 'success')
+            return redirect(url_for('loads.index'))
+            
+        except Exception as e:
+            db.session.rollback()
+            flash(f'Error creating load: {str(e)}', 'danger')
+            return redirect(url_for('loads.create_from_ai'))
+    
+    # GET request - show the form
     extracted_data = session.get('extracted_data')
     if not extracted_data:
         flash('No extracted data found. Please upload a PDF first.', 'warning')
