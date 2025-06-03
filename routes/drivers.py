@@ -431,13 +431,13 @@ def get_scorecards_data():
             for load in loads:
                 if load.actual_pickup_arrival and load.scheduled_pickup_time:
                     pickup_delay = (load.actual_pickup_arrival - load.scheduled_pickup_time).total_seconds() / 60
-                    if pickup_delay > 30:  # More than 30 minutes late
+                    if pickup_delay > 0:  # Any delay is counted
                         total_delay_minutes += pickup_delay
                         delayed_loads += 1
                 
                 if load.actual_delivery_arrival and load.scheduled_delivery_time:
                     delivery_delay = (load.actual_delivery_arrival - load.scheduled_delivery_time).total_seconds() / 60
-                    if delivery_delay > 30:  # More than 30 minutes late
+                    if delivery_delay > 0:  # Any delay is counted
                         total_delay_minutes += delivery_delay
                         delayed_loads += 1
             

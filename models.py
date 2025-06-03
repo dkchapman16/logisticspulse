@@ -111,17 +111,15 @@ class Load(db.Model):
     def pickup_on_time(self):
         if not self.actual_pickup_arrival or not self.scheduled_pickup_time:
             return None
-        # Industry standard: 30-minute grace period for on-time pickup
-        grace_period = timedelta(minutes=30)
-        return self.actual_pickup_arrival <= self.scheduled_pickup_time + grace_period
+        # Strict on-time: must be on scheduled time or earlier
+        return self.actual_pickup_arrival <= self.scheduled_pickup_time
     
     @property
     def delivery_on_time(self):
         if not self.actual_delivery_arrival or not self.scheduled_delivery_time:
             return None
-        # Industry standard: 30-minute grace period for on-time delivery
-        grace_period = timedelta(minutes=30)
-        return self.actual_delivery_arrival <= self.scheduled_delivery_time + grace_period
+        # Strict on-time: must be on scheduled time or earlier
+        return self.actual_delivery_arrival <= self.scheduled_delivery_time
 
 class LocationUpdate(db.Model):
     id = db.Column(db.Integer, primary_key=True)
