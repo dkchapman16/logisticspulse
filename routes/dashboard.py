@@ -1,6 +1,7 @@
 from flask import Blueprint, render_template, jsonify
 from datetime import datetime, timedelta
 from sqlalchemy import func, case
+from sqlalchemy.sql import or_
 from models import Load, Driver, DriverPerformance, Notification
 from app import db
 
@@ -140,8 +141,20 @@ def dashboard_summary():
         Notification.read == False
     ).order_by(Notification.created_at.desc()).limit(5).all()
     
-    # Calculate late shipments and total deliveries
+    # Calculate late shipments for all three types
     late_deliveries = total_deliveries - on_time_deliveries
+    late_pickups = total_pickups - on_time_pickups
+    # Overall late shipments: loads where either pickup OR delivery was late
+    late_overall = base_query.filter(
+        func.date(Load.actual_pickup_arrival) >= date_start,
+        func.date(Load.actual_pickup_arrival) <= date_end,
+        func.date(Load.actual_delivery_arrival) >= date_start,
+        func.date(Load.actual_delivery_arrival) <= date_end,
+        or_(
+            Load.actual_pickup_arrival > Load.scheduled_pickup_time,
+            Load.actual_delivery_arrival > Load.scheduled_delivery_time
+        )
+    ).count()
     
     # Get total driver count for company view
     total_drivers = Driver.query.filter_by(status='active').count()
@@ -156,6 +169,11 @@ def dashboard_summary():
             'pickup_percentage': round(pickup_percentage, 1),
             'delivery_percentage': round(delivery_percentage, 1),
             'overall_percentage': round(overall_percentage, 1)
+        },
+        'late_shipments': {
+            'delivery_count': late_deliveries,
+            'pickup_count': late_pickups,
+            'overall_count': late_overall
         },
         'top_drivers': top_drivers,
         'notifications': [
