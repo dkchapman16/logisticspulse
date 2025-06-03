@@ -178,7 +178,7 @@
                                 ${overallScore}%
                             </div>
                         </div>
-                        <div class="card-body">
+                        <div class="card-body d-flex flex-column">
                             <!-- Performance Metrics -->
                             <div class="row mb-3">
                                 <div class="col-6">
@@ -217,14 +217,16 @@
                             </div>
                             
                             <!-- Performance Badges -->
-                            <div class="d-flex justify-content-center gap-2">
+                            <div class="d-flex justify-content-center gap-2 mb-3">
                                 ${getPerformanceBadges(driver)}
                             </div>
-                        </div>
-                        <div class="card-footer">
-                            <a href="/drivers/${driver.id}" class="btn btn-sm btn-outline-primary w-100">
-                                <i data-feather="eye"></i> View Details
-                            </a>
+                            
+                            <!-- View Details Button -->
+                            <div class="mt-auto">
+                                <a href="/drivers/${driver.id}" class="btn btn-sm btn-outline-primary w-100">
+                                    <i data-feather="eye"></i> View Details
+                                </a>
+                            </div>
                         </div>
                     </div>
                 </div>
