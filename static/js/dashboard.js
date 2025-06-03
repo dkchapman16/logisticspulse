@@ -236,6 +236,31 @@ function loadDashboardSummary() {
                 showSlotMachineEffect(totalDeliveriesElement, data.total_deliveries);
             }
             
+            // Show/hide company stats based on view mode
+            const companyStatsElement = document.getElementById('company-stats');
+            if (companyStatsElement) {
+                if (currentViewMode === 'driver' && selectedDriverId) {
+                    // Hide company stats in individual driver view
+                    companyStatsElement.style.display = 'none';
+                } else {
+                    // Show company stats in company view
+                    companyStatsElement.style.display = 'flex';
+                    
+                    // Update driver count and top driver info if available
+                    const totalDriversElement = document.getElementById('total-drivers-count');
+                    const topDriverElement = document.getElementById('top-driver-info');
+                    
+                    if (totalDriversElement && data.total_drivers !== undefined) {
+                        totalDriversElement.textContent = data.total_drivers;
+                    }
+                    
+                    if (topDriverElement && data.top_drivers && data.top_drivers.length > 0) {
+                        const topDriver = data.top_drivers[0];
+                        topDriverElement.textContent = `${topDriver.name} (${Math.round(topDriver.on_time_percentage)}%)`;
+                    }
+                }
+            }
+            
             // Update on-time percentages with Tesla-style circular progress
             const onTimeDeliveryElement = document.getElementById('on-time-delivery-percentage');
             if (onTimeDeliveryElement) {

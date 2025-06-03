@@ -124,11 +124,15 @@ def dashboard_summary():
     # Calculate late shipments and total deliveries
     late_deliveries = total_deliveries - on_time_deliveries
     
+    # Get total driver count for company view
+    total_drivers = Driver.query.filter_by(status='active').count()
+    
     # Format the data for the response
     summary_data = {
         'active_loads': active_loads,
         'total_deliveries': total_deliveries,
         'late_deliveries': late_deliveries,
+        'total_drivers': total_drivers,
         'on_time': {
             'pickup_percentage': round(pickup_percentage, 1),
             'delivery_percentage': round(delivery_percentage, 1)
