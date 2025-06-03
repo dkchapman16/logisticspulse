@@ -136,13 +136,17 @@ def create_test_data():
         
         db.session.commit()
         
-        # Create loads (4 loads per driver = 40 total loads)
+        # Create loads (4 loads per week per driver for May 2025 = 16 loads per driver = 160 total loads)
         print("Creating loads...")
         loads = []
         may_start = datetime(2025, 5, 1)
         
+        # May 2025 has approximately 4 weeks (4 weeks * 7 days = 28 days)
+        weeks_in_may = 4
+        loads_per_week_per_driver = 4
+        
         # Calculate total loads needed and how many should be on-time
-        total_loads = len(drivers) * 4  # 4 loads per driver
+        total_loads = len(drivers) * weeks_in_may * loads_per_week_per_driver  # 16 loads per driver
         total_on_time = int(total_loads * 0.7)  # 70% on-time
         
         # Create a list to track which loads should be on-time
@@ -151,73 +155,74 @@ def create_test_data():
         
         load_index = 0
         for driver_idx, driver in enumerate(drivers):
-            # Each driver gets exactly 4 loads spread across May 2025
-            for load_num in range(4):
-                # Distribute loads across May, with each driver's loads in different weeks
-                week_offset = load_num * 7  # One load per week
-                day_offset = random.randint(0, 6)  # Random day within the week
-                load_date = may_start + timedelta(days=week_offset + day_offset)
-                
-                # Random pickup and delivery times
-                pickup_time = load_date + timedelta(hours=random.randint(6, 18))
-                delivery_time = pickup_time + timedelta(hours=random.randint(4, 24))
-                
-                # Select random facilities for pickup and delivery
-                pickup_facility = random.choice(facilities)
-                delivery_facility = random.choice([f for f in facilities if f.id != pickup_facility.id])
-                
-                # Create load
-                load = Load(
-                    reference_number=f"{610000 + load_index}",
-                    client_id=random.choice(clients).id,
-                    driver_id=driver.id,
-                    vehicle_id=vehicles[driver_idx % len(vehicles)].id,
-                    pickup_facility_id=pickup_facility.id,
-                    scheduled_pickup_time=pickup_time,
-                    delivery_facility_id=delivery_facility.id,
-                    scheduled_delivery_time=delivery_time,
-                    status='delivered',  # All loads are completed (in the past)
-                    created_at=load_date
-                )
-                
-                # Use predetermined on-time assignment for this load
-                is_on_time = on_time_assignments[load_index]
-                
-                if is_on_time:
-                    # On time for both pickup and delivery (strict - exactly on time or early)
-                    actual_pickup_arrival = pickup_time + timedelta(minutes=random.randint(-15, 0))
-                    actual_pickup_departure = actual_pickup_arrival + timedelta(minutes=random.randint(15, 45))
-                    actual_delivery_arrival = delivery_time + timedelta(minutes=random.randint(-15, 0))
-                    actual_delivery_departure = actual_delivery_arrival + timedelta(minutes=random.randint(15, 30))
-                else:
-                    # Late on either pickup or delivery (or both)
-                    late_on_pickup = random.random() < 0.6  # 60% chance pickup is the issue
+            # Each driver gets 16 loads across 4 weeks in May 2025 (4 loads per week)
+            for week in range(weeks_in_may):
+                for load_num in range(loads_per_week_per_driver):
+                    # Calculate the date for this load within the specific week
+                    week_start = may_start + timedelta(weeks=week)
+                    day_offset = random.randint(0, 6)  # Random day within the week
+                    load_date = week_start + timedelta(days=day_offset)
                     
-                    if late_on_pickup:
-                        # Late pickup
-                        actual_pickup_arrival = pickup_time + timedelta(minutes=random.randint(1, 180))
-                        actual_pickup_departure = actual_pickup_arrival + timedelta(minutes=random.randint(15, 45))
-                        # Delivery could be on time or late
-                        if random.random() < 0.5:
-                            actual_delivery_arrival = delivery_time + timedelta(minutes=random.randint(-15, 0))
-                        else:
-                            actual_delivery_arrival = delivery_time + timedelta(minutes=random.randint(1, 240))
-                        actual_delivery_departure = actual_delivery_arrival + timedelta(minutes=random.randint(15, 30))
-                    else:
-                        # On time pickup, late delivery
+                    # Random pickup and delivery times
+                    pickup_time = load_date + timedelta(hours=random.randint(6, 18))
+                    delivery_time = pickup_time + timedelta(hours=random.randint(4, 24))
+                    
+                    # Select random facilities for pickup and delivery
+                    pickup_facility = random.choice(facilities)
+                    delivery_facility = random.choice([f for f in facilities if f.id != pickup_facility.id])
+                    
+                    # Create load
+                    load = Load(
+                        reference_number=f"{610000 + load_index}",
+                        client_id=random.choice(clients).id,
+                        driver_id=driver.id,
+                        vehicle_id=vehicles[driver_idx % len(vehicles)].id,
+                        pickup_facility_id=pickup_facility.id,
+                        scheduled_pickup_time=pickup_time,
+                        delivery_facility_id=delivery_facility.id,
+                        scheduled_delivery_time=delivery_time,
+                        status='delivered',  # All loads are completed (in the past)
+                        created_at=load_date
+                    )
+                    
+                    # Use predetermined on-time assignment for this load
+                    is_on_time = on_time_assignments[load_index]
+                    
+                    if is_on_time:
+                        # On time for both pickup and delivery (strict - exactly on time or early)
                         actual_pickup_arrival = pickup_time + timedelta(minutes=random.randint(-15, 0))
                         actual_pickup_departure = actual_pickup_arrival + timedelta(minutes=random.randint(15, 45))
-                        actual_delivery_arrival = delivery_time + timedelta(minutes=random.randint(1, 240))
+                        actual_delivery_arrival = delivery_time + timedelta(minutes=random.randint(-15, 0))
                         actual_delivery_departure = actual_delivery_arrival + timedelta(minutes=random.randint(15, 30))
-                
-                load.actual_pickup_arrival = actual_pickup_arrival
-                load.actual_pickup_departure = actual_pickup_departure
-                load.actual_delivery_arrival = actual_delivery_arrival
-                load.actual_delivery_departure = actual_delivery_departure
-                
-                loads.append(load)
-                db.session.add(load)
-                load_index += 1
+                    else:
+                        # Late on either pickup or delivery (or both)
+                        late_on_pickup = random.random() < 0.6  # 60% chance pickup is the issue
+                        
+                        if late_on_pickup:
+                            # Late pickup
+                            actual_pickup_arrival = pickup_time + timedelta(minutes=random.randint(1, 180))
+                            actual_pickup_departure = actual_pickup_arrival + timedelta(minutes=random.randint(15, 45))
+                            # Delivery could be on time or late
+                            if random.random() < 0.5:
+                                actual_delivery_arrival = delivery_time + timedelta(minutes=random.randint(-15, 0))
+                            else:
+                                actual_delivery_arrival = delivery_time + timedelta(minutes=random.randint(1, 240))
+                            actual_delivery_departure = actual_delivery_arrival + timedelta(minutes=random.randint(15, 30))
+                        else:
+                            # On time pickup, late delivery
+                            actual_pickup_arrival = pickup_time + timedelta(minutes=random.randint(-15, 0))
+                            actual_pickup_departure = actual_pickup_arrival + timedelta(minutes=random.randint(15, 45))
+                            actual_delivery_arrival = delivery_time + timedelta(minutes=random.randint(1, 240))
+                            actual_delivery_departure = actual_delivery_arrival + timedelta(minutes=random.randint(15, 30))
+                    
+                    load.actual_pickup_arrival = actual_pickup_arrival
+                    load.actual_pickup_departure = actual_pickup_departure
+                    load.actual_delivery_arrival = actual_delivery_arrival
+                    load.actual_delivery_departure = actual_delivery_departure
+                    
+                    loads.append(load)
+                    db.session.add(load)
+                    load_index += 1
         
         db.session.commit()
         
