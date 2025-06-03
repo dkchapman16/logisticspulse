@@ -28,13 +28,13 @@
                             <div class="mb-3">
                                 <label for="reference_number" class="form-label">Reference Number</label>
                                 <input type="text" class="form-control" id="reference_number" name="reference_number" 
-                                       value="{{ data['reference_number'] }}" readonly>
+                                       value="{{ data['reference_number'] }}">
                             </div>
 
                             <div class="mb-3">
                                 <label for="customer" class="form-label">Customer</label>
                                 <input type="text" class="form-control" id="customer" name="customer" 
-                                       value="{{ data['client']['name'] }}" readonly>
+                                       value="{{ data['client']['name'] }}">
                             </div>
 
                             <div class="mb-3">
@@ -59,8 +59,13 @@
                             <div class="mb-3">
                                 <label for="pickup_facility" class="form-label">Pickup Facility</label>
                                 <input type="text" class="form-control" id="pickup_facility" name="pickup_facility" 
-                                       value="{{ data['pickup']['facility_name'] }}" readonly>
-                                <div class="form-text text-muted">{{ data['pickup']['address'] }}</div>
+                                       value="{{ data['pickup']['facility_name'] }}">
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="pickup_address" class="form-label">Pickup Address</label>
+                                <input type="text" class="form-control" id="pickup_address" name="pickup_address" 
+                                       value="{{ data['pickup']['address'] }}">
                             </div>
 
                             <div class="mb-3">
@@ -79,8 +84,13 @@
                             <div class="mb-3">
                                 <label for="delivery_facility" class="form-label">Delivery Facility</label>
                                 <input type="text" class="form-control" id="delivery_facility" name="delivery_facility" 
-                                       value="{{ data['delivery']['facility_name'] }}" readonly>
-                                <div class="form-text text-muted">{{ data['delivery']['address'] }}</div>
+                                       value="{{ data['delivery']['facility_name'] }}">
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="delivery_address" class="form-label">Delivery Address</label>
+                                <input type="text" class="form-control" id="delivery_address" name="delivery_address" 
+                                       value="{{ data['delivery']['address'] }}">
                             </div>
 
                             <div class="mb-3">
