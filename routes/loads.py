@@ -81,6 +81,27 @@ def load_detail(load_id):
                           vehicles=vehicles,
                           facilities=facilities)
 
+@loads_bp.route('/loads/<int:load_id>/delete', methods=['POST'])
+def delete_load(load_id):
+    """Delete a load"""
+    load = Load.query.get_or_404(load_id)
+    
+    try:
+        # Delete associated location updates first
+        LocationUpdate.query.filter_by(load_id=load.id).delete()
+        
+        # Delete the load
+        db.session.delete(load)
+        db.session.commit()
+        
+        flash('Load deleted successfully!', 'success')
+        return redirect(url_for('loads.index'))
+        
+    except Exception as e:
+        db.session.rollback()
+        flash(f'Error deleting load: {str(e)}', 'danger')
+        return redirect(url_for('loads.load_detail', load_id=load_id))
+
 @loads_bp.route('/loads/<int:load_id>/data')
 def get_load_data(load_id):
     """API endpoint to get detailed load data"""

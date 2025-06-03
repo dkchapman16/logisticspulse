@@ -8,16 +8,19 @@
                 <div class="card-header d-flex justify-content-between align-items-center">
                     <h5 class="mb-0">
                         {% if load %}
-                        <i data-feather="box"></i> Load #{{ load.reference_number }}
+                        <i data-feather="box"></i> #{{ load.reference_number }} - {{ load.client.name if load.client else 'No Customer' }}
                         {% else %}
                         <i data-feather="plus-circle"></i> Create New Load
                         {% endif %}
                     </h5>
                     <div>
                         {% if load %}
-                        <a href="{{ url_for('loads.index') }}" class="btn btn-outline-primary">
+                        <a href="{{ url_for('loads.index') }}" class="btn btn-outline-primary me-2">
                             <i data-feather="arrow-left"></i> Back to Loads
                         </a>
+                        <button type="button" class="btn btn-outline-danger" onclick="confirmDelete()">
+                            <i data-feather="trash-2"></i> Delete Load
+                        </button>
                         {% endif %}
                     </div>
                 </div>
@@ -461,6 +464,25 @@
         
         const date = new Date(dateTimeStr);
         return date.toLocaleDateString() + ' ' + date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    }
+    
+    function confirmDelete() {
+        if (confirm('Delete #{{ load.reference_number }} - {{ load.client.name if load.client else "No Customer" }}?')) {
+            // Create a form to submit DELETE request
+            const form = document.createElement('form');
+            form.method = 'POST';
+            form.action = '{{ url_for("loads.delete_load", load_id=load.id) if load else "" }}';
+            
+            // Add CSRF token if needed
+            const csrfInput = document.createElement('input');
+            csrfInput.type = 'hidden';
+            csrfInput.name = '_method';
+            csrfInput.value = 'DELETE';
+            form.appendChild(csrfInput);
+            
+            document.body.appendChild(form);
+            form.submit();
+        }
     }
 </script>
 {% endblock %}
