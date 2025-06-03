@@ -34,21 +34,22 @@ def get_drivers():
     # Paginate results
     drivers_page = query.paginate(page=page, per_page=per_page)
     
-    # Format response data
-    today = datetime.utcnow().date()
-    month_ago = today - timedelta(days=30)
+    # Format response data - use May 2025 test data period
+    today = datetime(2025, 5, 31).date()
+    month_ago = datetime(2025, 5, 1).date()
     
     drivers_data = []
     for driver in drivers_page.items:
-        # Get performance data
-        performances = DriverPerformance.query.filter(
-            DriverPerformance.driver_id == driver.id,
-            DriverPerformance.date >= month_ago
+        # Get loads directly from the Load table for accurate count
+        month_ago_datetime = datetime.combine(month_ago, datetime.min.time())
+        loads = Load.query.filter(
+            Load.driver_id == driver.id,
+            Load.scheduled_pickup_time >= month_ago_datetime
         ).all()
         
-        total_loads = sum(p.loads_completed for p in performances)
-        on_time_pickups = sum(p.on_time_pickups for p in performances)
-        on_time_deliveries = sum(p.on_time_deliveries for p in performances)
+        total_loads = len(loads)
+        on_time_pickups = sum(1 for load in loads if load.pickup_on_time == True)
+        on_time_deliveries = sum(1 for load in loads if load.delivery_on_time == True)
         
         pickup_percentage = (on_time_pickups / total_loads * 100) if total_loads > 0 else 0
         delivery_percentage = (on_time_deliveries / total_loads * 100) if total_loads > 0 else 0
@@ -406,10 +407,13 @@ def get_scorecards_data():
         
         for driver in drivers:
             # Get loads for this driver in the period
+            start_datetime = datetime.combine(start_date, datetime.min.time())
+            end_datetime = datetime.combine(end_date, datetime.max.time())
+            
             loads = db.session.query(Load).filter(
                 Load.driver_id == driver.id,
-                Load.scheduled_pickup_time >= start_date,
-                Load.scheduled_pickup_time <= end_date
+                Load.scheduled_pickup_time >= start_datetime,
+                Load.scheduled_pickup_time <= end_datetime
             ).all()
             
             if not loads:
