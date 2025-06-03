@@ -64,7 +64,14 @@
         <div class="dashboard-card">
             <div class="dashboard-card-header d-flex justify-content-between align-items-center">
                 <span>ON-TIME RATE</span>
-                <i data-feather="clock" style="color: var(--primary-action); opacity: 0.8;"></i>
+                <div class="d-flex align-items-center gap-2">
+                    <button type="button" class="info-btn" data-bs-toggle="modal" data-bs-target="#info-modal" 
+                            data-title="On-Time Rate Calculation" 
+                            data-content="Shows the percentage of deliveries completed on or before the scheduled delivery time. This metric is calculated from actual delivery arrivals compared to scheduled delivery times across all completed loads.">
+                        <i data-feather="info" style="width: 14px; height: 14px;"></i>
+                    </button>
+                    <i data-feather="clock" style="color: var(--primary-action); opacity: 0.8;"></i>
+                </div>
             </div>
             <div class="dashboard-card-body">
                 <div class="circular-metric" style="--percent: 87;">
@@ -81,7 +88,14 @@
         <div class="dashboard-card">
             <div class="dashboard-card-header d-flex justify-content-between align-items-center">
                 <span>LATE SHIPMENTS</span>
-                <i data-feather="alert-circle" style="color: var(--highlight-alert); opacity: 0.8;"></i>
+                <div class="d-flex align-items-center gap-2">
+                    <button type="button" class="info-btn" data-bs-toggle="modal" data-bs-target="#info-modal" 
+                            data-title="Late Shipments Counter" 
+                            data-content="Counts the total number of deliveries that arrived after the scheduled delivery time. This includes all loads where actual delivery arrival exceeded the promised delivery window.">
+                        <i data-feather="info" style="width: 14px; height: 14px;"></i>
+                    </button>
+                    <i data-feather="alert-circle" style="color: var(--highlight-alert); opacity: 0.8;"></i>
+                </div>
             </div>
             <div class="dashboard-card-body">
                 <div class="d-flex align-items-center mb-3">
@@ -111,7 +125,14 @@
         <div class="dashboard-card">
             <div class="dashboard-card-header d-flex justify-content-between align-items-center">
                 <span>DELIVERIES</span>
-                <i data-feather="package" style="color: var(--primary-action); opacity: 0.8;"></i>
+                <div class="d-flex align-items-center gap-2">
+                    <button type="button" class="info-btn" data-bs-toggle="modal" data-bs-target="#info-modal" 
+                            data-title="Active Loads Counter" 
+                            data-content="Shows the total number of loads currently active in the system (scheduled or in-transit). This includes all loads that have been dispatched but not yet delivered. Driver and top performer stats are shown below.">
+                        <i data-feather="info" style="width: 14px; height: 14px;"></i>
+                    </button>
+                    <i data-feather="package" style="color: var(--primary-action); opacity: 0.8;"></i>
+                </div>
             </div>
             <div class="dashboard-card-body text-center">
                 <div class="d-flex justify-content-center align-items-center" style="height: 120px;">
@@ -137,7 +158,14 @@
         <div class="dashboard-card" style="min-height: 400px;">
             <div class="dashboard-card-header d-flex justify-content-between align-items-center">
                 <span>ACTIVE LOADS MAP</span>
-                <i data-feather="map-pin" style="color: var(--primary-action); opacity: 0.8;"></i>
+                <div class="d-flex align-items-center gap-2">
+                    <button type="button" class="info-btn" data-bs-toggle="modal" data-bs-target="#info-modal" 
+                            data-title="Active Loads Map View" 
+                            data-content="Real-time map showing locations of all active loads and vehicles. Green markers indicate pickup locations, red markers show delivery destinations, and blue dots represent current vehicle positions with live tracking.">
+                        <i data-feather="info" style="width: 14px; height: 14px;"></i>
+                    </button>
+                    <i data-feather="map-pin" style="color: var(--primary-action); opacity: 0.8;"></i>
+                </div>
             </div>
             <div class="dashboard-card-body p-0">
                 <div id="tracking-map" style="height: 360px; border-radius: 0 0 16px 16px; overflow: hidden;"></div>
@@ -153,7 +181,14 @@
         <div class="dashboard-card">
             <div class="dashboard-card-header d-flex justify-content-between align-items-center">
                 <span>LOADS AT RISK</span>
-                <i data-feather="alert-triangle" style="color: var(--highlight-alert); opacity: 0.8;"></i>
+                <div class="d-flex align-items-center gap-2">
+                    <button type="button" class="info-btn" data-bs-toggle="modal" data-bs-target="#info-modal" 
+                            data-title="Loads At Risk Analysis" 
+                            data-content="Lists loads that are at risk of missing their scheduled pickup or delivery times based on current location, traffic conditions, and estimated travel time. Includes both pickup delays and delivery delays with time remaining until deadline.">
+                        <i data-feather="info" style="width: 14px; height: 14px;"></i>
+                    </button>
+                    <i data-feather="alert-triangle" style="color: var(--highlight-alert); opacity: 0.8;"></i>
+                </div>
             </div>
             <div class="dashboard-card-body" style="max-height: 360px; overflow-y: auto;">
                 <div id="no-at-risk-loads" class="text-center py-4 d-none">
@@ -190,7 +225,14 @@
         <div class="dashboard-card">
             <div class="dashboard-card-header d-flex justify-content-between align-items-center">
                 <span>PERFORMANCE TRENDS</span>
-                <i data-feather="trending-up" style="color: var(--primary-action); opacity: 0.8;"></i>
+                <div class="d-flex align-items-center gap-2">
+                    <button type="button" class="info-btn" data-bs-toggle="modal" data-bs-target="#info-modal" 
+                            data-title="Performance Trends Chart" 
+                            data-content="Shows daily on-time delivery performance over the past 30 days. The line chart displays percentage of loads delivered on time each day, helping identify performance patterns and trends over time.">
+                        <i data-feather="info" style="width: 14px; height: 14px;"></i>
+                    </button>
+                    <i data-feather="trending-up" style="color: var(--primary-action); opacity: 0.8;"></i>
+                </div>
             </div>
             <div class="dashboard-card-body" style="padding: 20px;">
                 <canvas id="performance-chart" height="280"></canvas>
@@ -201,7 +243,14 @@
         <div class="dashboard-card">
             <div class="dashboard-card-header d-flex justify-content-between align-items-center">
                 <span>TOP DRIVERS</span>
-                <i data-feather="award" style="color: var(--celebration-gold); opacity: 0.8;"></i>
+                <div class="d-flex align-items-center gap-2">
+                    <button type="button" class="info-btn" data-bs-toggle="modal" data-bs-target="#info-modal" 
+                            data-title="Top Drivers Ranking" 
+                            data-content="Displays drivers ranked by their on-time delivery percentage. Rankings are based on actual performance data from completed loads, showing the percentage of deliveries each driver completed on or before scheduled time.">
+                        <i data-feather="info" style="width: 14px; height: 14px;"></i>
+                    </button>
+                    <i data-feather="award" style="color: var(--celebration-gold); opacity: 0.8;"></i>
+                </div>
             </div>
             <div class="dashboard-card-body p-0">
                 <!-- Driver Ranking List -->
