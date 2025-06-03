@@ -8,7 +8,7 @@
                 <div class="card-header d-flex justify-content-between align-items-center">
                     <h5 class="mb-0">
                         {% if load %}
-                        <i data-feather="box"></i> #{{ load.reference_number }} - {{ load.client.name if load.client else 'No Customer' }}
+                        <i data-feather="box"></i> {{ load.status|upper }} #{{ load.reference_number }} - {{ load.client.name if load.client else 'No Customer' }}
                         {% else %}
                         <i data-feather="plus-circle"></i> Create New Load
                         {% endif %}
