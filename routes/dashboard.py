@@ -153,24 +153,64 @@ def dashboard_summary():
 @dashboard_bp.route('/api/dashboard/at_risk_loads')
 def at_risk_loads():
     """API endpoint for loads at risk of being late"""
-    # Get loads that are in transit and have an ETA after the scheduled delivery time
+    from datetime import datetime, timedelta
+    
+    # Get current time
+    current_time = datetime.utcnow()
+    
+    # Find loads that are scheduled for delivery soon but haven't been delivered yet
+    # and might be at risk based on their current status
     at_risk_loads = Load.query.filter(
-        Load.status == 'in_transit',
-        Load.current_eta > Load.scheduled_delivery_time,
-        Load.actual_delivery_arrival == None
-    ).join(Driver).all()
+        Load.status.in_(['scheduled', 'in_transit']),
+        Load.actual_delivery_arrival == None,
+        Load.scheduled_delivery_time <= current_time + timedelta(hours=24)  # Due within 24 hours
+    ).join(Driver, Load.driver_id == Driver.id, isouter=True).all()
+    
+    # Filter for loads that are actually at risk (overdue or close to being overdue)
+    filtered_loads = []
+    for load in at_risk_loads:
+        time_until_delivery = (load.scheduled_delivery_time - current_time).total_seconds() / 3600  # hours
+        
+        # Consider at risk if:
+        # 1. Already overdue (negative time)
+        # 2. Due within 2 hours and status is still 'scheduled'
+        # 3. Due within 4 hours and status is 'in_transit' but no recent progress
+        if (time_until_delivery < 0 or 
+            (time_until_delivery < 2 and load.status == 'scheduled') or
+            (time_until_delivery < 4 and load.status == 'in_transit')):
+            filtered_loads.append(load)
     
     # Format the data for the response
-    loads_data = [
-        {
+    loads_data = []
+    for load in filtered_loads[:10]:  # Limit to 10 most urgent
+        time_until_delivery = (load.scheduled_delivery_time - current_time).total_seconds() / 60  # minutes
+        
+        # Determine risk level
+        if time_until_delivery < 0:
+            risk_label = f"Delayed {abs(int(time_until_delivery))}m"
+            risk_class = "danger"
+        elif time_until_delivery < 60:
+            risk_label = f"At Risk {int(time_until_delivery)}m"
+            risk_class = "warning"
+        else:
+            hours = int(time_until_delivery / 60)
+            risk_label = f"At Risk {hours}h"
+            risk_class = "warning"
+        
+        pickup_facility = load.pickup_facility
+        delivery_facility = load.delivery_facility
+        
+        loads_data.append({
             'id': load.id,
             'reference_number': load.reference_number,
             'driver_name': load.driver.name if load.driver else 'Unassigned',
+            'origin': f"{pickup_facility.city}, {pickup_facility.state}" if pickup_facility else "Unknown",
+            'destination': f"{delivery_facility.city}, {delivery_facility.state}" if delivery_facility else "Unknown",
             'scheduled_delivery': load.scheduled_delivery_time.strftime('%Y-%m-%d %H:%M'),
-            'current_eta': load.current_eta.strftime('%Y-%m-%d %H:%M') if load.current_eta else None,
-            'delay_minutes': round((load.current_eta - load.scheduled_delivery_time).total_seconds() / 60) if load.current_eta else None
-        } for load in at_risk_loads
-    ]
+            'risk_label': risk_label,
+            'risk_class': risk_class,
+            'delay_minutes': abs(int(time_until_delivery)) if time_until_delivery < 0 else int(time_until_delivery)
+        })
     
     return jsonify(loads_data)
 

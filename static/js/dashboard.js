@@ -392,38 +392,50 @@ function loadAtRiskLoads() {
     fetch('/api/dashboard/at_risk_loads')
         .then(response => response.json())
         .then(loads => {
-            const atRiskTable = document.getElementById('at-risk-loads-table');
-            const atRiskBody = document.getElementById('at-risk-loads-body');
+            const atRiskContent = document.getElementById('at-risk-loads-content');
+            const noAtRiskDiv = document.getElementById('no-at-risk-loads');
             
-            if (atRiskBody) {
-                atRiskBody.innerHTML = '';
+            if (atRiskContent) {
+                atRiskContent.innerHTML = '';
                 
                 if (loads && loads.length > 0) {
-                    atRiskTable.classList.remove('d-none');
+                    noAtRiskDiv.classList.add('d-none');
                     
                     loads.forEach(load => {
-                        const row = document.createElement('tr');
+                        const isDelayed = load.risk_class === 'danger';
+                        const borderColor = isDelayed ? 'var(--highlight-alert)' : 'var(--celebration-gold)';
+                        const bgColor = isDelayed ? 'rgba(255, 87, 87, 0.1)' : 'rgba(255, 215, 0, 0.1)';
+                        const badgeColor = isDelayed ? 'var(--highlight-alert)' : 'var(--celebration-gold)';
+                        const badgeTextColor = isDelayed ? '#fff' : '#000';
                         
-                        // Set row color based on delay severity
-                        if (load.delay_minutes > 120) {
-                            row.className = 'table-danger';
-                        } else if (load.delay_minutes > 60) {
-                            row.className = 'table-warning';
-                        }
+                        const loadDiv = document.createElement('div');
+                        loadDiv.className = 'at-risk-load-item mb-3 p-3';
+                        loadDiv.style.cssText = `background-color: ${bgColor}; border-radius: 8px; border-left: 3px solid ${borderColor};`;
                         
-                        row.innerHTML = `
-                            <td><a href="/loads/${load.id}">${load.reference_number}</a></td>
-                            <td>${load.driver_name}</td>
-                            <td>${formatDateTime(load.scheduled_delivery)}</td>
-                            <td>${formatDateTime(load.current_eta)}</td>
-                            <td>${load.delay_minutes} min</td>
+                        loadDiv.innerHTML = `
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <span style="color: var(--bright-text); font-weight: 600;">${load.reference_number}</span>
+                                <span class="badge" style="background-color: ${badgeColor}; color: ${badgeTextColor};">${load.risk_label}</span>
+                            </div>
+                            <div class="d-flex justify-content-between mb-2">
+                                <div>
+                                    <div style="color: var(--neutral-text); font-size: 0.8rem;">ORIGIN-DESTINATION</div>
+                                    <div style="color: var(--bright-text);">${load.origin} → ${load.destination}</div>
+                                </div>
+                                <div class="text-end">
+                                    <div style="color: var(--neutral-text); font-size: 0.8rem;">DRIVER</div>
+                                    <div style="color: var(--bright-text);">${load.driver_name}</div>
+                                </div>
+                            </div>
+                            <div class="progress" style="height: 4px; background-color: rgba(255, 255, 255, 0.1);">
+                                <div class="progress-bar" role="progressbar" style="width: ${isDelayed ? '75' : '85'}%; background-color: ${borderColor};" aria-valuenow="${isDelayed ? '75' : '85'}" aria-valuemin="0" aria-valuemax="100"></div>
+                            </div>
                         `;
                         
-                        atRiskBody.appendChild(row);
+                        atRiskContent.appendChild(loadDiv);
                     });
                 } else {
-                    atRiskTable.classList.add('d-none');
-                    document.getElementById('no-at-risk-loads').classList.remove('d-none');
+                    noAtRiskDiv.classList.remove('d-none');
                 }
             }
         })
