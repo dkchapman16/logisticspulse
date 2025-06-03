@@ -306,10 +306,15 @@ def upload_ratecon():
             print(f"🔍 DELIVERY: {extracted_data.get('delivery', 'None')}")
             
             # Return the extracted data with success status
+            # Store extracted data in session for form display
+            from flask import session
+            session['extracted_data'] = extracted_data
+            
             return jsonify({
                 'success': True,
                 'message': 'PDF processed successfully',
-                'data': extracted_data
+                'data': extracted_data,
+                'redirect_url': '/loads/create-from-ai'
             })
             
         else:
@@ -320,6 +325,24 @@ def upload_ratecon():
             'success': False,
             'error': f'Error processing PDF: {str(e)}'
         }), 500
+
+@loads_bp.route('/loads/create-from-ai')
+def create_from_ai():
+    """Display form with AI-extracted data"""
+    from flask import session
+    
+    # Get extracted data from session
+    extracted_data = session.get('extracted_data')
+    if not extracted_data:
+        flash('No extracted data found. Please upload a PDF first.', 'warning')
+        return redirect(url_for('loads.index'))
+    
+    # Get available drivers (fallback to sample data if API fails)
+    drivers = ["Sydney Chapman", "Bryan Chapman"]
+    
+    return render_template('create_load_from_ai.html', 
+                          data=extracted_data, 
+                          drivers=drivers)
 
 @loads_bp.route('/loads/<int:load_id>/update-location', methods=['POST'])
 def update_location(load_id):
