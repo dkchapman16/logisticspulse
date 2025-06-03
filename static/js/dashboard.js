@@ -268,11 +268,13 @@ function loadDashboardSummary() {
             // Update on-time percentages with Tesla-style circular progress
             const onTimeDeliveryElement = document.getElementById('on-time-delivery-percentage');
             if (onTimeDeliveryElement) {
-                const percentValue = data.on_time.delivery_percentage;
+                const percentValue = Math.ceil(data.on_time.delivery_percentage);
                 onTimeDeliveryElement.textContent = percentValue;
                 
                 // Find the parent circular-metric element and update the --percent CSS variable
                 const circularMetric = onTimeDeliveryElement.closest('.circular-metric');
+                const circularMetricValue = circularMetric?.querySelector('.circular-metric-value');
+                
                 if (circularMetric) {
                     circularMetric.style.setProperty('--percent', percentValue);
                 }
@@ -282,18 +284,24 @@ function loadDashboardSummary() {
                 
                 if (percentValue >= 85) {
                     // Excellent performance - Green
-                    onTimeDeliveryElement.style.color = '#00c48c';
-                    onTimeDeliveryElement.style.textShadow = '0 0 15px rgba(0, 196, 140, 0.6)';
+                    if (circularMetricValue) {
+                        circularMetricValue.style.color = '#00c48c';
+                        circularMetricValue.style.textShadow = '0 0 15px rgba(0, 196, 140, 0.6)';
+                    }
                     if (progressCircle) progressCircle.style.stroke = '#00c48c';
                 } else if (percentValue >= 70) {
                     // Warning performance - Yellow/Gold
-                    onTimeDeliveryElement.style.color = '#FFD700';
-                    onTimeDeliveryElement.style.textShadow = '0 0 15px rgba(255, 215, 0, 0.6)';
+                    if (circularMetricValue) {
+                        circularMetricValue.style.color = '#FFD700';
+                        circularMetricValue.style.textShadow = '0 0 15px rgba(255, 215, 0, 0.6)';
+                    }
                     if (progressCircle) progressCircle.style.stroke = '#FFD700';
                 } else {
                     // Poor performance - Red
-                    onTimeDeliveryElement.style.color = '#ff5757';
-                    onTimeDeliveryElement.style.textShadow = '0 0 15px rgba(255, 87, 87, 0.6)';
+                    if (circularMetricValue) {
+                        circularMetricValue.style.color = '#ff5757';
+                        circularMetricValue.style.textShadow = '0 0 15px rgba(255, 87, 87, 0.6)';
+                    }
                     if (progressCircle) progressCircle.style.stroke = '#ff5757';
                 }
             }
