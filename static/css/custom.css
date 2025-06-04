@@ -19,16 +19,15 @@
     background: none !important;
     display: flex;
     align-items: center;
-    justify-content: center;
-    width: 40px;
-    height: 40px;
-    border-radius: 8px;
+    padding: 0.75rem 1.5rem;
+    font-weight: 500;
+    border-left: 3px solid transparent;
 }
 
 .sound-toggle-btn:hover {
-    color: var(--bright-text) !important;
-    background-color: rgba(255, 255, 255, 0.1) !important;
-    transform: scale(1.05);
+    background-color: var(--card-background) !important;
+    color: var(--primary-action) !important;
+    border-left-color: var(--primary-action);
 }
 
 .sound-toggle-btn:focus {
@@ -37,7 +36,13 @@
 }
 
 .sound-toggle-btn:active {
-    transform: scale(0.95);
+    transform: scale(0.98);
+}
+
+.sound-toggle-btn i {
+    margin-right: 0.75rem;
+    width: 18px;
+    height: 18px;
 }
 
 /* Color variables based on creative vision - Tesla dark mode inspired */
