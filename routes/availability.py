@@ -140,13 +140,16 @@ def generate_email_template():
                 if delivery_facility:
                     location = f"Delivering to {delivery_facility.city}, {delivery_facility.state}"
                 
+                # Include both date and time for upcoming availability
+                delivery_datetime = latest_load.scheduled_delivery_time.strftime('%m/%d/%Y at %I:%M %p')
+                
                 upcoming_availability.append({
                     'driver_name': driver.name,
                     'truck_info': f"Driver: {driver.name}",
                     'current_location': location,
-                    'available_date': latest_load.scheduled_delivery_time.strftime('%m/%d/%Y'),
+                    'available_date': delivery_datetime,
                     'contact_info': driver.phone or "Contact dispatch",
-                    'status': 'Available Soon'
+                    'status': 'Available after delivery'
                 })
         
         fleet_data = {
@@ -222,7 +225,6 @@ def generate_availability_email_html(fleet_data):
                             <th>Current Location</th>
                             <th>Available Date</th>
                             <th>Contact</th>
-                            <th>Status</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -236,7 +238,6 @@ def generate_availability_email_html(fleet_data):
                             <td>{truck['current_location']}</td>
                             <td>{truck['available_date']}</td>
                             <td>{truck['contact_info']}</td>
-                            <td class="status-available">{truck['status']}</td>
                         </tr>
         """
     
@@ -252,9 +253,8 @@ def generate_availability_email_html(fleet_data):
                         <tr>
                             <th>Driver</th>
                             <th>Current Status</th>
-                            <th>Available Date</th>
+                            <th>Available Date & Time</th>
                             <th>Contact</th>
-                            <th>Status</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -268,7 +268,6 @@ def generate_availability_email_html(fleet_data):
                             <td>{truck['current_location']}</td>
                             <td>{truck['available_date']}</td>
                             <td>{truck['contact_info']}</td>
-                            <td class="status-soon">{truck['status']}</td>
                         </tr>
         """
     
@@ -286,7 +285,7 @@ def generate_availability_email_html(fleet_data):
             </div>
             
             <div class="footer">
-                <p>Hitched Logistics LLC - Reliable Transportation Solutions</p>
+                <p>Hitched Logistics LLC</p>
                 <p>This report was generated on {current_date}</p>
             </div>
         </div>
@@ -314,7 +313,6 @@ Driver: {truck['driver_name']}
 Location: {truck['current_location']}
 Available: {truck['available_date']}
 Contact: {truck['contact_info']}
-Status: {truck['status']}
 ---
 """
     
@@ -331,7 +329,6 @@ Driver: {truck['driver_name']}
 Current Status: {truck['current_location']}
 Available: {truck['available_date']}
 Contact: {truck['contact_info']}
-Status: {truck['status']}
 ---
 """
     
@@ -343,7 +340,7 @@ Contact our dispatch team:
 📱 Phone: (555) 123-4567
 🕒 Available 24/7 for your shipping needs
 
-Hitched Logistics LLC - Reliable Transportation Solutions
+Hitched Logistics LLC
 This report was generated on {current_date}
 """
     
