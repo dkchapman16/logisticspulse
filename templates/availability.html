@@ -1,0 +1,405 @@
+{% extends 'layout.html' %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">
+                        <i data-feather="mail"></i> Fleet Availability Email Blast
+                    </h5>
+                    <div class="d-flex gap-2">
+                        <button class="btn btn-outline-primary" id="preview-btn">
+                            <i data-feather="eye"></i> Preview Email
+                        </button>
+                        <button class="btn btn-primary" id="send-blast-btn">
+                            <i data-feather="send"></i> Send Email Blast
+                        </button>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <!-- Fleet Status Overview -->
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <div class="card bg-success bg-opacity-10 border-success">
+                                <div class="card-body text-center">
+                                    <i data-feather="truck" class="text-success mb-2" style="width: 32px; height: 32px;"></i>
+                                    <h3 id="available-now-count" class="text-success mb-1">-</h3>
+                                    <p class="mb-0 text-success">Available Now</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="card bg-warning bg-opacity-10 border-warning">
+                                <div class="card-body text-center">
+                                    <i data-feather="calendar" class="text-warning mb-2" style="width: 32px; height: 32px;"></i>
+                                    <h3 id="upcoming-count" class="text-warning mb-1">-</h3>
+                                    <p class="mb-0 text-warning">Available Soon</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Email Configuration -->
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h6 class="mb-0">Email Configuration</h6>
+                                </div>
+                                <div class="card-body">
+                                    <div class="mb-3">
+                                        <label for="email-subject" class="form-label">Email Subject</label>
+                                        <input type="text" class="form-control" id="email-subject" 
+                                               value="Weekly Fleet Availability Update">
+                                    </div>
+                                    
+                                    <div class="mb-3">
+                                        <label for="recipient-list" class="form-label">Recipients</label>
+                                        <textarea class="form-control" id="recipient-list" rows="6" 
+                                                  placeholder="Enter email addresses, one per line:&#10;customer1@example.com&#10;broker1@example.com&#10;partner@company.com"></textarea>
+                                        <div class="form-text">Enter one email address per line</div>
+                                    </div>
+                                    
+                                    <div class="mb-3">
+                                        <button class="btn btn-outline-secondary btn-sm" id="load-contacts-btn">
+                                            <i data-feather="users"></i> Load from Contacts
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h6 class="mb-0">Current Fleet Status</h6>
+                                </div>
+                                <div class="card-body" style="max-height: 400px; overflow-y: auto;">
+                                    <div id="fleet-status-loading" class="text-center py-3">
+                                        <div class="spinner-border spinner-border-sm" role="status">
+                                            <span class="visually-hidden">Loading...</span>
+                                        </div>
+                                        <p class="mt-2 mb-0">Loading fleet status...</p>
+                                    </div>
+                                    
+                                    <div id="fleet-status-content" class="d-none">
+                                        <!-- Available Now Section -->
+                                        <div class="mb-3">
+                                            <h6 class="text-success">Available Now</h6>
+                                            <div id="available-now-list">
+                                                <!-- Will be populated by JavaScript -->
+                                            </div>
+                                        </div>
+                                        
+                                        <!-- Upcoming Availability Section -->
+                                        <div class="mb-3">
+                                            <h6 class="text-warning">Available Soon</h6>
+                                            <div id="upcoming-list">
+                                                <!-- Will be populated by JavaScript -->
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Email Preview Modal -->
+<div class="modal fade" id="email-preview-modal" tabindex="-1" aria-labelledby="emailPreviewModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="emailPreviewModalLabel">Email Preview</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div id="email-preview-content" style="max-height: 70vh; overflow-y: auto; border: 1px solid #ddd; padding: 20px; background-color: #f4f4f4;">
+                    <!-- Email preview will be loaded here -->
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary" id="send-from-preview-btn">
+                    <i data-feather="send"></i> Send Email Blast
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Contact Selection Modal -->
+<div class="modal fade" id="contacts-modal" tabindex="-1" aria-labelledby="contactsModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="contactsModalLabel">Select Contacts</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <input type="text" class="form-control" id="contact-search" placeholder="Search contacts...">
+                </div>
+                <div id="contacts-list" style="max-height: 400px; overflow-y: auto;">
+                    <!-- Contacts will be loaded here -->
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" id="add-selected-contacts-btn">
+                    Add Selected Contacts
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    let fleetData = null;
+    
+    document.addEventListener('DOMContentLoaded', function() {
+        // Load fleet status on page load
+        loadFleetStatus();
+        
+        // Set up event listeners
+        document.getElementById('preview-btn').addEventListener('click', previewEmail);
+        document.getElementById('send-blast-btn').addEventListener('click', sendEmailBlast);
+        document.getElementById('send-from-preview-btn').addEventListener('click', sendEmailBlast);
+        document.getElementById('load-contacts-btn').addEventListener('click', loadContacts);
+        document.getElementById('add-selected-contacts-btn').addEventListener('click', addSelectedContacts);
+        
+        // Initialize feather icons
+        feather.replace();
+    });
+    
+    function loadFleetStatus() {
+        const loadingEl = document.getElementById('fleet-status-loading');
+        const contentEl = document.getElementById('fleet-status-content');
+        
+        loadingEl.classList.remove('d-none');
+        contentEl.classList.add('d-none');
+        
+        fetch('/availability/fleet-status')
+            .then(response => response.json())
+            .then(data => {
+                fleetData = data;
+                
+                // Update counters
+                document.getElementById('available-now-count').textContent = data.total_available || 0;
+                document.getElementById('upcoming-count').textContent = data.total_upcoming || 0;
+                
+                // Populate available now list
+                const availableNowList = document.getElementById('available-now-list');
+                availableNowList.innerHTML = '';
+                
+                if (data.available_now && data.available_now.length > 0) {
+                    data.available_now.forEach(truck => {
+                        const item = document.createElement('div');
+                        item.className = 'border-bottom pb-2 mb-2';
+                        item.innerHTML = `
+                            <div class="d-flex justify-content-between">
+                                <div>
+                                    <strong>${truck.driver_name}</strong>
+                                    <br><small class="text-muted">${truck.current_location}</small>
+                                </div>
+                                <span class="badge bg-success">Available</span>
+                            </div>
+                        `;
+                        availableNowList.appendChild(item);
+                    });
+                } else {
+                    availableNowList.innerHTML = '<p class="text-muted">No trucks available now</p>';
+                }
+                
+                // Populate upcoming list
+                const upcomingList = document.getElementById('upcoming-list');
+                upcomingList.innerHTML = '';
+                
+                if (data.upcoming_availability && data.upcoming_availability.length > 0) {
+                    data.upcoming_availability.forEach(truck => {
+                        const item = document.createElement('div');
+                        item.className = 'border-bottom pb-2 mb-2';
+                        item.innerHTML = `
+                            <div class="d-flex justify-content-between">
+                                <div>
+                                    <strong>${truck.driver_name}</strong>
+                                    <br><small class="text-muted">${truck.current_location}</small>
+                                    <br><small class="text-warning">Available: ${truck.available_date}</small>
+                                </div>
+                                <span class="badge bg-warning">Soon</span>
+                            </div>
+                        `;
+                        upcomingList.appendChild(item);
+                    });
+                } else {
+                    upcomingList.innerHTML = '<p class="text-muted">No upcoming availability</p>';
+                }
+                
+                loadingEl.classList.add('d-none');
+                contentEl.classList.remove('d-none');
+            })
+            .catch(error => {
+                console.error('Error loading fleet status:', error);
+                loadingEl.innerHTML = '<p class="text-danger">Error loading fleet status</p>';
+            });
+    }
+    
+    function previewEmail() {
+        if (!fleetData) {
+            alert('Fleet data not loaded. Please wait a moment and try again.');
+            return;
+        }
+        
+        // Generate preview by calling the backend
+        const subject = document.getElementById('email-subject').value;
+        
+        fetch('/availability/send-email-blast', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                email_list: ['preview@example.com'], // Dummy email for preview
+                subject: subject
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.preview_html) {
+                document.getElementById('email-preview-content').innerHTML = data.preview_html;
+                const modal = new bootstrap.Modal(document.getElementById('email-preview-modal'));
+                modal.show();
+            } else {
+                alert('Unable to generate preview');
+            }
+        })
+        .catch(error => {
+            console.error('Error generating preview:', error);
+            alert('Error generating email preview');
+        });
+    }
+    
+    function sendEmailBlast() {
+        const emailList = document.getElementById('recipient-list').value
+            .split('\n')
+            .map(email => email.trim())
+            .filter(email => email && email.includes('@'));
+        
+        if (emailList.length === 0) {
+            alert('Please enter at least one valid email address.');
+            return;
+        }
+        
+        const subject = document.getElementById('email-subject').value;
+        
+        if (confirm(`Send email blast to ${emailList.length} recipients?`)) {
+            // Show loading state
+            const sendBtn = document.getElementById('send-blast-btn');
+            const originalText = sendBtn.innerHTML;
+            sendBtn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Sending...';
+            sendBtn.disabled = true;
+            
+            fetch('/availability/send-email-blast', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    email_list: emailList,
+                    subject: subject
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert(`Email blast sent successfully to ${data.recipients_count} recipients!`);
+                    // Close preview modal if open
+                    const modal = bootstrap.Modal.getInstance(document.getElementById('email-preview-modal'));
+                    if (modal) modal.hide();
+                } else {
+                    alert('Error sending email blast: ' + (data.error || 'Unknown error'));
+                }
+            })
+            .catch(error => {
+                console.error('Error sending email blast:', error);
+                alert('Error sending email blast');
+            })
+            .finally(() => {
+                // Reset button state
+                sendBtn.innerHTML = originalText;
+                sendBtn.disabled = false;
+            });
+        }
+    }
+    
+    function loadContacts() {
+        // Show contacts modal
+        const modal = new bootstrap.Modal(document.getElementById('contacts-modal'));
+        modal.show();
+        
+        // Load client contacts
+        fetch('/loads/get_loads?limit=1000')
+            .then(response => response.json())
+            .then(data => {
+                const contactsSet = new Set();
+                
+                // Extract unique client contact emails
+                if (data.loads) {
+                    data.loads.forEach(load => {
+                        if (load.client && load.client.contact_email) {
+                            contactsSet.add(load.client.contact_email);
+                        }
+                    });
+                }
+                
+                const contactsList = document.getElementById('contacts-list');
+                contactsList.innerHTML = '';
+                
+                if (contactsSet.size > 0) {
+                    Array.from(contactsSet).forEach(email => {
+                        const item = document.createElement('div');
+                        item.className = 'form-check';
+                        item.innerHTML = `
+                            <input class="form-check-input" type="checkbox" value="${email}" id="contact-${email}">
+                            <label class="form-check-label" for="contact-${email}">
+                                ${email}
+                            </label>
+                        `;
+                        contactsList.appendChild(item);
+                    });
+                } else {
+                    contactsList.innerHTML = '<p class="text-muted">No contacts found</p>';
+                }
+            })
+            .catch(error => {
+                console.error('Error loading contacts:', error);
+                document.getElementById('contacts-list').innerHTML = '<p class="text-danger">Error loading contacts</p>';
+            });
+    }
+    
+    function addSelectedContacts() {
+        const checkboxes = document.querySelectorAll('#contacts-list input[type="checkbox"]:checked');
+        const selectedEmails = Array.from(checkboxes).map(cb => cb.value);
+        
+        if (selectedEmails.length > 0) {
+            const currentList = document.getElementById('recipient-list').value;
+            const newList = currentList ? currentList + '\n' + selectedEmails.join('\n') : selectedEmails.join('\n');
+            document.getElementById('recipient-list').value = newList;
+            
+            // Close modal
+            const modal = bootstrap.Modal.getInstance(document.getElementById('contacts-modal'));
+            modal.hide();
+        } else {
+            alert('Please select at least one contact.');
+        }
+    }
+</script>
+{% endblock %}
