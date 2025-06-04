@@ -209,19 +209,25 @@
         
         function initializeSoundToggle() {
             // Get saved sound preference
-            soundEnabled = localStorage.getItem('soundEnabled') !== 'false';
+            const savedPref = localStorage.getItem('soundEnabled');
+            soundEnabled = savedPref !== 'false';
+            console.log('Sound initialized with preference:', savedPref, 'resulting in soundEnabled:', soundEnabled);
             updateSoundIcon();
             
             // Add click handler
             const soundToggle = document.getElementById('soundToggle');
             if (soundToggle) {
                 soundToggle.addEventListener('click', toggleSound);
+                console.log('Sound toggle button event listener added');
+            } else {
+                console.log('Sound toggle button not found');
             }
         }
         
         function toggleSound() {
             soundEnabled = !soundEnabled;
             localStorage.setItem('soundEnabled', soundEnabled);
+            console.log('Sound toggled to:', soundEnabled ? 'ON' : 'OFF');
             updateSoundIcon();
         }
         
@@ -242,7 +248,12 @@
         
         // Play notification sound (only if enabled)
         function playNotificationSound() {
-            if (!soundEnabled) return;
+            if (!soundEnabled) {
+                console.log('Sound disabled, not playing notification sound');
+                return;
+            }
+            
+            console.log('Playing notification sound');
             
             // Create a subtle notification sound using Web Audio API
             try {
@@ -263,7 +274,7 @@
                 oscillator.start(audioContext.currentTime);
                 oscillator.stop(audioContext.currentTime + 0.2);
             } catch (error) {
-                console.log('Audio not supported');
+                console.log('Audio not supported:', error);
             }
         }
         
