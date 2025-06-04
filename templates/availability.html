@@ -84,10 +84,15 @@
                                                 <input type="text" class="form-control" id="contact-name" 
                                                        placeholder="Dispatch Team">
                                             </div>
-                                            <div class="mb-0">
+                                            <div class="mb-3">
                                                 <label for="availability-hours" class="form-label">Availability Hours</label>
                                                 <input type="text" class="form-control" id="availability-hours" 
                                                        placeholder="Available 24/7 for your shipping needs">
+                                            </div>
+                                            <div class="d-flex justify-content-end">
+                                                <button type="button" class="btn btn-outline-primary" id="save-contact-btn">
+                                                    <i data-feather="save"></i> Save Contact Information
+                                                </button>
                                             </div>
                                         </div>
                                     </div>
@@ -265,6 +270,12 @@
         
         // Set up phone number formatting
         document.getElementById('contact-phone').addEventListener('input', formatPhoneNumber);
+        
+        // Set up save contact button
+        document.getElementById('save-contact-btn').addEventListener('click', saveContactInformation);
+        
+        // Load saved contact information
+        loadSavedContactInformation();
         
         // Initialize feather icons
         feather.replace();
@@ -485,6 +496,46 @@
         
         // Update the input value
         input.value = formattedValue;
+    }
+    
+    function saveContactInformation() {
+        const contactInfo = {
+            email: document.getElementById('contact-email').value,
+            phone: document.getElementById('contact-phone').value,
+            name: document.getElementById('contact-name').value,
+            hours: document.getElementById('availability-hours').value
+        };
+        
+        localStorage.setItem('savedContactInfo', JSON.stringify(contactInfo));
+        
+        // Update button temporarily to show success
+        const btn = document.getElementById('save-contact-btn');
+        const originalText = btn.innerHTML;
+        btn.innerHTML = '<i data-feather="check"></i> Saved!';
+        btn.classList.remove('btn-outline-primary');
+        btn.classList.add('btn-success');
+        
+        setTimeout(() => {
+            btn.innerHTML = originalText;
+            btn.classList.remove('btn-success');
+            btn.classList.add('btn-outline-primary');
+            feather.replace();
+        }, 2000);
+    }
+    
+    function loadSavedContactInformation() {
+        const savedInfo = localStorage.getItem('savedContactInfo');
+        if (savedInfo) {
+            try {
+                const contactInfo = JSON.parse(savedInfo);
+                document.getElementById('contact-email').value = contactInfo.email || '';
+                document.getElementById('contact-phone').value = contactInfo.phone || '';
+                document.getElementById('contact-name').value = contactInfo.name || '';
+                document.getElementById('availability-hours').value = contactInfo.hours || '';
+            } catch (e) {
+                console.error('Error loading saved contact information:', e);
+            }
+        }
     }
 
 </script>
