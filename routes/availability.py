@@ -98,12 +98,12 @@ def generate_email_template():
         subject = data.get('subject', 'Weekly Fleet Availability Update')
         from_email = data.get('from_email', 'dispatch@hitchedlogistics.com')
         
-        # Get contact information from the request
+        # Get contact information from the request, use "x" for empty fields
         contact_info = {
-            'email': data.get('contact_email', 'dispatch@hitchedlogistics.com'),
-            'phone': data.get('contact_phone', '(555) 123-4567'),
-            'name': data.get('contact_name', 'Dispatch Team'),
-            'hours': data.get('availability_hours', 'Available 24/7 for your shipping needs')
+            'email': data.get('contact_email', '').strip() or 'x',
+            'phone': data.get('contact_phone', '').strip() or 'x',
+            'name': data.get('contact_name', '').strip() or 'x',
+            'hours': data.get('availability_hours', '').strip() or 'x'
         }
         
         # Get current fleet status
@@ -193,10 +193,10 @@ def generate_availability_email_html(fleet_data, contact_info=None):
     """Generate professional HTML email content for availability report"""
     if contact_info is None:
         contact_info = {
-            'email': 'dispatch@hitchedlogistics.com',
-            'phone': '(555) 123-4567',
-            'name': 'Dispatch Team',
-            'hours': 'Available 24/7 for your shipping needs'
+            'email': 'x',
+            'phone': 'x',
+            'name': 'x',
+            'hours': 'x'
         }
     
     current_date = datetime.now().strftime('%B %d, %Y')
@@ -315,10 +315,10 @@ def generate_plain_text_email(fleet_data, contact_info=None):
     """Generate plain text email for copy/paste"""
     if contact_info is None:
         contact_info = {
-            'email': 'dispatch@hitchedlogistics.com',
-            'phone': '(555) 123-4567',
-            'name': 'Dispatch Team',
-            'hours': 'Available 24/7 for your shipping needs'
+            'email': 'x',
+            'phone': 'x',
+            'name': 'x',
+            'hours': 'x'
         }
     
     current_date = datetime.now().strftime('%B %d, %Y')
