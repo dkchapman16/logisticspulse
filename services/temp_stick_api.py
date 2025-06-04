@@ -100,6 +100,11 @@ def get_current_temperatures():
     sensors = get_sensors()
     current_readings = []
     
+    # If no sensors found, return empty list with connection status
+    if not sensors:
+        logger.warning("No sensors retrieved from Temp Stick API - check API connection")
+        return []
+    
     for sensor in sensors:
         sensor_id = sensor.get('id')
         if not sensor_id:
