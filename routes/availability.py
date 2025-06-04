@@ -311,8 +311,16 @@ def generate_availability_email_html(fleet_data, contact_info=None):
     
     return html
 
-def generate_plain_text_email(fleet_data):
+def generate_plain_text_email(fleet_data, contact_info=None):
     """Generate plain text email for copy/paste"""
+    if contact_info is None:
+        contact_info = {
+            'email': 'dispatch@hitchedlogistics.com',
+            'phone': '(555) 123-4567',
+            'name': 'Dispatch Team',
+            'hours': 'Available 24/7 for your shipping needs'
+        }
+    
     current_date = datetime.now().strftime('%B %d, %Y')
     
     text = f"""HITCHED LOGISTICS LLC
@@ -351,10 +359,10 @@ Contact: {truck['contact_info']}
     text += f"""
 
 📞 CONTACT INFORMATION
-Contact our dispatch team:
-📧 Email: dispatch@hitchedlogistics.com
-📱 Phone: (555) 123-4567
-🕒 Available 24/7 for your shipping needs
+Contact our {contact_info['name']}:
+📧 Email: {contact_info['email']}
+📱 Phone: {contact_info['phone']}
+🕒 {contact_info['hours']}
 
 Hitched Logistics LLC
 This report was generated on {current_date}
