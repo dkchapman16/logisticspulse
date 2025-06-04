@@ -55,11 +55,6 @@
                                                value="Weekly Fleet Availability Update">
                                     </div>
                                     
-                                    <div class="mb-3">
-                                        <label for="from-email" class="form-label">From Email</label>
-                                        <input type="email" class="form-control" id="from-email" 
-                                               placeholder="your-email@company.com">
-                                    </div>
                                     
                                     <!-- Contact Information Section -->
                                     <div class="card border-secondary mb-3">
@@ -363,7 +358,6 @@
         }
         
         const subject = document.getElementById('email-subject').value;
-        const fromEmail = document.getElementById('from-email').value;
         const contactEmail = document.getElementById('contact-email').value;
         const contactPhone = document.getElementById('contact-phone').value;
         const contactName = document.getElementById('contact-name').value;
@@ -382,7 +376,6 @@
             },
             body: JSON.stringify({
                 subject: subject,
-                from_email: fromEmail,
                 contact_email: contactEmail,
                 contact_phone: contactPhone,
                 contact_name: contactName,

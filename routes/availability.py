@@ -96,7 +96,6 @@ def generate_email_template():
     try:
         data = request.get_json()
         subject = data.get('subject', 'Weekly Fleet Availability Update')
-        from_email = data.get('from_email', '').strip() or 'x'
         
         # Get contact information from the request, use "x" for empty fields
         contact_info = {
@@ -177,7 +176,6 @@ def generate_email_template():
         return jsonify({
             'success': True,
             'subject': subject,
-            'from_email': from_email,
             'html_content': html_content,
             'plain_text': plain_text,
             'available_count': fleet_data['total_available'],
