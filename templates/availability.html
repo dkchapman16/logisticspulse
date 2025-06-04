@@ -61,6 +61,41 @@
                                                value="dispatch@hitchedlogistics.com">
                                     </div>
                                     
+                                    <!-- Contact Information Section -->
+                                    <div class="card border-secondary mb-3">
+                                        <div class="card-header">
+                                            <h6 class="mb-0"><i data-feather="phone"></i> Contact Information</h6>
+                                        </div>
+                                        <div class="card-body">
+                                            <div class="row">
+                                                <div class="col-md-6">
+                                                    <div class="mb-3">
+                                                        <label for="contact-email" class="form-label">Contact Email</label>
+                                                        <input type="email" class="form-control" id="contact-email" 
+                                                               value="dispatch@hitchedlogistics.com">
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <div class="mb-3">
+                                                        <label for="contact-phone" class="form-label">Contact Phone</label>
+                                                        <input type="tel" class="form-control" id="contact-phone" 
+                                                               value="(555) 123-4567">
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="mb-3">
+                                                <label for="contact-name" class="form-label">Contact Person/Department</label>
+                                                <input type="text" class="form-control" id="contact-name" 
+                                                       value="Dispatch Team">
+                                            </div>
+                                            <div class="mb-0">
+                                                <label for="availability-hours" class="form-label">Availability Hours</label>
+                                                <input type="text" class="form-control" id="availability-hours" 
+                                                       value="Available 24/7 for your shipping needs">
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
                                     <div class="alert alert-info">
                                         <i data-feather="info"></i>
                                         <strong>Manual Sending:</strong> Generate the email template below, then copy and paste it into your preferred email client to send to your customers and brokers.
@@ -325,6 +360,10 @@
         
         const subject = document.getElementById('email-subject').value;
         const fromEmail = document.getElementById('from-email').value;
+        const contactEmail = document.getElementById('contact-email').value;
+        const contactPhone = document.getElementById('contact-phone').value;
+        const contactName = document.getElementById('contact-name').value;
+        const availabilityHours = document.getElementById('availability-hours').value;
         
         // Show loading state
         const generateBtn = document.getElementById('generate-template-btn');
@@ -339,7 +378,11 @@
             },
             body: JSON.stringify({
                 subject: subject,
-                from_email: fromEmail
+                from_email: fromEmail,
+                contact_email: contactEmail,
+                contact_phone: contactPhone,
+                contact_name: contactName,
+                availability_hours: availabilityHours
             })
         })
         .then(response => response.json())

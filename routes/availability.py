@@ -98,6 +98,14 @@ def generate_email_template():
         subject = data.get('subject', 'Weekly Fleet Availability Update')
         from_email = data.get('from_email', 'dispatch@hitchedlogistics.com')
         
+        # Get contact information from the request
+        contact_info = {
+            'email': data.get('contact_email', 'dispatch@hitchedlogistics.com'),
+            'phone': data.get('contact_phone', '(555) 123-4567'),
+            'name': data.get('contact_name', 'Dispatch Team'),
+            'hours': data.get('availability_hours', 'Available 24/7 for your shipping needs')
+        }
+        
         # Get current fleet status
         drivers = db.session.query(Driver).filter_by(status='active').all()
         
@@ -160,11 +168,11 @@ def generate_email_template():
             'report_date': datetime.now().strftime('%B %d, %Y')
         }
         
-        # Generate HTML email content
-        html_content = generate_availability_email_html(fleet_data)
+        # Generate HTML email content with contact info
+        html_content = generate_availability_email_html(fleet_data, contact_info)
         
-        # Generate plain text version for copying
-        plain_text = generate_plain_text_email(fleet_data)
+        # Generate plain text version for copying with contact info
+        plain_text = generate_plain_text_email(fleet_data, contact_info)
         
         return jsonify({
             'success': True,
@@ -181,8 +189,16 @@ def generate_email_template():
         logger.error(f"Error sending email blast: {e}")
         return jsonify({'error': 'Failed to generate email blast'}), 500
 
-def generate_availability_email_html(fleet_data):
+def generate_availability_email_html(fleet_data, contact_info=None):
     """Generate professional HTML email content for availability report"""
+    if contact_info is None:
+        contact_info = {
+            'email': 'dispatch@hitchedlogistics.com',
+            'phone': '(555) 123-4567',
+            'name': 'Dispatch Team',
+            'hours': 'Available 24/7 for your shipping needs'
+        }
+    
     current_date = datetime.now().strftime('%B %d, %Y')
     
     html = f"""
@@ -278,10 +294,10 @@ def generate_availability_email_html(fleet_data):
             
             <div class="contact-info">
                 <h3>📞 Contact Information</h3>
-                <p><strong>Contact our dispatch team:</strong></p>
-                <p>📧 Email: dispatch@hitchedlogistics.com</p>
-                <p>📱 Phone: (555) 123-4567</p>
-                <p>🕒 Available 24/7 for your shipping needs</p>
+                <p><strong>Contact our {contact_info['name']}:</strong></p>
+                <p>📧 Email: {contact_info['email']}</p>
+                <p>📱 Phone: {contact_info['phone']}</p>
+                <p>🕒 {contact_info['hours']}</p>
             </div>
             
             <div class="footer">
