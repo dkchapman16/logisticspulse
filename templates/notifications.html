@@ -1,0 +1,238 @@
+{% extends 'layout.html' %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">
+                    <i data-feather="bell"></i> Notifications
+                </h5>
+                <div class="d-flex gap-2">
+                    <button class="btn btn-outline-primary btn-sm" id="mark-all-read-btn">
+                        <i data-feather="check-circle"></i> Mark All Read
+                    </button>
+                    <button class="btn btn-outline-secondary btn-sm" id="refresh-notifications-btn">
+                        <i data-feather="refresh-cw"></i> Refresh
+                    </button>
+                </div>
+            </div>
+            <div class="card-body p-0">
+                <!-- Notifications List -->
+                <div id="notifications-container">
+                    <div class="text-center p-4">
+                        <div class="spinner-border spinner-border-sm" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                        <span class="ms-2">Loading notifications...</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Notification Detail Modal -->
+<div class="modal fade" id="notificationModal" tabindex="-1" aria-labelledby="notificationModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="notificationModalLabel">Notification Details</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body" id="notification-detail-content">
+                <!-- Detail content will be loaded here -->
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary" id="mark-read-btn" style="display: none;">Mark as Read</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    loadNotifications();
+    
+    // Set up event listeners
+    document.getElementById('refresh-notifications-btn').addEventListener('click', loadNotifications);
+    document.getElementById('mark-all-read-btn').addEventListener('click', markAllAsRead);
+    
+    // Initialize feather icons
+    feather.replace();
+});
+
+function loadNotifications() {
+    const container = document.getElementById('notifications-container');
+    container.innerHTML = `
+        <div class="text-center p-4">
+            <div class="spinner-border spinner-border-sm" role="status">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+            <span class="ms-2">Loading notifications...</span>
+        </div>
+    `;
+    
+    fetch('/notifications/get_notifications')
+        .then(response => response.json())
+        .then(data => {
+            displayNotifications(data.notifications || []);
+        })
+        .catch(error => {
+            console.error('Error loading notifications:', error);
+            container.innerHTML = `
+                <div class="text-center p-4 text-danger">
+                    <i data-feather="alert-circle"></i>
+                    <span class="ms-2">Error loading notifications</span>
+                </div>
+            `;
+            feather.replace();
+        });
+}
+
+function displayNotifications(notifications) {
+    const container = document.getElementById('notifications-container');
+    
+    if (notifications.length === 0) {
+        container.innerHTML = `
+            <div class="text-center p-4 text-muted">
+                <i data-feather="bell"></i>
+                <div class="mt-2">No notifications found</div>
+            </div>
+        `;
+        feather.replace();
+        return;
+    }
+    
+    let html = '';
+    notifications.forEach(notification => {
+        const isRead = notification.read;
+        const typeIcon = getNotificationIcon(notification.type);
+        const typeClass = getNotificationClass(notification.type);
+        
+        html += `
+            <div class="notification-item ${isRead ? 'read' : 'unread'}" data-id="${notification.id}">
+                <div class="d-flex align-items-start p-3 border-bottom">
+                    <div class="flex-shrink-0 me-3">
+                        <div class="notification-icon ${typeClass}">
+                            <i data-feather="${typeIcon}"></i>
+                        </div>
+                    </div>
+                    <div class="flex-grow-1">
+                        <div class="d-flex justify-content-between align-items-start">
+                            <div>
+                                <p class="mb-1 ${isRead ? 'text-muted' : ''}">${notification.message}</p>
+                                <small class="text-muted">
+                                    <i data-feather="clock"></i> ${notification.created_at}
+                                </small>
+                            </div>
+                            <div class="d-flex gap-1">
+                                ${!isRead ? `
+                                    <button class="btn btn-sm btn-outline-primary mark-read-btn" data-id="${notification.id}">
+                                        <i data-feather="check"></i>
+                                    </button>
+                                ` : ''}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+    });
+    
+    container.innerHTML = html;
+    
+    // Add event listeners for mark as read buttons
+    container.querySelectorAll('.mark-read-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const notificationId = this.getAttribute('data-id');
+            markAsRead([notificationId]);
+        });
+    });
+    
+    feather.replace();
+}
+
+function getNotificationIcon(type) {
+    switch(type) {
+        case 'success': return 'check-circle';
+        case 'warning': return 'alert-triangle';
+        case 'danger': case 'error': return 'alert-circle';
+        case 'info': return 'info';
+        default: return 'bell';
+    }
+}
+
+function getNotificationClass(type) {
+    switch(type) {
+        case 'success': return 'text-success';
+        case 'warning': return 'text-warning';
+        case 'danger': case 'error': return 'text-danger';
+        case 'info': return 'text-info';
+        default: return 'text-primary';
+    }
+}
+
+function markAsRead(notificationIds) {
+    fetch('/notifications/mark_read', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            notification_ids: notificationIds
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            loadNotifications(); // Refresh the list
+        }
+    })
+    .catch(error => {
+        console.error('Error marking notifications as read:', error);
+    });
+}
+
+function markAllAsRead() {
+    fetch('/notifications/mark_all_read', {
+        method: 'POST'
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            loadNotifications(); // Refresh the list
+        }
+    })
+    .catch(error => {
+        console.error('Error marking all notifications as read:', error);
+    });
+}
+</script>
+
+<style>
+.notification-item.unread {
+    background-color: rgba(0, 196, 140, 0.05);
+    border-left: 3px solid var(--primary-action);
+}
+
+.notification-item.read {
+    opacity: 0.7;
+}
+
+.notification-icon {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: var(--card-background);
+}
+
+.notification-item:hover {
+    background-color: var(--card-background);
+}
+</style>
+{% endblock %}
