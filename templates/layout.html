@@ -143,10 +143,15 @@
                             </a>
                         </li>
                         <li>
-                            <button class="nav-section-link sound-toggle-btn w-100 text-start border-0" type="button" id="soundToggle" title="Toggle Sound">
-                                <i data-feather="volume-2" id="soundIcon"></i>
-                                <span id="soundText">Sound: On</span>
-                            </button>
+                            <div class="nav-section-link d-flex justify-content-between align-items-center">
+                                <div class="d-flex align-items-center">
+                                    <i data-feather="volume-2" id="soundIcon"></i>
+                                    <span class="ms-3">Sound</span>
+                                </div>
+                                <div class="sound-toggle-switch" id="soundToggle" title="Toggle Sound">
+                                    <div class="sound-toggle-slider" id="soundSlider"></div>
+                                </div>
+                            </div>
                         </li>
                     </ul>
                 </div>
@@ -233,15 +238,18 @@
         
         function updateSoundIcon() {
             const soundIcon = document.getElementById('soundIcon');
-            const soundText = document.getElementById('soundText');
             const soundToggle = document.getElementById('soundToggle');
             if (soundIcon && soundToggle) {
                 soundIcon.setAttribute('data-feather', soundEnabled ? 'volume-2' : 'volume-x');
-                soundToggle.style.color = soundEnabled ? 'var(--primary-action)' : 'var(--neutral-text)';
                 soundToggle.title = soundEnabled ? 'Sound On (Click to disable)' : 'Sound Off (Click to enable)';
-                if (soundText) {
-                    soundText.textContent = soundEnabled ? 'Sound: On' : 'Sound: Off';
+                
+                // Update toggle switch appearance
+                if (soundEnabled) {
+                    soundToggle.classList.add('active');
+                } else {
+                    soundToggle.classList.remove('active');
                 }
+                
                 feather.replace();
             }
         }

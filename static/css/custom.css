@@ -11,38 +11,48 @@
     text-decoration: underline !important;
 }
 
-/* Sound toggle button styling */
-.sound-toggle-btn {
-    color: var(--primary-action) !important;
-    transition: all 0.2s ease;
-    border: none !important;
-    background: none !important;
-    display: flex;
-    align-items: center;
-    padding: 0.75rem 1.5rem;
-    font-weight: 500;
-    border-left: 3px solid transparent;
+/* Sound toggle switch styling */
+.sound-toggle-switch {
+    width: 44px;
+    height: 24px;
+    background-color: var(--border-color);
+    border-radius: 12px;
+    position: relative;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
 }
 
-.sound-toggle-btn:hover {
-    background-color: var(--card-background) !important;
-    color: var(--primary-action) !important;
-    border-left-color: var(--primary-action);
+.sound-toggle-switch:hover {
+    background-color: var(--neutral-text);
 }
 
-.sound-toggle-btn:focus {
-    box-shadow: 0 0 0 2px rgba(0, 196, 140, 0.3) !important;
-    outline: none;
+.sound-toggle-switch.active {
+    background-color: var(--primary-action);
 }
 
-.sound-toggle-btn:active {
-    transform: scale(0.98);
+.sound-toggle-slider {
+    width: 20px;
+    height: 20px;
+    background-color: var(--bright-text);
+    border-radius: 50%;
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    transition: transform 0.3s ease;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
 }
 
-.sound-toggle-btn i {
-    margin-right: 0.75rem;
-    width: 18px;
-    height: 18px;
+.sound-toggle-switch.active .sound-toggle-slider {
+    transform: translateX(20px);
+}
+
+/* Navigation link styling for sound toggle */
+.nav-section-link span {
+    color: var(--bright-text) !important;
+}
+
+.nav-section-link i {
+    color: var(--bright-text) !important;
 }
 
 /* Color variables based on creative vision - Tesla dark mode inspired */
