@@ -277,7 +277,7 @@ def generate_availability_email_html(fleet_data):
             </div>
             
             <div class="contact-info">
-                <h3>📞 Ready to Book?</h3>
+                <h3>📞 Contact Information</h3>
                 <p><strong>Contact our dispatch team:</strong></p>
                 <p>📧 Email: dispatch@hitchedlogistics.com</p>
                 <p>📱 Phone: (555) 123-4567</p>
@@ -334,7 +334,7 @@ Contact: {truck['contact_info']}
     
     text += f"""
 
-📞 READY TO BOOK?
+📞 CONTACT INFORMATION
 Contact our dispatch team:
 📧 Email: dispatch@hitchedlogistics.com
 📱 Phone: (555) 123-4567
