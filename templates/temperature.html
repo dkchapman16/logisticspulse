@@ -1,0 +1,431 @@
+{% extends 'layout.html' %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-md-12">
+        <div class="d-flex justify-content-between align-items-center">
+            <h2>Temperature Monitoring</h2>
+            <div class="d-flex gap-2">
+                <button class="btn btn-outline-primary" id="refresh-btn">
+                    <i data-feather="refresh-cw"></i> Refresh
+                </button>
+                <button class="btn btn-outline-secondary" id="alerts-btn">
+                    <i data-feather="alert-triangle"></i> Alerts <span class="badge bg-danger ms-1" id="alert-count">0</span>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Temperature Overview Cards -->
+<div class="row mb-4" id="temperature-overview">
+    <div class="col-md-3">
+        <div class="card">
+            <div class="card-body text-center">
+                <div class="spinner-border spinner-border-sm" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+                <div class="mt-2">Loading sensors...</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Temperature Sensors Grid -->
+<div class="row mb-4">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i data-feather="thermometer"></i> Reefer Temperature Sensors
+                </h5>
+            </div>
+            <div class="card-body">
+                <div id="sensors-grid" class="row">
+                    <div class="col-12 text-center">
+                        <div class="spinner-border" role="status">
+                            <span class="visually-hidden">Loading sensors...</span>
+                        </div>
+                        <div class="mt-2">Loading temperature data...</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Temperature Alerts -->
+<div class="row mb-4">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i data-feather="alert-triangle"></i> Temperature Alerts
+                </h5>
+            </div>
+            <div class="card-body">
+                <div id="alerts-container">
+                    <div class="text-center">
+                        <div class="spinner-border spinner-border-sm" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                        <span class="ms-2">Loading alerts...</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Temperature History Modal -->
+<div class="modal fade" id="historyModal" tabindex="-1" aria-labelledby="historyModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="historyModalLabel">Temperature History</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <canvas id="temperatureChart" width="400" height="200"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    loadTemperatureData();
+    loadTemperatureAlerts();
+    
+    // Set up refresh interval (every 5 minutes)
+    setInterval(loadTemperatureData, 5 * 60 * 1000);
+    setInterval(loadTemperatureAlerts, 5 * 60 * 1000);
+    
+    // Set up event listeners
+    document.getElementById('refresh-btn').addEventListener('click', function() {
+        loadTemperatureData();
+        loadTemperatureAlerts();
+    });
+    
+    feather.replace();
+});
+
+function loadTemperatureData() {
+    fetch('/temperature/api/current')
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                displayTemperatureOverview(data.readings);
+                displaySensorsGrid(data.readings);
+            } else {
+                showError('Failed to load temperature data: ' + (data.error || 'Unknown error'));
+            }
+        })
+        .catch(error => {
+            console.error('Error loading temperature data:', error);
+            showError('Error connecting to temperature monitoring service');
+        });
+}
+
+function loadTemperatureAlerts() {
+    fetch('/temperature/api/alerts')
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                displayTemperatureAlerts(data.alerts);
+                updateAlertCount(data.count);
+            } else {
+                console.error('Failed to load alerts:', data.error);
+            }
+        })
+        .catch(error => {
+            console.error('Error loading alerts:', error);
+        });
+}
+
+function displayTemperatureOverview(readings) {
+    const overview = document.getElementById('temperature-overview');
+    const totalSensors = readings.length;
+    const normalCount = readings.filter(r => r.status === 'normal').length;
+    const warningCount = readings.filter(r => r.status === 'warning').length;
+    const criticalCount = readings.filter(r => r.status === 'critical').length;
+    
+    overview.innerHTML = `
+        <div class="col-md-3">
+            <div class="card">
+                <div class="card-body text-center">
+                    <h3 class="text-primary">${totalSensors}</h3>
+                    <p class="mb-0">Total Sensors</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card">
+                <div class="card-body text-center">
+                    <h3 class="text-success">${normalCount}</h3>
+                    <p class="mb-0">Normal</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card">
+                <div class="card-body text-center">
+                    <h3 class="text-warning">${warningCount}</h3>
+                    <p class="mb-0">Warning</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card">
+                <div class="card-body text-center">
+                    <h3 class="text-danger">${criticalCount}</h3>
+                    <p class="mb-0">Critical</p>
+                </div>
+            </div>
+        </div>
+    `;
+}
+
+function displaySensorsGrid(readings) {
+    const grid = document.getElementById('sensors-grid');
+    
+    if (readings.length === 0) {
+        grid.innerHTML = `
+            <div class="col-12 text-center">
+                <p class="text-muted">No temperature sensors found. Check your Temp Stick API connection.</p>
+            </div>
+        `;
+        return;
+    }
+    
+    let html = '';
+    readings.forEach(reading => {
+        const statusClass = getStatusClass(reading.status);
+        const statusIcon = getStatusIcon(reading.status);
+        const lastUpdate = reading.timestamp ? new Date(reading.timestamp).toLocaleString() : 'Unknown';
+        
+        html += `
+            <div class="col-md-4 mb-3">
+                <div class="card ${statusClass}">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-start">
+                            <div>
+                                <h6 class="card-title">${reading.name}</h6>
+                                <p class="text-muted small mb-2">${reading.location}</p>
+                            </div>
+                            <i data-feather="${statusIcon}" class="status-icon"></i>
+                        </div>
+                        
+                        <div class="temperature-display mb-3">
+                            <span class="temperature-value">${reading.temperature_f ? reading.temperature_f.toFixed(1) : 'N/A'}°F</span>
+                            ${reading.temperature_c ? `<small class="text-muted">(${reading.temperature_c.toFixed(1)}°C)</small>` : ''}
+                        </div>
+                        
+                        ${reading.humidity ? `<p class="mb-2"><small>Humidity: ${reading.humidity}%</small></p>` : ''}
+                        
+                        <div class="d-flex justify-content-between align-items-center">
+                            <small class="text-muted">Updated: ${lastUpdate}</small>
+                            <button class="btn btn-sm btn-outline-primary" onclick="showHistory('${reading.sensor_id}', '${reading.name}')">
+                                <i data-feather="bar-chart-2"></i>
+                            </button>
+                        </div>
+                        
+                        ${reading.battery_level ? `
+                            <div class="mt-2">
+                                <small class="text-muted">Battery: ${reading.battery_level}%</small>
+                                <div class="progress" style="height: 4px;">
+                                    <div class="progress-bar ${reading.battery_level < 20 ? 'bg-danger' : 'bg-success'}" 
+                                         style="width: ${reading.battery_level}%"></div>
+                                </div>
+                            </div>
+                        ` : ''}
+                    </div>
+                </div>
+            </div>
+        `;
+    });
+    
+    grid.innerHTML = html;
+    feather.replace();
+}
+
+function displayTemperatureAlerts(alerts) {
+    const container = document.getElementById('alerts-container');
+    
+    if (alerts.length === 0) {
+        container.innerHTML = '<p class="text-muted">No active temperature alerts.</p>';
+        return;
+    }
+    
+    let html = '';
+    alerts.forEach(alert => {
+        const alertClass = alert.severity === 'critical' ? 'alert-danger' : 'alert-warning';
+        const alertIcon = alert.severity === 'critical' ? 'alert-circle' : 'alert-triangle';
+        
+        html += `
+            <div class="alert ${alertClass} d-flex align-items-center" role="alert">
+                <i data-feather="${alertIcon}" class="me-2"></i>
+                <div class="flex-grow-1">
+                    <strong>${alert.sensor_name}</strong>: ${alert.message}
+                    <br><small class="text-muted">Time: ${new Date(alert.timestamp).toLocaleString()}</small>
+                </div>
+            </div>
+        `;
+    });
+    
+    container.innerHTML = html;
+    feather.replace();
+}
+
+function updateAlertCount(count) {
+    const badge = document.getElementById('alert-count');
+    badge.textContent = count;
+    badge.style.display = count > 0 ? 'inline' : 'none';
+}
+
+function getStatusClass(status) {
+    switch(status) {
+        case 'normal': return 'border-success';
+        case 'warning': return 'border-warning';
+        case 'critical': return 'border-danger';
+        default: return 'border-secondary';
+    }
+}
+
+function getStatusIcon(status) {
+    switch(status) {
+        case 'normal': return 'check-circle';
+        case 'warning': return 'alert-triangle';
+        case 'critical': return 'alert-circle';
+        default: return 'help-circle';
+    }
+}
+
+function showHistory(sensorId, sensorName) {
+    // Load temperature history for the sensor
+    fetch(`/temperature/api/sensor/${sensorId}/history?hours=24`)
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                document.getElementById('historyModalLabel').textContent = `Temperature History - ${sensorName}`;
+                // Display chart with the data
+                displayTemperatureChart(data.data);
+                new bootstrap.Modal(document.getElementById('historyModal')).show();
+            } else {
+                showError('Failed to load temperature history');
+            }
+        })
+        .catch(error => {
+            console.error('Error loading history:', error);
+            showError('Error loading temperature history');
+        });
+}
+
+function displayTemperatureChart(data) {
+    // Simple chart implementation - you could use Chart.js for more advanced charts
+    const canvas = document.getElementById('temperatureChart');
+    const ctx = canvas.getContext('2d');
+    
+    // Clear canvas
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    
+    if (!data.data || data.data.length === 0) {
+        ctx.fillStyle = '#666';
+        ctx.font = '16px Arial';
+        ctx.textAlign = 'center';
+        ctx.fillText('No data available', canvas.width / 2, canvas.height / 2);
+        return;
+    }
+    
+    // Simple line chart implementation
+    const readings = data.data;
+    const margin = 40;
+    const chartWidth = canvas.width - 2 * margin;
+    const chartHeight = canvas.height - 2 * margin;
+    
+    // Find min/max temperatures
+    const temperatures = readings.map(r => r.temperature_f).filter(t => t !== null);
+    const minTemp = Math.min(...temperatures);
+    const maxTemp = Math.max(...temperatures);
+    const tempRange = maxTemp - minTemp;
+    
+    // Draw axes
+    ctx.strokeStyle = '#666';
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.moveTo(margin, margin);
+    ctx.lineTo(margin, margin + chartHeight);
+    ctx.lineTo(margin + chartWidth, margin + chartHeight);
+    ctx.stroke();
+    
+    // Draw temperature line
+    ctx.strokeStyle = '#00C48C';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    
+    readings.forEach((reading, index) => {
+        if (reading.temperature_f !== null) {
+            const x = margin + (index / (readings.length - 1)) * chartWidth;
+            const y = margin + chartHeight - ((reading.temperature_f - minTemp) / tempRange) * chartHeight;
+            
+            if (index === 0) {
+                ctx.moveTo(x, y);
+            } else {
+                ctx.lineTo(x, y);
+            }
+        }
+    });
+    
+    ctx.stroke();
+    
+    // Add labels
+    ctx.fillStyle = '#666';
+    ctx.font = '12px Arial';
+    ctx.textAlign = 'center';
+    ctx.fillText(`${minTemp.toFixed(1)}°F`, margin - 15, margin + chartHeight);
+    ctx.fillText(`${maxTemp.toFixed(1)}°F`, margin - 15, margin);
+}
+
+function showError(message) {
+    // Simple error display
+    const overview = document.getElementById('temperature-overview');
+    overview.innerHTML = `
+        <div class="col-12">
+            <div class="alert alert-danger">
+                <i data-feather="alert-circle"></i> ${message}
+            </div>
+        </div>
+    `;
+    feather.replace();
+}
+</script>
+
+<style>
+.temperature-value {
+    font-size: 2rem;
+    font-weight: bold;
+    color: var(--primary-action);
+}
+
+.status-icon {
+    width: 20px;
+    height: 20px;
+}
+
+.border-success {
+    border-left: 4px solid var(--bs-success) !important;
+}
+
+.border-warning {
+    border-left: 4px solid var(--bs-warning) !important;
+}
+
+.border-danger {
+    border-left: 4px solid var(--bs-danger) !important;
+}
+
+.border-secondary {
+    border-left: 4px solid var(--bs-secondary) !important;
+}
+</style>
+{% endblock %}

@@ -60,6 +60,7 @@ with app.app_context():
     from routes.assignments import assignments_bp
     from routes.imports import imports_bp
     from routes.availability import availability_bp
+    from routes.temperature import temperature_bp
     
     app.register_blueprint(dashboard_bp)
     app.register_blueprint(loads_bp)
@@ -69,6 +70,7 @@ with app.app_context():
     app.register_blueprint(assignments_bp)
     app.register_blueprint(imports_bp)
     app.register_blueprint(availability_bp)
+    app.register_blueprint(temperature_bp, url_prefix='/temperature')
     
     # Add root route redirect
     @app.route('/')

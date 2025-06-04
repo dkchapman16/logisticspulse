@@ -143,6 +143,12 @@
                             </a>
                         </li>
                         <li>
+                            <a class="nav-section-link {% if request.endpoint.startswith('temperature.') %}active{% endif %}" href="{{ url_for('temperature.index') }}">
+                                <i data-feather="thermometer"></i>
+                                <span>Temperature</span>
+                            </a>
+                        </li>
+                        <li>
                             <div class="nav-section-link d-flex justify-content-between align-items-center">
                                 <div class="d-flex align-items-center">
                                     <i data-feather="volume-2" id="soundIcon"></i>
