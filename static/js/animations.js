@@ -185,8 +185,18 @@ function showSlotMachineEffect(container, finalValue, prefix = '', suffix = '') 
     playSlotMachineSound();
 }
 
+// Check if sound is enabled (get from localStorage like the main sound toggle)
+function isSoundEnabled() {
+    return localStorage.getItem('soundEnabled') !== 'false';
+}
+
 // Play slot machine sound effect
 function playSlotMachineSound() {
+    if (!isSoundEnabled()) {
+        console.log('Sound disabled, not playing slot machine sound');
+        return;
+    }
+    
     const audio = new Audio();
     audio.src = 'https://freesound.org/data/previews/337/337049_3232293-lq.mp3'; // Slot machine sound
     audio.volume = 0.5;
@@ -197,6 +207,11 @@ function playSlotMachineSound() {
 
 // Play success sound effect
 function playSuccessSound() {
+    if (!isSoundEnabled()) {
+        console.log('Sound disabled, not playing success sound');
+        return;
+    }
+    
     const audio = new Audio();
     audio.src = 'https://freesound.org/data/previews/320/320654_5260872-lq.mp3'; // Success chime
     audio.volume = 0.5;
@@ -207,6 +222,11 @@ function playSuccessSound() {
 
 // Play coin sound effect for achievements
 function playCoinSound() {
+    if (!isSoundEnabled()) {
+        console.log('Sound disabled, not playing coin sound');
+        return;
+    }
+    
     const audio = new Audio();
     audio.src = 'https://freesound.org/data/previews/511/511484_9353313-lq.mp3'; // Coin sound
     audio.volume = 0.5;
