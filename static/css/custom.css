@@ -17,15 +17,27 @@
     transition: all 0.2s ease;
     border: none !important;
     background: none !important;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    border-radius: 8px;
 }
 
 .sound-toggle-btn:hover {
     color: var(--bright-text) !important;
-    transform: scale(1.1);
+    background-color: rgba(255, 255, 255, 0.1) !important;
+    transform: scale(1.05);
 }
 
 .sound-toggle-btn:focus {
     box-shadow: 0 0 0 2px rgba(0, 196, 140, 0.3) !important;
+    outline: none;
+}
+
+.sound-toggle-btn:active {
+    transform: scale(0.95);
 }
 
 /* Color variables based on creative vision - Tesla dark mode inspired */

@@ -27,22 +27,25 @@
                 <span class="ms-2" style="color: var(--neutral-text); font-size: 0.75rem; font-weight: 500; letter-spacing: 1px;">PRECISION TO PERFORMANCE</span>
             </a>
             
-            <div class="d-flex align-items-center">
+            <div class="d-flex align-items-center gap-2">
                 <button class="btn btn-link d-lg-none" type="button" data-bs-toggle="offcanvas" data-bs-target="#sidePanel" aria-controls="sidePanel">
                     <i data-feather="menu"></i>
                 </button>
                 
-                <!-- Sound Toggle -->
-                <button class="btn btn-link nav-link sound-toggle-btn" type="button" id="soundToggle" title="Toggle Sound">
-                    <i data-feather="volume-2" id="soundIcon"></i>
-                </button>
-                
-                <a class="nav-link position-relative {% if request.endpoint.startswith('notifications.') %}active{% endif %}" href="{{ url_for('notifications.index') }}">
-                    <i data-feather="bell"></i>
-                    <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger notification-badge d-none">
-                        0
-                    </span>
-                </a>
+                <div class="d-flex align-items-center">
+                    <!-- Sound Toggle -->
+                    <button class="btn btn-link sound-toggle-btn p-2" type="button" id="soundToggle" title="Toggle Sound">
+                        <i data-feather="volume-2" id="soundIcon"></i>
+                    </button>
+                    
+                    <!-- Notifications -->
+                    <a class="nav-link position-relative p-2 {% if request.endpoint.startswith('notifications.') %}active{% endif %}" href="{{ url_for('notifications.index') }}">
+                        <i data-feather="bell"></i>
+                        <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger notification-badge d-none">
+                            0
+                        </span>
+                    </a>
+                </div>
             </div>
         </div>
     </nav>
