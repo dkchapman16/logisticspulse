@@ -261,6 +261,9 @@
             }
         }
         
+        // Track if this is the first notification check
+        let isFirstNotificationCheck = true;
+        
         // Function to check for unread notifications
         function checkNotifications() {
             fetch('/notifications/count')
@@ -273,13 +276,16 @@
                         badge.textContent = data.unread_count > 99 ? '99+' : data.unread_count;
                         badge.classList.remove('d-none');
                         
-                        // Play sound if count increased
-                        if (data.unread_count > currentCount) {
+                        // Play sound only if count increased and it's not the first check
+                        if (data.unread_count > currentCount && !isFirstNotificationCheck) {
                             playNotificationSound();
                         }
                     } else {
                         badge.classList.add('d-none');
                     }
+                    
+                    // Mark that we've done the first check
+                    isFirstNotificationCheck = false;
                 })
                 .catch(error => console.error('Error checking notifications:', error));
         }
