@@ -169,7 +169,7 @@ def send_email_blast():
             
             # Log the broadcast
             send_notification(
-                user_id=current_user.id,
+                user_id=1,  # Default user ID since no authentication
                 message=f"Weekly availability email blast sent to {len(email_list)} recipients",
                 notification_type='success'
             )
@@ -327,7 +327,6 @@ def send_bulk_email(email_list, subject, html_content):
     return results
 
 @availability_bp.route('/availability/templates')
-@login_required
 def get_message_templates():
     """Get predefined message templates for availability broadcasts"""
     templates = [
@@ -352,7 +351,6 @@ def get_message_templates():
     return jsonify({'templates': templates})
 
 @availability_bp.route('/availability/history')
-@login_required
 def broadcast_history():
     """Get history of availability broadcasts"""
     try:
