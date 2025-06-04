@@ -267,8 +267,8 @@
             }
         }
         
-        // Track if this is the first notification check
-        let isFirstNotificationCheck = true;
+        // Track the last known notification count to prevent sounds on refresh
+        let lastNotificationCount = null;
         
         // Function to check for unread notifications
         function checkNotifications() {
@@ -276,22 +276,23 @@
                 .then(response => response.json())
                 .then(data => {
                     const badge = document.querySelector('.notification-badge');
-                    const currentCount = parseInt(badge.textContent) || 0;
                     
                     if (data.unread_count > 0) {
                         badge.textContent = data.unread_count > 99 ? '99+' : data.unread_count;
                         badge.classList.remove('d-none');
                         
-                        // Play sound only if count increased and it's not the first check
-                        if (data.unread_count > currentCount && !isFirstNotificationCheck) {
+                        // Play sound only if count increased from a known previous state
+                        if (lastNotificationCount !== null && 
+                            data.unread_count > lastNotificationCount && 
+                            soundEnabled) {
                             playNotificationSound();
                         }
                     } else {
                         badge.classList.add('d-none');
                     }
                     
-                    // Mark that we've done the first check
-                    isFirstNotificationCheck = false;
+                    // Update the last known count
+                    lastNotificationCount = data.unread_count;
                 })
                 .catch(error => console.error('Error checking notifications:', error));
         }
