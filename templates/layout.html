@@ -31,6 +31,12 @@
                 <button class="btn btn-link d-lg-none" type="button" data-bs-toggle="offcanvas" data-bs-target="#sidePanel" aria-controls="sidePanel">
                     <i data-feather="menu"></i>
                 </button>
+                
+                <!-- Sound Toggle -->
+                <button class="btn btn-link nav-link sound-toggle-btn" type="button" id="soundToggle" title="Toggle Sound">
+                    <i data-feather="volume-2" id="soundIcon"></i>
+                </button>
+                
                 <a class="nav-link position-relative {% if request.endpoint.startswith('notifications.') %}active{% endif %}" href="{{ url_for('notifications.index') }}">
                     <i data-feather="bell"></i>
                     <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger notification-badge d-none">
@@ -185,6 +191,9 @@
         document.addEventListener('DOMContentLoaded', function() {
             feather.replace();
             
+            // Initialize sound toggle
+            initializeSoundToggle();
+            
             // Check for unread notifications
             if (document.querySelector('.notification-badge')) {
                 checkNotifications();
@@ -193,15 +202,81 @@
             }
         });
         
+        // Sound toggle functionality
+        let soundEnabled = true;
+        
+        function initializeSoundToggle() {
+            // Get saved sound preference
+            soundEnabled = localStorage.getItem('soundEnabled') !== 'false';
+            updateSoundIcon();
+            
+            // Add click handler
+            const soundToggle = document.getElementById('soundToggle');
+            if (soundToggle) {
+                soundToggle.addEventListener('click', toggleSound);
+            }
+        }
+        
+        function toggleSound() {
+            soundEnabled = !soundEnabled;
+            localStorage.setItem('soundEnabled', soundEnabled);
+            updateSoundIcon();
+        }
+        
+        function updateSoundIcon() {
+            const soundIcon = document.getElementById('soundIcon');
+            const soundToggle = document.getElementById('soundToggle');
+            if (soundIcon && soundToggle) {
+                soundIcon.setAttribute('data-feather', soundEnabled ? 'volume-2' : 'volume-x');
+                soundToggle.style.color = soundEnabled ? 'var(--primary-action)' : 'var(--neutral-text)';
+                soundToggle.title = soundEnabled ? 'Sound On (Click to disable)' : 'Sound Off (Click to enable)';
+                feather.replace();
+            }
+        }
+        
+        // Play notification sound (only if enabled)
+        function playNotificationSound() {
+            if (!soundEnabled) return;
+            
+            // Create a subtle notification sound using Web Audio API
+            try {
+                const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                const oscillator = audioContext.createOscillator();
+                const gainNode = audioContext.createGain();
+                
+                oscillator.connect(gainNode);
+                gainNode.connect(audioContext.destination);
+                
+                oscillator.frequency.setValueAtTime(800, audioContext.currentTime);
+                oscillator.frequency.setValueAtTime(600, audioContext.currentTime + 0.1);
+                
+                gainNode.gain.setValueAtTime(0, audioContext.currentTime);
+                gainNode.gain.linearRampToValueAtTime(0.1, audioContext.currentTime + 0.05);
+                gainNode.gain.linearRampToValueAtTime(0, audioContext.currentTime + 0.2);
+                
+                oscillator.start(audioContext.currentTime);
+                oscillator.stop(audioContext.currentTime + 0.2);
+            } catch (error) {
+                console.log('Audio not supported');
+            }
+        }
+        
         // Function to check for unread notifications
         function checkNotifications() {
             fetch('/notifications/count')
                 .then(response => response.json())
                 .then(data => {
                     const badge = document.querySelector('.notification-badge');
+                    const currentCount = parseInt(badge.textContent) || 0;
+                    
                     if (data.unread_count > 0) {
                         badge.textContent = data.unread_count > 99 ? '99+' : data.unread_count;
                         badge.classList.remove('d-none');
+                        
+                        // Play sound if count increased
+                        if (data.unread_count > currentCount) {
+                            playNotificationSound();
+                        }
                     } else {
                         badge.classList.add('d-none');
                     }

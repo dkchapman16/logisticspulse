@@ -11,6 +11,23 @@
     text-decoration: underline !important;
 }
 
+/* Sound toggle button styling */
+.sound-toggle-btn {
+    color: var(--primary-action) !important;
+    transition: all 0.2s ease;
+    border: none !important;
+    background: none !important;
+}
+
+.sound-toggle-btn:hover {
+    color: var(--bright-text) !important;
+    transform: scale(1.1);
+}
+
+.sound-toggle-btn:focus {
+    box-shadow: 0 0 0 2px rgba(0, 196, 140, 0.3) !important;
+}
+
 /* Color variables based on creative vision - Tesla dark mode inspired */
 :root {
     --primary-action: #00C48C; /* Mint Green - used for buttons, on-time badges, positive feedback */
