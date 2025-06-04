@@ -13,8 +13,8 @@
                         <button class="btn btn-outline-primary" id="preview-btn">
                             <i data-feather="eye"></i> Preview Email
                         </button>
-                        <button class="btn btn-primary" id="send-blast-btn">
-                            <i data-feather="send"></i> Send Email Blast
+                        <button class="btn btn-primary" id="generate-template-btn">
+                            <i data-feather="file-text"></i> Generate Email Template
                         </button>
                     </div>
                 </div>
@@ -46,7 +46,7 @@
                         <div class="col-md-6">
                             <div class="card">
                                 <div class="card-header">
-                                    <h6 class="mb-0">Email Configuration</h6>
+                                    <h6 class="mb-0">Email Template Settings</h6>
                                 </div>
                                 <div class="card-body">
                                     <div class="mb-3">
@@ -56,16 +56,14 @@
                                     </div>
                                     
                                     <div class="mb-3">
-                                        <label for="recipient-list" class="form-label">Recipients</label>
-                                        <textarea class="form-control" id="recipient-list" rows="6" 
-                                                  placeholder="Enter email addresses, one per line:&#10;customer1@example.com&#10;broker1@example.com&#10;partner@company.com"></textarea>
-                                        <div class="form-text">Enter one email address per line</div>
+                                        <label for="from-email" class="form-label">From Email</label>
+                                        <input type="email" class="form-control" id="from-email" 
+                                               value="dispatch@hitchedlogistics.com">
                                     </div>
                                     
-                                    <div class="mb-3">
-                                        <button class="btn btn-outline-secondary btn-sm" id="load-contacts-btn">
-                                            <i data-feather="users"></i> Load from Contacts
-                                        </button>
+                                    <div class="alert alert-info">
+                                        <i data-feather="info"></i>
+                                        <strong>Manual Sending:</strong> Generate the email template below, then copy and paste it into your preferred email client to send to your customers and brokers.
                                     </div>
                                 </div>
                             </div>
@@ -111,23 +109,81 @@
     </div>
 </div>
 
-<!-- Email Preview Modal -->
-<div class="modal fade" id="email-preview-modal" tabindex="-1" aria-labelledby="emailPreviewModalLabel" aria-hidden="true">
+<!-- Email Template Modal -->
+<div class="modal fade" id="email-template-modal" tabindex="-1" aria-labelledby="emailTemplateModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-xl">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="emailPreviewModalLabel">Email Preview</h5>
+                <h5 class="modal-title" id="emailTemplateModalLabel">Generated Email Template</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-                <div id="email-preview-content" style="max-height: 70vh; overflow-y: auto; border: 1px solid #ddd; padding: 20px; background-color: #f4f4f4;">
-                    <!-- Email preview will be loaded here -->
+                <!-- Template Summary -->
+                <div class="alert alert-success mb-3">
+                    <h6 class="mb-2">Email Template Generated Successfully</h6>
+                    <div class="row">
+                        <div class="col-md-4">
+                            <strong>Subject:</strong> <span id="template-subject"></span>
+                        </div>
+                        <div class="col-md-4">
+                            <strong>Available Now:</strong> <span id="template-available"></span> trucks
+                        </div>
+                        <div class="col-md-4">
+                            <strong>Upcoming:</strong> <span id="template-upcoming"></span> trucks
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Template Options -->
+                <ul class="nav nav-tabs" id="template-tabs" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link active" id="html-tab" data-bs-toggle="tab" data-bs-target="#html-tab-pane" type="button" role="tab">HTML Version</button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="text-tab" data-bs-toggle="tab" data-bs-target="#text-tab-pane" type="button" role="tab">Plain Text</button>
+                    </li>
+                </ul>
+                
+                <div class="tab-content" id="template-tabs-content">
+                    <!-- HTML Version -->
+                    <div class="tab-pane fade show active" id="html-tab-pane" role="tabpanel">
+                        <div class="mt-3">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <h6>HTML Email Template</h6>
+                                <button class="btn btn-sm btn-outline-primary" id="copy-html-btn">
+                                    <i data-feather="copy"></i> Copy HTML
+                                </button>
+                            </div>
+                            <textarea class="form-control" id="html-template" rows="15" readonly style="font-family: monospace; font-size: 12px;"></textarea>
+                        </div>
+                    </div>
+                    
+                    <!-- Plain Text Version -->
+                    <div class="tab-pane fade" id="text-tab-pane" role="tabpanel">
+                        <div class="mt-3">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <h6>Plain Text Email Template</h6>
+                                <button class="btn btn-sm btn-outline-primary" id="copy-text-btn">
+                                    <i data-feather="copy"></i> Copy Text
+                                </button>
+                            </div>
+                            <textarea class="form-control" id="text-template" rows="15" readonly style="font-family: monospace; font-size: 12px;"></textarea>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Preview -->
+                <div class="mt-3">
+                    <h6>Email Preview</h6>
+                    <div id="email-preview-content" style="max-height: 400px; overflow-y: auto; border: 1px solid #ddd; padding: 20px; background-color: #f4f4f4;">
+                        <!-- Email preview will be loaded here -->
+                    </div>
                 </div>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                <button type="button" class="btn btn-primary" id="send-from-preview-btn">
-                    <i data-feather="send"></i> Send Email Blast
+                <button type="button" class="btn btn-primary" id="generate-new-btn">
+                    <i data-feather="refresh-cw"></i> Generate New Template
                 </button>
             </div>
         </div>
@@ -171,10 +227,10 @@
         
         // Set up event listeners
         document.getElementById('preview-btn').addEventListener('click', previewEmail);
-        document.getElementById('send-blast-btn').addEventListener('click', sendEmailBlast);
-        document.getElementById('send-from-preview-btn').addEventListener('click', sendEmailBlast);
-        document.getElementById('load-contacts-btn').addEventListener('click', loadContacts);
-        document.getElementById('add-selected-contacts-btn').addEventListener('click', addSelectedContacts);
+        document.getElementById('generate-template-btn').addEventListener('click', generateEmailTemplate);
+        document.getElementById('generate-new-btn').addEventListener('click', generateEmailTemplate);
+        document.getElementById('copy-html-btn').addEventListener('click', copyHtmlTemplate);
+        document.getElementById('copy-text-btn').addEventListener('click', copyTextTemplate);
         
         // Initialize feather icons
         feather.replace();
@@ -258,33 +314,111 @@
             return;
         }
         
-        // Generate preview by calling the backend
-        const subject = document.getElementById('email-subject').value;
+        generateEmailTemplate();
+    }
+    
+    function generateEmailTemplate() {
+        if (!fleetData) {
+            alert('Fleet data not loaded. Please wait a moment and try again.');
+            return;
+        }
         
-        fetch('/availability/send-email-blast', {
+        const subject = document.getElementById('email-subject').value;
+        const fromEmail = document.getElementById('from-email').value;
+        
+        // Show loading state
+        const generateBtn = document.getElementById('generate-template-btn');
+        const originalText = generateBtn.innerHTML;
+        generateBtn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Generating...';
+        generateBtn.disabled = true;
+        
+        fetch('/availability/generate-email-template', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
             },
             body: JSON.stringify({
-                email_list: ['preview@example.com'], // Dummy email for preview
-                subject: subject
+                subject: subject,
+                from_email: fromEmail
             })
         })
         .then(response => response.json())
         .then(data => {
-            if (data.preview_html) {
-                document.getElementById('email-preview-content').innerHTML = data.preview_html;
-                const modal = new bootstrap.Modal(document.getElementById('email-preview-modal'));
+            if (data.success) {
+                // Populate template modal
+                document.getElementById('template-subject').textContent = data.subject;
+                document.getElementById('template-available').textContent = data.available_count;
+                document.getElementById('template-upcoming').textContent = data.upcoming_count;
+                document.getElementById('html-template').value = data.html_content;
+                document.getElementById('text-template').value = data.plain_text;
+                document.getElementById('email-preview-content').innerHTML = data.html_content;
+                
+                // Show template modal
+                const modal = new bootstrap.Modal(document.getElementById('email-template-modal'));
                 modal.show();
             } else {
-                alert('Unable to generate preview');
+                alert('Error generating template: ' + (data.error || 'Unknown error'));
             }
         })
         .catch(error => {
-            console.error('Error generating preview:', error);
-            alert('Error generating email preview');
+            console.error('Error generating template:', error);
+            alert('Error generating email template');
+        })
+        .finally(() => {
+            // Reset button state
+            generateBtn.innerHTML = originalText;
+            generateBtn.disabled = false;
         });
+    }
+    
+    function copyHtmlTemplate() {
+        const htmlContent = document.getElementById('html-template');
+        htmlContent.select();
+        htmlContent.setSelectionRange(0, 99999); // For mobile devices
+        
+        try {
+            document.execCommand('copy');
+            // Update button temporarily
+            const btn = document.getElementById('copy-html-btn');
+            const originalText = btn.innerHTML;
+            btn.innerHTML = '<i data-feather="check"></i> Copied!';
+            btn.classList.remove('btn-outline-primary');
+            btn.classList.add('btn-success');
+            
+            setTimeout(() => {
+                btn.innerHTML = originalText;
+                btn.classList.remove('btn-success');
+                btn.classList.add('btn-outline-primary');
+                feather.replace();
+            }, 2000);
+        } catch (err) {
+            alert('Failed to copy HTML template');
+        }
+    }
+    
+    function copyTextTemplate() {
+        const textContent = document.getElementById('text-template');
+        textContent.select();
+        textContent.setSelectionRange(0, 99999); // For mobile devices
+        
+        try {
+            document.execCommand('copy');
+            // Update button temporarily
+            const btn = document.getElementById('copy-text-btn');
+            const originalText = btn.innerHTML;
+            btn.innerHTML = '<i data-feather="check"></i> Copied!';
+            btn.classList.remove('btn-outline-primary');
+            btn.classList.add('btn-success');
+            
+            setTimeout(() => {
+                btn.innerHTML = originalText;
+                btn.classList.remove('btn-success');
+                btn.classList.add('btn-outline-primary');
+                feather.replace();
+            }, 2000);
+        } catch (err) {
+            alert('Failed to copy text template');
+        }
     }
     
     function sendEmailBlast() {

@@ -90,16 +90,13 @@ def get_fleet_status():
         logger.error(f"Error getting fleet status: {e}")
         return jsonify({'error': 'Failed to load fleet status'}), 500
 
-@availability_bp.route('/availability/send-email-blast', methods=['POST'])
-def send_email_blast():
-    """Generate and send weekly truck availability email blast"""
+@availability_bp.route('/availability/generate-email-template', methods=['POST'])
+def generate_email_template():
+    """Generate HTML email template for manual sending"""
     try:
         data = request.get_json()
-        email_list = data.get('email_list', [])
         subject = data.get('subject', 'Weekly Fleet Availability Update')
-        
-        if not email_list:
-            return jsonify({'error': 'No email addresses provided'}), 400
+        from_email = data.get('from_email', 'dispatch@hitchedlogistics.com')
         
         # Get current fleet status
         drivers = db.session.query(Driver).filter_by(status='active').all()
@@ -163,30 +160,19 @@ def send_email_blast():
         # Generate HTML email content
         html_content = generate_availability_email_html(fleet_data)
         
-        # Send email blast (requires email credentials)
-        try:
-            send_results = send_bulk_email(email_list, subject, html_content)
-            
-            # Log the broadcast
-            send_notification(
-                user_id=1,  # Default user ID since no authentication
-                message=f"Weekly availability email blast sent to {len(email_list)} recipients",
-                notification_type='success'
-            )
-            
-            return jsonify({
-                'success': True,
-                'recipients_count': len(email_list),
-                'message': 'Email blast sent successfully',
-                'results': send_results
-            })
-            
-        except Exception as email_error:
-            logger.error(f"Email sending failed: {email_error}")
-            return jsonify({
-                'error': 'Email sending failed. Please check email configuration.',
-                'preview_html': html_content  # Return preview for testing
-            }), 500
+        # Generate plain text version for copying
+        plain_text = generate_plain_text_email(fleet_data)
+        
+        return jsonify({
+            'success': True,
+            'subject': subject,
+            'from_email': from_email,
+            'html_content': html_content,
+            'plain_text': plain_text,
+            'available_count': fleet_data['total_available'],
+            'upcoming_count': fleet_data['total_upcoming'],
+            'message': 'Email template generated successfully'
+        })
         
     except Exception as e:
         logger.error(f"Error sending email blast: {e}")
@@ -310,21 +296,58 @@ def generate_availability_email_html(fleet_data):
     
     return html
 
-def send_bulk_email(email_list, subject, html_content):
-    """Send email blast to multiple recipients"""
-    # Note: This requires email configuration
-    # For now, we'll simulate the process and return success
-    # In production, you would integrate with services like SendGrid, AWS SES, etc.
+def generate_plain_text_email(fleet_data):
+    """Generate plain text email for copy/paste"""
+    current_date = datetime.now().strftime('%B %d, %Y')
     
-    results = []
-    for email in email_list:
-        results.append({
-            'email': email,
-            'status': 'success',
-            'message': 'Email sent successfully'
-        })
+    text = f"""HITCHED LOGISTICS LLC
+Weekly Fleet Availability Report - {current_date}
+
+🚛 AVAILABLE NOW ({fleet_data.get('total_available', 0)} TRUCKS)
+{"=" * 50}
+"""
     
-    return results
+    # Add available trucks
+    for truck in fleet_data.get('available_now', []):
+        text += f"""
+Driver: {truck['driver_name']}
+Location: {truck['current_location']}
+Available: {truck['available_date']}
+Contact: {truck['contact_info']}
+Status: {truck['status']}
+---
+"""
+    
+    text += f"""
+
+📅 UPCOMING AVAILABILITY ({fleet_data.get('total_upcoming', 0)} TRUCKS)
+{"=" * 50}
+"""
+    
+    # Add upcoming availability
+    for truck in fleet_data.get('upcoming_availability', []):
+        text += f"""
+Driver: {truck['driver_name']}
+Current Status: {truck['current_location']}
+Available: {truck['available_date']}
+Contact: {truck['contact_info']}
+Status: {truck['status']}
+---
+"""
+    
+    text += f"""
+
+📞 READY TO BOOK?
+Contact our dispatch team:
+📧 Email: dispatch@hitchedlogistics.com
+📱 Phone: (555) 123-4567
+🕒 Available 24/7 for your shipping needs
+
+Hitched Logistics LLC - Reliable Transportation Solutions
+This report was generated on {current_date}
+"""
+    
+    return text
 
 @availability_bp.route('/availability/templates')
 def get_message_templates():

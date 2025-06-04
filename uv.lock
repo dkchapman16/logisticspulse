@@ -372,6 +372,18 @@ wheels = [
 ]
 
 [[package]]
+name = "ecdsa"
+version = "0.19.1"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "six" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/c0/1f/924e3caae75f471eae4b26bd13b698f6af2c44279f67af317439c2f4c46a/ecdsa-0.19.1.tar.gz", hash = "sha256:478cba7b62555866fcb3bb3fe985e06decbdb68ef55713c4e5ab98c57d508e61", size = 201793 }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/cb/a3/460c57f094a4a165c84a1341c373b0a4f5ec6ac244b998d5021aade89b77/ecdsa-0.19.1-py2.py3-none-any.whl", hash = "sha256:30638e27cf77b7e15c4c4cc1973720149e1033827cfd00661ca5c8cc0cdb24c3", size = 150607 },
+]
+
+[[package]]
 name = "email-validator"
 version = "2.2.0"
 source = { registry = "https://pypi.org/simple" }
@@ -1431,6 +1443,15 @@ wheels = [
 ]
 
 [[package]]
+name = "python-http-client"
+version = "3.3.7"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/56/fa/284e52a8c6dcbe25671f02d217bf2f85660db940088faf18ae7a05e97313/python_http_client-3.3.7.tar.gz", hash = "sha256:bf841ee45262747e00dec7ee9971dfb8c7d83083f5713596488d67739170cea0", size = 9377 }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/29/31/9b360138f4e4035ee9dac4fe1132b6437bd05751aaf1db2a2d83dc45db5f/python_http_client-3.3.7-py3-none-any.whl", hash = "sha256:ad371d2bbedc6ea15c26179c6222a78bc9308d272435ddf1d5c84f068f249a36", size = 8352 },
+]
+
+[[package]]
 name = "pytz"
 version = "2025.2"
 source = { registry = "https://pypi.org/simple" }
@@ -1512,6 +1533,7 @@ dependencies = [
     { name = "pypdf2" },
     { name = "pytesseract" },
     { name = "requests" },
+    { name = "sendgrid" },
     { name = "sqlalchemy" },
     { name = "tabula-py" },
     { name = "trafilatura" },
@@ -1536,6 +1558,7 @@ requires-dist = [
     { name = "pypdf2", specifier = ">=3.0.1" },
     { name = "pytesseract", specifier = ">=0.3.13" },
     { name = "requests", specifier = ">=2.32.3" },
+    { name = "sendgrid", specifier = ">=6.12.3" },
     { name = "sqlalchemy", specifier = ">=2.0.41" },
     { name = "tabula-py", specifier = ">=2.10.0" },
     { name = "trafilatura", specifier = ">=2.0.0" },
@@ -1556,6 +1579,20 @@ dependencies = [
 sdist = { url = "https://files.pythonhosted.org/packages/63/70/2bf7780ad2d390a8d301ad0b550f1581eadbd9a20f896afe06353c2a2913/requests-2.32.3.tar.gz", hash = "sha256:55365417734eb18255590a9ff9eb97e9e1da868d4ccd6402399eaf68af20a760", size = 131218 }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/f9/9b/335f9764261e915ed497fcdeb11df5dfd6f7bf257d4a6a2a686d80da4d54/requests-2.32.3-py3-none-any.whl", hash = "sha256:70761cfe03c773ceb22aa2f671b4757976145175cdfca038c02654d061d6dcc6", size = 64928 },
+]
+
+[[package]]
+name = "sendgrid"
+version = "6.12.3"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "ecdsa" },
+    { name = "python-http-client" },
+    { name = "werkzeug" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/d2/47/13521678a980c614ab007ec0a1bc805cd2db48b7ed858ee2ec26077ab423/sendgrid-6.12.3.tar.gz", hash = "sha256:d0cb7bf92cb5cc9fc4466074d6a40fd474332bbb52914a93620f566f26060ac7", size = 50260 }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/e2/5a/3a2eff65d2c1cfca5be93b2ce9bdf9017618de911d9f8b8b0efb33d78fac/sendgrid-6.12.3-py3-none-any.whl", hash = "sha256:b5fc32c8a3b4bd20a46cdde1d7592a32e97165c4179354fe720850c2e8055d16", size = 102113 },
 ]
 
 [[package]]
