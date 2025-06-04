@@ -18,92 +18,155 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
-    <!-- Tesla-Inspired Navigation Header -->
-    <nav class="navbar navbar-expand-lg mb-4" style="background-color: var(--background); border-bottom: 1px solid var(--border-color);">
-        <div class="container-fluid">
+    <!-- Top Header Bar -->
+    <nav class="navbar navbar-expand-lg" style="background-color: var(--background); border-bottom: 1px solid var(--border-color); padding: 0.75rem 1.5rem;">
+        <div class="container-fluid p-0">
             <a class="navbar-brand fw-bold" href="{{ url_for('dashboard.index') }}" style="display: flex; align-items: center;">
                 <i data-feather="truck" style="margin-right: 12px; color: var(--primary-action); filter: drop-shadow(0 0 8px var(--primary-glow));"></i>
                 <span style="font-size: 1.5rem; color: var(--bright-text);">FreightPace</span>
                 <span class="ms-2" style="color: var(--neutral-text); font-size: 0.75rem; font-weight: 500; letter-spacing: 1px;">PRECISION TO PERFORMANCE</span>
             </a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation" style="border-color: var(--border-color);">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav me-auto">
-                    <li class="nav-item">
-                        <a class="nav-link {% if request.endpoint == 'dashboard.index' %}active{% endif %}" href="{{ url_for('dashboard.index') }}">
-                            <i data-feather="home"></i> Dashboard
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link {% if request.endpoint.startswith('loads.') %}active{% endif %}" href="{{ url_for('loads.index') }}">
-                            <i data-feather="box"></i> Loads
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link {% if request.endpoint.startswith('drivers.') and request.endpoint != 'drivers.scorecards' %}active{% endif %}" href="{{ url_for('drivers.index') }}">
-                            <i data-feather="users"></i> Drivers
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link {% if request.endpoint == 'drivers.scorecards' %}active{% endif %}" href="{{ url_for('drivers.scorecards') }}">
-                            <i data-feather="award"></i> Scorecards
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link {% if request.endpoint.startswith('geofencing.') %}active{% endif %}" href="{{ url_for('geofencing.index') }}">
-                            <i data-feather="map-pin"></i> Geofencing
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link {% if request.endpoint.startswith('assignments.') %}active{% endif %}" href="{{ url_for('assignments.assign') }}">
-                            <i data-feather="shuffle"></i> Assignments
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link {% if request.endpoint.startswith('imports.') %}active{% endif %}" href="{{ url_for('imports.import_drivers_vehicles') }}">
-                            <i data-feather="download"></i> Import
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link {% if request.endpoint.startswith('availability.') %}active{% endif %}" href="{{ url_for('availability.index') }}">
-                            <i data-feather="mail"></i> Email Blast
-                        </a>
-                    </li>
-                </ul>
-                <ul class="navbar-nav">
-                    <li class="nav-item dropdown">
-                        <a class="nav-link position-relative {% if request.endpoint.startswith('notifications.') %}active{% endif %}" href="{{ url_for('notifications.index') }}">
-                            <i data-feather="bell"></i>
-                            <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger notification-badge d-none">
-                                0
-                            </span>
-                        </a>
-                    </li>
-                </ul>
+            
+            <div class="d-flex align-items-center">
+                <button class="btn btn-link d-lg-none" type="button" data-bs-toggle="offcanvas" data-bs-target="#sidePanel" aria-controls="sidePanel">
+                    <i data-feather="menu"></i>
+                </button>
+                <a class="nav-link position-relative {% if request.endpoint.startswith('notifications.') %}active{% endif %}" href="{{ url_for('notifications.index') }}">
+                    <i data-feather="bell"></i>
+                    <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger notification-badge d-none">
+                        0
+                    </span>
+                </a>
             </div>
         </div>
     </nav>
 
-    <!-- Flash Messages -->
-    <div class="container">
-        {% with messages = get_flashed_messages(with_categories=true) %}
-        {% if messages %}
-            {% for category, message in messages %}
-            <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
-                {{ message }}
-                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    <!-- Side Panel Navigation -->
+    <div class="offcanvas offcanvas-start d-lg-block" tabindex="-1" id="sidePanel" style="width: 280px; background-color: var(--background); border-right: 1px solid var(--border-color);">
+        <div class="offcanvas-header d-lg-none">
+            <h5 class="offcanvas-title">Navigation</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="offcanvas"></button>
+        </div>
+        <div class="offcanvas-body p-0">
+            <div class="nav-sidebar">
+                <!-- Dashboard Section -->
+                <div class="nav-section">
+                    <div class="nav-section-header">
+                        <i data-feather="activity"></i>
+                        <span>Overview</span>
+                    </div>
+                    <ul class="nav-section-items">
+                        <li>
+                            <a class="nav-section-link {% if request.endpoint == 'dashboard.index' %}active{% endif %}" href="{{ url_for('dashboard.index') }}">
+                                <i data-feather="home"></i>
+                                <span>Dashboard</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a class="nav-section-link {% if request.endpoint.startswith('notifications.') %}active{% endif %}" href="{{ url_for('notifications.index') }}">
+                                <i data-feather="bell"></i>
+                                <span>Notifications</span>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- Operations Section -->
+                <div class="nav-section">
+                    <div class="nav-section-header">
+                        <i data-feather="truck"></i>
+                        <span>Operations</span>
+                    </div>
+                    <ul class="nav-section-items">
+                        <li>
+                            <a class="nav-section-link {% if request.endpoint.startswith('loads.') %}active{% endif %}" href="{{ url_for('loads.index') }}">
+                                <i data-feather="box"></i>
+                                <span>Loads</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a class="nav-section-link {% if request.endpoint.startswith('drivers.') and request.endpoint != 'drivers.scorecards' %}active{% endif %}" href="{{ url_for('drivers.index') }}">
+                                <i data-feather="users"></i>
+                                <span>Drivers</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a class="nav-section-link {% if request.endpoint.startswith('assignments.') %}active{% endif %}" href="{{ url_for('assignments.assign') }}">
+                                <i data-feather="shuffle"></i>
+                                <span>Assignments</span>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- Performance Section -->
+                <div class="nav-section">
+                    <div class="nav-section-header">
+                        <i data-feather="trending-up"></i>
+                        <span>Performance</span>
+                    </div>
+                    <ul class="nav-section-items">
+                        <li>
+                            <a class="nav-section-link {% if request.endpoint == 'drivers.scorecards' %}active{% endif %}" href="{{ url_for('drivers.scorecards') }}">
+                                <i data-feather="award"></i>
+                                <span>Scorecards</span>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- Tools Section -->
+                <div class="nav-section">
+                    <div class="nav-section-header">
+                        <i data-feather="settings"></i>
+                        <span>Tools</span>
+                    </div>
+                    <ul class="nav-section-items">
+                        <li>
+                            <a class="nav-section-link {% if request.endpoint.startswith('geofencing.') %}active{% endif %}" href="{{ url_for('geofencing.index') }}">
+                                <i data-feather="map-pin"></i>
+                                <span>Geofencing</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a class="nav-section-link {% if request.endpoint.startswith('imports.') %}active{% endif %}" href="{{ url_for('imports.import_drivers_vehicles') }}">
+                                <i data-feather="download"></i>
+                                <span>Import Data</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a class="nav-section-link {% if request.endpoint.startswith('availability.') %}active{% endif %}" href="{{ url_for('availability.index') }}">
+                                <i data-feather="mail"></i>
+                                <span>Email Blast</span>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
             </div>
-            {% endfor %}
-        {% endif %}
-        {% endwith %}
+        </div>
     </div>
 
-    <!-- Main Content -->
-    <main class="container-fluid">
-        {% block content %}{% endblock %}
-    </main>
+    <!-- Main Content Area -->
+    <div class="main-content" style="margin-left: 280px; min-height: calc(100vh - 76px);">
+        <!-- Flash Messages -->
+        <div class="container-fluid p-4">
+            {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+                {% endfor %}
+            {% endif %}
+            {% endwith %}
+        </div>
+        
+        <!-- Page Content -->
+        <main class="container-fluid px-4 pb-4">
+            {% block content %}{% endblock %}
+        </main>
+    </div>
 
     <!-- Footer -->
     <footer class="footer mt-5 py-3 bg-dark">
