@@ -45,6 +45,15 @@ def get_drivers():
         if status_filter:
             query = query.filter(Driver.status == status_filter)
         
+        # Sort active drivers before inactive ones
+        query = query.order_by(
+            db.case(
+                (Driver.status == 'active', 0),
+                else_=1
+            ),
+            Driver.name.asc()
+        )
+        
         drivers = query.paginate(
             page=page, 
             per_page=per_page, 

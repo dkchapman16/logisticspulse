@@ -1,0 +1,544 @@
+{% extends "layout.html" %}
+
+{% block title %}Trucks - Assets Management{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <!-- Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <div class="d-flex align-items-center">
+                    <a href="{{ url_for('assets.index') }}" class="btn btn-outline-secondary me-3">
+                        <i data-feather="arrow-left" style="width: 16px; height: 16px;"></i>
+                    </a>
+                    <div>
+                        <h1 class="h2 mb-1">Trucks</h1>
+                        <p class="text-muted mb-0">Manage truck fleet and specifications</p>
+                    </div>
+                </div>
+                <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#createTruckModal">
+                    <i data-feather="plus" style="width: 16px; height: 16px;" class="me-2"></i>
+                    Create Truck
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filters -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card border-0" style="background-color: var(--card-bg);">
+                <div class="card-body">
+                    <div class="row g-3">
+                        <div class="col-md-4">
+                            <input type="text" class="form-control" id="searchInput" placeholder="Search trucks...">
+                        </div>
+                        <div class="col-md-3">
+                            <select class="form-select" id="statusFilter">
+                                <option value="">All Statuses</option>
+                                <option value="active">Active</option>
+                                <option value="inactive">Inactive</option>
+                                <option value="maintenance">Maintenance</option>
+                            </select>
+                        </div>
+                        <div class="col-md-2">
+                            <button class="btn btn-outline-primary w-100" onclick="loadTrucks()">
+                                <i data-feather="search" style="width: 16px; height: 16px;" class="me-1"></i>
+                                Search
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Trucks Table -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card border-0" style="background-color: var(--card-bg);">
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Truck #</th>
+                                    <th>Make/Model</th>
+                                    <th>Year</th>
+                                    <th>Status</th>
+                                    <th>Current Driver</th>
+                                    <th>VIN</th>
+                                    <th>License Plate</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="trucksTableBody">
+                                <tr>
+                                    <td colspan="8" class="text-center py-4">
+                                        <div class="spinner-border text-primary" role="status">
+                                            <span class="visually-hidden">Loading...</span>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Pagination -->
+                    <nav aria-label="Trucks pagination" class="mt-4">
+                        <ul class="pagination justify-content-center" id="pagination">
+                        </ul>
+                    </nav>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Create Truck Modal -->
+<div class="modal fade" id="createTruckModal" tabindex="-1">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content" style="background-color: var(--card-bg);">
+            <div class="modal-header border-bottom" style="border-color: var(--border-color) !important;">
+                <div class="d-flex align-items-center">
+                    <div class="rounded-circle me-3 d-flex align-items-center justify-content-center" 
+                         style="width: 40px; height: 40px; background-color: var(--accent-color); color: var(--background);">
+                        <i data-feather="truck" style="width: 20px; height: 20px;"></i>
+                    </div>
+                    <h5 class="modal-title mb-0">Create a truck</h5>
+                </div>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-4">
+                <form id="createTruckForm">
+                    <div class="row g-4">
+                        <!-- Truck Info -->
+                        <div class="col-md-4">
+                            <h6 class="mb-3">Truck Info</h6>
+                            
+                            <div class="mb-3">
+                                <label class="form-label">Status *</label>
+                                <select class="form-select" name="status" required>
+                                    <option value="active">Active</option>
+                                    <option value="inactive">Inactive</option>
+                                    <option value="maintenance">Maintenance</option>
+                                </select>
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label">Truck Number *</label>
+                                <input type="text" class="form-control" name="truck_number" required>
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label">Year</label>
+                                <input type="number" class="form-control" name="year" min="1900" max="2030">
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label">Make</label>
+                                <input type="text" class="form-control" name="make">
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label">Model</label>
+                                <input type="text" class="form-control" name="model">
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label">Color</label>
+                                <input type="text" class="form-control" name="color">
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label">VIN</label>
+                                <input type="text" class="form-control" name="vin" maxlength="17">
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label">License Plate</label>
+                                <input type="text" class="form-control" name="license_plate">
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label">State</label>
+                                <select class="form-select" name="state">
+                                    <option value=""></option>
+                                    <option value="CA">California</option>
+                                    <option value="TX">Texas</option>
+                                    <option value="FL">Florida</option>
+                                    <option value="NY">New York</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- Expiration Dates -->
+                        <div class="col-md-4">
+                            <h6 class="mb-3">Expiration Dates</h6>
+
+                            <div class="mb-3">
+                                <label class="form-label">DOT Expiration Date</label>
+                                <input type="date" class="form-control" name="dot_expiration">
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label">Annual Inspection Expiration Date</label>
+                                <input type="date" class="form-control" name="annual_inspection_expiration">
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label">Insurance Expiration Date</label>
+                                <input type="date" class="form-control" name="insurance_expiration">
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label">Registration Expiration Date</label>
+                                <input type="date" class="form-control" name="registration_expiration">
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label">Annual Permit Expiration Date</label>
+                                <input type="date" class="form-control" name="annual_permit_expiration">
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label">OR Permit Expiration Date</label>
+                                <input type="date" class="form-control" name="or_permit_expiration">
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label">Monthly Inspection</label>
+                                <input type="date" class="form-control" name="monthly_inspection">
+                            </div>
+
+                            <!-- Company IFTA -->
+                            <h6 class="mb-3 mt-4">Company IFTA</h6>
+
+                            <div class="mb-3">
+                                <label class="form-label">IFTA Decal</label>
+                                <input type="text" class="form-control" name="ifta_decal">
+                            </div>
+
+                            <!-- Finance -->
+                            <h6 class="mb-3 mt-4">Finance</h6>
+
+                            <div class="mb-3">
+                                <label class="form-label">Ownership Type</label>
+                                <select class="form-select" name="ownership_type">
+                                    <option value=""></option>
+                                    <option value="owned">Owned</option>
+                                    <option value="leased">Leased</option>
+                                    <option value="rental">Rental</option>
+                                </select>
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label">Date Acquired</label>
+                                <input type="date" class="form-control" name="date_acquired">
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label">Payment Start Date</label>
+                                <input type="date" class="form-control" name="payment_start_date">
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label">Payment Amount</label>
+                                <input type="number" class="form-control" name="payment_amount" step="0.01">
+                            </div>
+
+                            <div class="mb-3">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" name="monthly_payment" id="monthlyPayment">
+                                    <label class="form-check-label" for="monthlyPayment">Monthly Payment</label>
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label">Service Date</label>
+                                <input type="date" class="form-control" name="service_date">
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label">Lender</label>
+                                <input type="text" class="form-control" name="lender">
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label">Contract Number</label>
+                                <input type="text" class="form-control" name="contract_number">
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label">Date Sold</label>
+                                <input type="date" class="form-control" name="date_sold">
+                            </div>
+                        </div>
+
+                        <!-- Specs, Notes, and Assignments -->
+                        <div class="col-md-4">
+                            <!-- Specs -->
+                            <h6 class="mb-3">Specs</h6>
+
+                            <div class="mb-3">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" name="sleeper_purchased" id="sleeperPurchased">
+                                    <label class="form-check-label" for="sleeperPurchased">Sleeper of Purchased</label>
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label">Engine Type/Brand</label>
+                                <input type="text" class="form-control" name="engine_type_brand">
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label">Brake Type/Brand</label>
+                                <input type="text" class="form-control" name="brake_type_brand">
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label">Empty Weight</label>
+                                <input type="number" class="form-control" name="empty_weight">
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label">Current Value</label>
+                                <input type="number" class="form-control" name="current_value" step="0.01">
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label">Replacement Cost</label>
+                                <input type="number" class="form-control" name="replacement_cost" step="0.01">
+                            </div>
+
+                            <!-- Notes -->
+                            <h6 class="mb-3 mt-4">Notes</h6>
+                            
+                            <div class="mb-3">
+                                <textarea class="form-control" name="notes" rows="3" placeholder="There are no notes yet"></textarea>
+                                <button type="button" class="btn btn-outline-primary btn-sm mt-2">
+                                    ADD NOTE
+                                </button>
+                            </div>
+
+                            <!-- Driver Assignments -->
+                            <h6 class="mb-3 mt-4">Driver Assignments</h6>
+                            
+                            <div class="table-responsive">
+                                <table class="table table-sm">
+                                    <thead>
+                                        <tr>
+                                            <th>Driver #</th>
+                                            <th>Start Date</th>
+                                            <th>End Date</th>
+                                            <th>Current</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td colspan="4" class="text-center text-muted">No assignments yet</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                                <button type="button" class="btn btn-outline-primary btn-sm">
+                                    New Assignment
+                                </button>
+                            </div>
+
+                            <!-- Fuel Card -->
+                            <h6 class="mb-3 mt-4">Fuel Card</h6>
+                            
+                            <div class="mb-3">
+                                <label class="form-label">Fuel Card</label>
+                                <input type="text" class="form-control" name="fuel_card">
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer border-top" style="border-color: var(--border-color) !important;">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" onclick="createTruck()">Create</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+let currentPage = 1;
+let currentSearch = '';
+let currentStatus = '';
+
+document.addEventListener('DOMContentLoaded', function() {
+    loadTrucks();
+    
+    // Search functionality
+    document.getElementById('searchInput').addEventListener('keyup', function(e) {
+        if (e.key === 'Enter') {
+            loadTrucks();
+        }
+    });
+});
+
+async function loadTrucks(page = 1) {
+    try {
+        currentPage = page;
+        currentSearch = document.getElementById('searchInput').value;
+        currentStatus = document.getElementById('statusFilter').value;
+        
+        const params = new URLSearchParams({
+            page: page,
+            per_page: 10,
+            search: currentSearch,
+            status: currentStatus
+        });
+        
+        const response = await fetch(`/assets/api/trucks?${params}`);
+        const data = await response.json();
+        
+        if (data.error) {
+            throw new Error(data.error);
+        }
+        
+        renderTrucksTable(data.trucks);
+        renderPagination(data);
+        
+    } catch (error) {
+        console.error('Error loading trucks:', error);
+        document.getElementById('trucksTableBody').innerHTML = `
+            <tr>
+                <td colspan="8" class="text-center text-danger py-4">
+                    Error loading trucks: ${error.message}
+                </td>
+            </tr>
+        `;
+    }
+}
+
+function renderTrucksTable(trucks) {
+    const tbody = document.getElementById('trucksTableBody');
+    
+    if (trucks.length === 0) {
+        tbody.innerHTML = `
+            <tr>
+                <td colspan="8" class="text-center text-muted py-4">
+                    No trucks found
+                </td>
+            </tr>
+        `;
+        return;
+    }
+    
+    tbody.innerHTML = trucks.map(truck => `
+        <tr>
+            <td>
+                <div class="d-flex align-items-center">
+                    <div class="me-2">
+                        <div class="rounded-circle bg-primary d-flex align-items-center justify-content-center" 
+                             style="width: 32px; height: 32px; font-size: 12px; color: white;">
+                            <i data-feather="truck" style="width: 16px; height: 16px;"></i>
+                        </div>
+                    </div>
+                    <strong>${truck.truck_number}</strong>
+                </div>
+            </td>
+            <td>${truck.make ? `${truck.make} ${truck.model || ''}` : '-'}</td>
+            <td>${truck.year || '-'}</td>
+            <td>
+                <span class="badge ${truck.status === 'active' ? 'bg-success' : truck.status === 'maintenance' ? 'bg-warning' : 'bg-secondary'}">
+                    ${truck.status}
+                </span>
+            </td>
+            <td>${truck.current_driver || '-'}</td>
+            <td>${truck.vin || '-'}</td>
+            <td>${truck.license_plate || '-'}</td>
+            <td>
+                <div class="btn-group btn-group-sm">
+                    <button class="btn btn-outline-primary" onclick="editTruck(${truck.id})">
+                        <i data-feather="edit-2" style="width: 14px; height: 14px;"></i>
+                    </button>
+                    <button class="btn btn-outline-success" onclick="assignDriver(${truck.id})">
+                        <i data-feather="user-plus" style="width: 14px; height: 14px;"></i>
+                    </button>
+                </div>
+            </td>
+        </tr>
+    `).join('');
+    
+    // Re-initialize feather icons
+    feather.replace();
+}
+
+function renderPagination(data) {
+    const pagination = document.getElementById('pagination');
+    let html = '';
+    
+    // Previous button
+    if (data.has_prev) {
+        html += `<li class="page-item"><a class="page-link" href="#" onclick="loadTrucks(${data.current_page - 1})">Previous</a></li>`;
+    }
+    
+    // Page numbers
+    for (let i = 1; i <= data.pages; i++) {
+        html += `<li class="page-item ${i === data.current_page ? 'active' : ''}">
+                    <a class="page-link" href="#" onclick="loadTrucks(${i})">${i}</a>
+                 </li>`;
+    }
+    
+    // Next button
+    if (data.has_next) {
+        html += `<li class="page-item"><a class="page-link" href="#" onclick="loadTrucks(${data.current_page + 1})">Next</a></li>`;
+    }
+    
+    pagination.innerHTML = html;
+}
+
+async function createTruck() {
+    try {
+        const form = document.getElementById('createTruckForm');
+        const formData = new FormData(form);
+        const data = Object.fromEntries(formData);
+        
+        // Convert checkbox values
+        data.monthly_payment = formData.has('monthly_payment');
+        data.sleeper_purchased = formData.has('sleeper_purchased');
+        
+        const response = await fetch('/assets/api/trucks', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(data)
+        });
+        
+        const result = await response.json();
+        
+        if (result.error) {
+            throw new Error(result.error);
+        }
+        
+        // Close modal and refresh list
+        const modal = bootstrap.Modal.getInstance(document.getElementById('createTruckModal'));
+        modal.hide();
+        form.reset();
+        loadTrucks(currentPage);
+        
+        alert('Truck created successfully!');
+        
+    } catch (error) {
+        console.error('Error creating truck:', error);
+        alert('Error creating truck: ' + error.message);
+    }
+}
+
+function editTruck(truckId) {
+    console.log('Edit truck:', truckId);
+}
+
+function assignDriver(truckId) {
+    console.log('Assign driver to truck:', truckId);
+}
+</script>
+{% endblock %}
