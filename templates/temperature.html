@@ -95,10 +95,11 @@
 <script>
 function formatTimestamp(timestamp) {
     try {
-        // Parse the timestamp and format it properly
-        const date = new Date(timestamp);
+        // Parse the UTC timestamp and convert to CST
+        const utcDate = new Date(timestamp + 'Z'); // Ensure it's treated as UTC
+        const cstDate = new Date(utcDate.getTime() - (6 * 60 * 60 * 1000)); // Convert to CST (UTC-6)
         const now = new Date();
-        const diff = now - date;
+        const diff = now - cstDate;
         const hours = Math.floor(diff / (1000 * 60 * 60));
         const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
         
@@ -107,7 +108,7 @@ function formatTimestamp(timestamp) {
         } else if (hours < 24) {
             return `${hours}h ${minutes}m ago`;
         } else {
-            return date.toLocaleDateString() + ' ' + date.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+            return cstDate.toLocaleDateString() + ' ' + cstDate.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
         }
     } catch (e) {
         return timestamp;
