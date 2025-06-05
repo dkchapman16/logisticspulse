@@ -301,7 +301,7 @@ function displayTemperatureAlerts(alerts) {
                 <i data-feather="${alertIcon}" class="me-2"></i>
                 <div class="flex-grow-1">
                     <strong>${alert.sensor_name}</strong>: ${alert.message}
-                    <br><small class="text-muted">Time: ${new Date(alert.timestamp).toLocaleString()}</small>
+                    <br><small class="text-muted">Time: ${formatTimestamp(alert.timestamp)}</small>
                 </div>
             </div>
         `;
