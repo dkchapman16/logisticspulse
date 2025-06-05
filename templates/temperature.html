@@ -95,20 +95,37 @@
 <script>
 function formatTimestamp(timestamp) {
     try {
-        // Parse the UTC timestamp and convert to CST
-        const utcDate = new Date(timestamp + 'Z'); // Ensure it's treated as UTC
-        const cstDate = new Date(utcDate.getTime() - (6 * 60 * 60 * 1000)); // Convert to CST (UTC-6)
+        // Parse the timestamp and display in CST
+        let date;
+        if (timestamp.includes('Z') || timestamp.includes('+')) {
+            // Already has timezone info
+            date = new Date(timestamp);
+        } else {
+            // Assume UTC and add Z
+            date = new Date(timestamp + 'Z');
+        }
+        
+        // Convert to CST (UTC-6)
+        const cstOffset = -6 * 60; // CST is UTC-6
+        const utc = date.getTime() + (date.getTimezoneOffset() * 60000);
+        const cstDate = new Date(utc + (cstOffset * 60000));
+        
         const now = new Date();
-        const diff = now - cstDate;
+        const nowCST = new Date(now.getTime() + ((now.getTimezoneOffset() + 360) * 60000)); // Convert current time to CST
+        
+        const diff = nowCST - cstDate;
         const hours = Math.floor(diff / (1000 * 60 * 60));
         const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
         
-        if (hours < 1) {
+        if (diff < 0) {
+            // Future time, just show the actual time
+            return cstDate.toLocaleDateString() + ' ' + cstDate.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) + ' CST';
+        } else if (hours < 1) {
             return `${minutes} min ago`;
         } else if (hours < 24) {
             return `${hours}h ${minutes}m ago`;
         } else {
-            return cstDate.toLocaleDateString() + ' ' + cstDate.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+            return cstDate.toLocaleDateString() + ' ' + cstDate.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) + ' CST';
         }
     } catch (e) {
         return timestamp;
@@ -247,7 +264,7 @@ function displaySensorsGrid(readings) {
                         
                         <div class="d-flex justify-content-between align-items-center">
                             <small class="text-muted">Updated: ${lastUpdate}</small>
-                            <button class="btn btn-sm btn-outline-primary" onclick="showHistory('${reading.sensor_id}', '${reading.name}')">
+                            <button class="btn btn-sm btn-outline-secondary" disabled title="Historical data not available">
                                 <i data-feather="bar-chart-2"></i>
                             </button>
                         </div>
