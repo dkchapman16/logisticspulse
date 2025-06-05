@@ -3,7 +3,33 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#0E1117">
+    <meta name="color-scheme" content="dark">
     <title>FreightPace | Turn precision into performance</title>
+    <style>
+        /* Critical CSS to prevent flash */
+        html, body {
+            background-color: #0E1117 !important;
+            color: #FFFFFF !important;
+            margin: 0;
+            padding: 0;
+        }
+        .loading-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: #0E1117;
+            z-index: 9999;
+            opacity: 1;
+            transition: opacity 0.3s ease-out;
+        }
+        .loading-screen.fade-out {
+            opacity: 0;
+            pointer-events: none;
+        }
+    </style>
     <!-- Bootstrap CSS -->
     <link rel="stylesheet" href="https://cdn.replit.com/agent/bootstrap-agent-dark-theme.min.css">
     <!-- Feather Icons -->
@@ -200,9 +226,16 @@
     <script src="https://cdn.jsdelivr.net/npm/feather-icons/dist/feather.min.js"></script>
     <!-- Common JS -->
     <script>
+        // Prevent white flash during navigation
+        document.documentElement.style.backgroundColor = '#0E1117';
+        document.body.style.backgroundColor = '#0E1117';
+        
         // Initialize Feather icons
         document.addEventListener('DOMContentLoaded', function() {
             feather.replace();
+            
+            // Initialize smooth transitions
+            initializeSmoothTransitions();
             
             // Initialize sound toggle
             initializeSoundToggle();
@@ -214,6 +247,39 @@
                 setInterval(checkNotifications, 60000);
             }
         });
+        
+        // Smooth page transitions
+        function initializeSmoothTransitions() {
+            const mainContent = document.querySelector('main');
+            if (mainContent) {
+                mainContent.classList.add('page-transition');
+            }
+            
+            // Remove loading screen once page is loaded
+            setTimeout(() => {
+                const loadingScreen = document.getElementById('loadingScreen');
+                if (loadingScreen) {
+                    loadingScreen.classList.add('fade-out');
+                    setTimeout(() => {
+                        loadingScreen.remove();
+                    }, 300);
+                }
+            }, 100);
+            
+            // Add transition to navigation links
+            const navLinks = document.querySelectorAll('.nav-section-link, .navbar-brand');
+            navLinks.forEach(link => {
+                link.addEventListener('click', function(e) {
+                    // Don't add loading state if clicking the same page
+                    if (this.href && this.href !== window.location.href) {
+                        if (mainContent) {
+                            mainContent.style.transition = 'opacity 0.15s ease-out';
+                            mainContent.style.opacity = '0.7';
+                        }
+                    }
+                });
+            });
+        }
         
         // Sound toggle functionality
         let soundEnabled = true;

@@ -88,6 +88,18 @@ body {
     font-family: 'Inter', sans-serif;
     background-color: var(--background);
     color: var(--bright-text);
+    /* Prevent white flash during navigation */
+    transition: opacity 0.15s ease-in-out;
+}
+
+/* Page transition styles */
+.page-transition {
+    opacity: 1;
+    transition: opacity 0.15s ease-in-out;
+}
+
+.page-transition.loading {
+    opacity: 0.7;
 }
 
 main {
