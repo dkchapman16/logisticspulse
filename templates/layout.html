@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" data-bs-theme="dark">
+<html lang="en" data-bs-theme="dark" style="background-color: #0E1117 !important;">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,29 +7,39 @@
     <meta name="color-scheme" content="dark">
     <title>FreightPace | Turn precision into performance</title>
     <style>
-        /* Critical CSS to prevent flash */
-        html, body {
-            background-color: #0E1117 !important;
-            color: #FFFFFF !important;
+        /* Critical CSS to prevent flash - highest priority */
+        * {
             margin: 0;
             padding: 0;
+            box-sizing: border-box;
         }
-        .loading-screen {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: #0E1117;
-            z-index: 9999;
-            opacity: 1;
-            transition: opacity 0.3s ease-out;
+        html {
+            background-color: #0E1117 !important;
+            color: #FFFFFF !important;
         }
-        .loading-screen.fade-out {
+        body {
+            background-color: #0E1117 !important;
+            color: #FFFFFF !important;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             opacity: 0;
-            pointer-events: none;
+            transition: opacity 0.2s ease-in;
+        }
+        body.loaded {
+            opacity: 1;
+        }
+        /* Prevent any white backgrounds */
+        *, *::before, *::after {
+            background-color: inherit;
+        }
+        .container, .container-fluid, main, div {
+            background-color: transparent !important;
         }
     </style>
+    <script>
+        // Prevent flash by setting background immediately
+        document.documentElement.style.setProperty('background-color', '#0E1117', 'important');
+        document.documentElement.style.setProperty('color', '#FFFFFF', 'important');
+    </script>
     <!-- Bootstrap CSS -->
     <link rel="stylesheet" href="https://cdn.replit.com/agent/bootstrap-agent-dark-theme.min.css">
     <!-- Feather Icons -->
@@ -43,7 +53,7 @@
     <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
-<body>
+<body style="background-color: #0E1117 !important; color: #FFFFFF !important;">
     <!-- Top Header Bar -->
     <nav class="navbar navbar-expand-lg" style="background-color: var(--background); border-bottom: 1px solid var(--border-color); padding: 0.75rem 1.5rem;">
         <div class="container-fluid p-0">
@@ -226,12 +236,12 @@
     <script src="https://cdn.jsdelivr.net/npm/feather-icons/dist/feather.min.js"></script>
     <!-- Common JS -->
     <script>
-        // Prevent white flash during navigation
-        document.documentElement.style.backgroundColor = '#0E1117';
-        document.body.style.backgroundColor = '#0E1117';
-        
-        // Initialize Feather icons
+        // Initialize page immediately
         document.addEventListener('DOMContentLoaded', function() {
+            // Show body content
+            document.body.classList.add('loaded');
+            
+            // Initialize Feather icons
             feather.replace();
             
             // Initialize smooth transitions
@@ -248,35 +258,24 @@
             }
         });
         
+        // Show content immediately if DOM is already loaded
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', function() {
+                document.body.classList.add('loaded');
+            });
+        } else {
+            document.body.classList.add('loaded');
+        }
+        
         // Smooth page transitions
         function initializeSmoothTransitions() {
-            const mainContent = document.querySelector('main');
-            if (mainContent) {
-                mainContent.classList.add('page-transition');
-            }
-            
-            // Remove loading screen once page is loaded
-            setTimeout(() => {
-                const loadingScreen = document.getElementById('loadingScreen');
-                if (loadingScreen) {
-                    loadingScreen.classList.add('fade-out');
-                    setTimeout(() => {
-                        loadingScreen.remove();
-                    }, 300);
-                }
-            }, 100);
-            
             // Add transition to navigation links
             const navLinks = document.querySelectorAll('.nav-section-link, .navbar-brand');
             navLinks.forEach(link => {
                 link.addEventListener('click', function(e) {
-                    // Don't add loading state if clicking the same page
-                    if (this.href && this.href !== window.location.href) {
-                        if (mainContent) {
-                            mainContent.style.transition = 'opacity 0.15s ease-out';
-                            mainContent.style.opacity = '0.7';
-                        }
-                    }
+                    // Add smooth transition on navigation
+                    document.body.style.transition = 'opacity 0.1s ease-out';
+                    document.body.style.opacity = '0.9';
                 });
             });
         }
