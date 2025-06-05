@@ -1072,6 +1072,48 @@ textarea.form-control {
     resize: vertical;
 }
 
+/* Modal backdrop styling - reduce background distraction */
+.modal-backdrop {
+    background-color: rgba(0, 0, 0, 0.8) !important;
+    backdrop-filter: blur(4px);
+}
+
+.modal-content {
+    background-color: var(--card-background) !important;
+    border: 1px solid var(--border-color) !important;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6) !important;
+    border-radius: 12px !important;
+}
+
+.modal-header {
+    background-color: var(--secondary-accent) !important;
+    border-bottom: 1px solid var(--border-color) !important;
+    border-radius: 12px 12px 0 0 !important;
+}
+
+.modal-body {
+    background-color: var(--card-background) !important;
+}
+
+.modal-footer {
+    background-color: var(--card-background) !important;
+    border-top: 1px solid var(--border-color) !important;
+    border-radius: 0 0 12px 12px !important;
+}
+
+.modal-title {
+    color: var(--bright-text) !important;
+}
+
+.btn-close {
+    filter: invert(1);
+    opacity: 0.8;
+}
+
+.btn-close:hover {
+    opacity: 1;
+}
+
 /* Loading indicators */
 .loading-overlay {
     position: absolute;
