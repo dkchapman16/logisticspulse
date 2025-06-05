@@ -15,11 +15,6 @@
         body {
             background-color: #0E1117 !important;
             color: #FFFFFF !important;
-            opacity: 0;
-            transition: opacity 0.2s ease-in;
-        }
-        body.ready {
-            opacity: 1;
         }
     </style>
     <!-- Bootstrap CSS -->
@@ -218,16 +213,10 @@
     <script src="https://cdn.jsdelivr.net/npm/feather-icons/dist/feather.min.js"></script>
     <!-- Common JS -->
     <script>
-        // Make body visible once everything is ready
+        // Initialize page functionality
         document.addEventListener('DOMContentLoaded', function() {
-            // Show body content
-            document.body.classList.add('ready');
-            
             // Initialize Feather icons
             feather.replace();
-            
-            // Initialize smooth transitions
-            initializeSmoothTransitions();
             
             // Initialize sound toggle
             initializeSoundToggle();
@@ -239,34 +228,6 @@
                 setInterval(checkNotifications, 60000);
             }
         });
-        
-        // Show content immediately if DOM is already loaded
-        if (document.readyState !== 'loading') {
-            document.body.classList.add('ready');
-        }
-        
-        // Smooth page transitions
-        function initializeSmoothTransitions() {
-            // Override browser navigation to prevent white flash
-            const navLinks = document.querySelectorAll('.nav-section-link, .navbar-brand');
-            navLinks.forEach(link => {
-                link.addEventListener('click', function(e) {
-                    e.preventDefault();
-                    
-                    // Get the target URL
-                    const targetUrl = this.href;
-                    
-                    // Fade out current content
-                    document.body.style.transition = 'opacity 0.15s ease-out';
-                    document.body.style.opacity = '0.7';
-                    
-                    // Navigate after brief delay
-                    setTimeout(() => {
-                        window.location.href = targetUrl;
-                    }, 75);
-                });
-            });
-        }
         
         // Sound toggle functionality
         let soundEnabled = true;
