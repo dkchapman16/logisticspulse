@@ -105,32 +105,23 @@ def get_current_temperatures():
         return []
     
     for sensor in sensors:
-        sensor_id = sensor.get('id')
-        if not sensor_id:
-            continue
-            
-        # Get recent data (last 2 hours)
-        data = get_sensor_data(sensor_id, hours=2)
-        readings = data.get('data', [])
+        sensor_id = sensor.get('sensor_id')
+        temp_c = sensor.get('last_temp')  # Temp Stick returns temperature in Celsius
+        temp_f = celsius_to_fahrenheit(temp_c)
         
-        if readings:
-            # Get the most recent reading
-            latest_reading = readings[-1]
-            temp_c = latest_reading.get('temperature')  # Temp Stick returns temperature in Celsius
-            temp_f = celsius_to_fahrenheit(temp_c)
-            
-            current_readings.append({
-                'sensor_id': sensor_id,
-                'name': sensor.get('name', f'Sensor {sensor_id}'),
-                'location': sensor.get('location', 'Unknown'),
-                'temperature_f': temp_f,
-                'temperature_c': temp_c,
-                'humidity': latest_reading.get('humidity'),
-                'timestamp': latest_reading.get('timestamp'),
-                'battery_level': sensor.get('battery_level'),
-                'signal_strength': sensor.get('signal_strength'),
-                'status': determine_status(temp_f)
-            })
+        current_readings.append({
+            'sensor_id': sensor_id,
+            'name': sensor.get('sensor_name', f'Sensor {sensor_id}'),
+            'location': 'Reefer Trailer',  # You can customize this based on sensor names
+            'temperature_f': temp_f,
+            'temperature_c': temp_c,
+            'humidity': sensor.get('last_humidity'),
+            'timestamp': sensor.get('last_checkin'),
+            'battery_level': sensor.get('battery_pct'),
+            'signal_strength': sensor.get('rssi'),
+            'status': determine_status(temp_f),
+            'offline': sensor.get('offline') == '1'
+        })
     
     return current_readings
 
@@ -140,60 +131,53 @@ def determine_status(temp_f):
     if temp_f is None:
         return 'unknown'
     
-    # Standard reefer temperature ranges (can be customized)
-    if temp_f <= 32:  # Frozen goods
+    # Reefer temperature thresholds
+    if 32 <= temp_f <= 45:  # Normal reefer range
         return 'normal'
-    elif temp_f <= 38:  # Refrigerated goods
-        return 'normal'
-    elif temp_f <= 45:  # Warning range
+    elif (20 <= temp_f < 32) or (45 < temp_f <= 55):  # Warning range
         return 'warning'
-    else:  # Above safe temperature
+    else:  # Below 20°F or above 55°F
         return 'critical'
 
 
-def check_temperature_alerts():
-    """Check for temperature violations and generate alerts"""
+def get_temperature_alerts():
+    """Generate temperature alerts for critical conditions"""
     current_readings = get_current_temperatures()
     alerts = []
     
     for reading in current_readings:
         temp_f = reading.get('temperature_f')
-        if temp_f is None:
-            continue
-            
-        # Check for temperature violations
-        if temp_f > 45:  # Critical high temperature
-            alerts.append({
-                'sensor_id': reading['sensor_id'],
-                'sensor_name': reading['name'],
-                'type': 'temperature_high',
-                'severity': 'critical',
-                'message': f"High temperature alert: {temp_f}°F",
-                'temperature': temp_f,
-                'timestamp': reading['timestamp']
-            })
-        elif temp_f > 38:  # Warning temperature
-            alerts.append({
-                'sensor_id': reading['sensor_id'],
-                'sensor_name': reading['name'],
-                'type': 'temperature_warning',
-                'severity': 'warning',
-                'message': f"Temperature warning: {temp_f}°F",
-                'temperature': temp_f,
-                'timestamp': reading['timestamp']
-            })
+        status = reading.get('status')
+        name = reading.get('name')
         
-        # Check for sensor issues
-        battery_level = reading.get('battery_level')
-        if battery_level and battery_level < 20:
+        if status == 'critical':
+            if temp_f > 55:
+                message = f"Temperature too high: {temp_f:.1f}°F (should be below 45°F)"
+                severity = 'critical'
+            elif temp_f < 20:
+                message = f"Temperature too low: {temp_f:.1f}°F (should be above 32°F)"
+                severity = 'critical'
+            else:
+                message = f"Temperature out of range: {temp_f:.1f}°F"
+                severity = 'critical'
+                
             alerts.append({
-                'sensor_id': reading['sensor_id'],
-                'sensor_name': reading['name'],
-                'type': 'low_battery',
+                'sensor_id': reading.get('sensor_id'),
+                'sensor_name': name,
+                'message': message,
+                'severity': severity,
+                'timestamp': reading.get('timestamp'),
+                'temperature_f': temp_f
+            })
+        elif status == 'warning':
+            message = f"Temperature approaching limits: {temp_f:.1f}°F"
+            alerts.append({
+                'sensor_id': reading.get('sensor_id'),
+                'sensor_name': name,
+                'message': message,
                 'severity': 'warning',
-                'message': f"Low battery: {battery_level}%",
-                'battery_level': battery_level,
-                'timestamp': reading['timestamp']
+                'timestamp': reading.get('timestamp'),
+                'temperature_f': temp_f
             })
     
     return alerts
