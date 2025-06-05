@@ -6,7 +6,7 @@ from services.temp_stick_api import (
     get_current_temperatures,
     get_sensors,
     get_sensor_data,
-    check_temperature_alerts
+    get_temperature_alerts
 )
 from services.logger import setup_logger
 
@@ -77,10 +77,10 @@ def get_sensor_history(sensor_id):
 
 
 @temperature_bp.route('/api/alerts')
-def get_temperature_alerts():
+def get_alerts():
     """API endpoint to get temperature alerts"""
     try:
-        alerts = check_temperature_alerts()
+        alerts = get_temperature_alerts()
         return jsonify({
             'success': True,
             'alerts': alerts,
