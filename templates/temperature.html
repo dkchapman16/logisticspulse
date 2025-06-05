@@ -95,37 +95,32 @@
 <script>
 function formatTimestamp(timestamp) {
     try {
-        // Parse the timestamp and display in CST
-        let date;
+        // Parse the UTC timestamp
+        let utcDate;
         if (timestamp.includes('Z') || timestamp.includes('+')) {
-            // Already has timezone info
-            date = new Date(timestamp);
+            utcDate = new Date(timestamp);
         } else {
-            // Assume UTC and add Z
-            date = new Date(timestamp + 'Z');
+            utcDate = new Date(timestamp + 'Z');
         }
         
-        // Convert to CST (UTC-6)
-        const cstOffset = -6 * 60; // CST is UTC-6
-        const utc = date.getTime() + (date.getTimezoneOffset() * 60000);
-        const cstDate = new Date(utc + (cstOffset * 60000));
-        
+        // Convert to America/Chicago timezone (US Central)
+        const centralDate = new Date(utcDate.toLocaleString("en-US", {timeZone: "America/Chicago"}));
         const now = new Date();
-        const nowCST = new Date(now.getTime() + ((now.getTimezoneOffset() + 360) * 60000)); // Convert current time to CST
+        const nowCentral = new Date(now.toLocaleString("en-US", {timeZone: "America/Chicago"}));
         
-        const diff = nowCST - cstDate;
+        const diff = nowCentral - centralDate;
         const hours = Math.floor(diff / (1000 * 60 * 60));
         const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
         
         if (diff < 0) {
-            // Future time, just show the actual time
-            return cstDate.toLocaleDateString() + ' ' + cstDate.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) + ' CST';
+            // Future time, show actual time
+            return centralDate.toLocaleDateString() + ' ' + centralDate.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) + ' CT';
         } else if (hours < 1) {
             return `${minutes} min ago`;
         } else if (hours < 24) {
             return `${hours}h ${minutes}m ago`;
         } else {
-            return cstDate.toLocaleDateString() + ' ' + cstDate.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) + ' CST';
+            return centralDate.toLocaleDateString() + ' ' + centralDate.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) + ' CT';
         }
     } catch (e) {
         return timestamp;
