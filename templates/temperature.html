@@ -107,32 +107,14 @@ function formatTimestamp(timestamp) {
         const options = {
             timeZone: "America/Chicago",
             year: 'numeric',
-            month: '2-digit',
-            day: '2-digit',
-            hour: '2-digit',
+            month: 'short',
+            day: 'numeric',
+            hour: 'numeric',
             minute: '2-digit',
             hour12: true
         };
         
-        const centralTimeString = utcDate.toLocaleString("en-US", options);
-        
-        // Also calculate relative time for context
-        const now = new Date();
-        const nowCentral = new Date(now.toLocaleString("en-US", {timeZone: "America/Chicago"}));
-        const centralDate = new Date(utcDate.toLocaleString("en-US", {timeZone: "America/Chicago"}));
-        
-        const diff = nowCentral - centralDate;
-        const hours = Math.floor(diff / (1000 * 60 * 60));
-        const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-        
-        // Show relative time for recent updates, full time for older ones
-        if (hours < 1) {
-            return `${minutes} min ago`;
-        } else if (hours < 24) {
-            return `${hours}h ${minutes}m ago`;
-        } else {
-            return centralTimeString.replace(',', '') + ' CT';
-        }
+        return utcDate.toLocaleString("en-US", options);
     } catch (e) {
         return timestamp;
     }
