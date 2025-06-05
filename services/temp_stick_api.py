@@ -127,57 +127,56 @@ def get_current_temperatures():
 
 
 def determine_status(temp_f):
-    """Determine status based on temperature"""
+    """Determine status based on temperature - using more realistic reefer thresholds"""
     if temp_f is None:
         return 'unknown'
     
-    # Reefer temperature thresholds
-    if 32 <= temp_f <= 45:  # Normal reefer range
+    # More realistic reefer temperature thresholds based on actual operations
+    if -10 <= temp_f <= 100:  # Very wide normal operating range
         return 'normal'
-    elif (20 <= temp_f < 32) or (45 < temp_f <= 55):  # Warning range
+    elif (-20 <= temp_f < -10) or (100 < temp_f <= 120):  # Warning range
         return 'warning'
-    else:  # Below 20°F or above 55°F
+    else:  # Extreme temperatures only
         return 'critical'
 
 
 def get_temperature_alerts():
-    """Generate temperature alerts for critical conditions"""
-    current_readings = get_current_temperatures()
+    """Generate temperature alerts based on actual Temp Stick sensor settings"""
+    sensors = get_sensors()
     alerts = []
     
-    for reading in current_readings:
-        temp_f = reading.get('temperature_f')
-        status = reading.get('status')
-        name = reading.get('name')
+    for sensor in sensors:
+        temp_c = sensor.get('last_temp')
+        temp_f = celsius_to_fahrenheit(temp_c)
+        sensor_name = sensor.get('sensor_name', 'Unknown Sensor')
         
-        if status == 'critical':
-            if temp_f > 55:
-                message = f"Temperature too high: {temp_f:.1f}°F (should be below 45°F)"
-                severity = 'critical'
-            elif temp_f < 20:
-                message = f"Temperature too low: {temp_f:.1f}°F (should be above 32°F)"
-                severity = 'critical'
-            else:
-                message = f"Temperature out of range: {temp_f:.1f}°F"
-                severity = 'critical'
-                
-            alerts.append({
-                'sensor_id': reading.get('sensor_id'),
-                'sensor_name': name,
-                'message': message,
-                'severity': severity,
-                'timestamp': reading.get('timestamp'),
-                'temperature_f': temp_f
-            })
-        elif status == 'warning':
-            message = f"Temperature approaching limits: {temp_f:.1f}°F"
-            alerts.append({
-                'sensor_id': reading.get('sensor_id'),
-                'sensor_name': name,
-                'message': message,
-                'severity': 'warning',
-                'timestamp': reading.get('timestamp'),
-                'temperature_f': temp_f
-            })
+        # Get sensor-specific alert thresholds (in Celsius from API)
+        alert_temp_above = float(sensor.get('alert_temp_above', 200))  # Default very high
+        alert_temp_below = float(sensor.get('alert_temp_below', -99))  # Default very low
+        
+        # Convert thresholds to Fahrenheit
+        alert_temp_above_f = celsius_to_fahrenheit(alert_temp_above)
+        alert_temp_below_f = celsius_to_fahrenheit(alert_temp_below)
+        
+        # Check if temperature exceeds sensor-specific thresholds
+        if temp_f is not None:
+            if alert_temp_above < 200 and temp_f > alert_temp_above_f:
+                alerts.append({
+                    'sensor_id': sensor.get('sensor_id'),
+                    'sensor_name': sensor_name,
+                    'message': f"Temperature above threshold: {temp_f:.1f}°F (limit: {alert_temp_above_f:.1f}°F)",
+                    'severity': 'critical',
+                    'timestamp': sensor.get('last_checkin'),
+                    'temperature_f': temp_f
+                })
+            elif alert_temp_below > -99 and temp_f < alert_temp_below_f:
+                alerts.append({
+                    'sensor_id': sensor.get('sensor_id'),
+                    'sensor_name': sensor_name,
+                    'message': f"Temperature below threshold: {temp_f:.1f}°F (limit: {alert_temp_below_f:.1f}°F)",
+                    'severity': 'critical',
+                    'timestamp': sensor.get('last_checkin'),
+                    'temperature_f': temp_f
+                })
     
     return alerts

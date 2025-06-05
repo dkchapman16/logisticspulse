@@ -93,6 +93,27 @@
 </div>
 
 <script>
+function formatTimestamp(timestamp) {
+    try {
+        // Parse the timestamp and format it properly
+        const date = new Date(timestamp);
+        const now = new Date();
+        const diff = now - date;
+        const hours = Math.floor(diff / (1000 * 60 * 60));
+        const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+        
+        if (hours < 1) {
+            return `${minutes} min ago`;
+        } else if (hours < 24) {
+            return `${hours}h ${minutes}m ago`;
+        } else {
+            return date.toLocaleDateString() + ' ' + date.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+        }
+    } catch (e) {
+        return timestamp;
+    }
+}
+
 document.addEventListener('DOMContentLoaded', function() {
     loadTemperatureData();
     loadTemperatureAlerts();
@@ -202,7 +223,7 @@ function displaySensorsGrid(readings) {
     readings.forEach(reading => {
         const statusClass = getStatusClass(reading.status);
         const statusIcon = getStatusIcon(reading.status);
-        const lastUpdate = reading.timestamp ? new Date(reading.timestamp).toLocaleString() : 'Unknown';
+        const lastUpdate = reading.timestamp ? formatTimestamp(reading.timestamp) : 'Unknown';
         
         html += `
             <div class="col-md-4 mb-3">
