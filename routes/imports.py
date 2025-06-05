@@ -19,10 +19,15 @@ def import_drivers_vehicles():
                 drivers_added = 0
                 vehicles_added = 0
                 
-                # Add drivers to database
+                # Add only active drivers to database
                 for driver_item in motive_drivers:
                     user_data = driver_item.get('user', {})
                     motive_id = str(user_data.get('id'))
+                    user_status = user_data.get('status', '')
+                    
+                    # Only process active drivers
+                    if user_status != 'active':
+                        continue
                     
                     first_name = user_data.get('first_name', '').strip()
                     last_name = user_data.get('last_name', '').strip()
@@ -44,16 +49,21 @@ def import_drivers_vehicles():
                         email=user_data.get('email', ''),
                         phone=user_data.get('phone', ''),
                         company='Hitched Logistics LLC',
-                        status='active' if user_data.get('status') == 'active' else 'inactive'
+                        status='active'
                     )
                     db.session.add(new_driver)
                     drivers_added += 1
                 
-                # Add vehicles to database
+                # Add only active vehicles to database
                 for vehicle_item in motive_vehicles:
                     vehicle_data = vehicle_item.get('vehicle', {})
                     motive_id = str(vehicle_data.get('id'))
+                    vehicle_status = vehicle_data.get('status', '')
                     license_plate = vehicle_data.get('license_plate_number', '').strip()
+                    
+                    # Only process active vehicles
+                    if vehicle_status != 'active':
+                        continue
                     
                     if not motive_id:
                         continue
@@ -73,7 +83,7 @@ def import_drivers_vehicles():
                         make=vehicle_data.get('make', ''),
                         model=vehicle_data.get('model', ''),
                         year=vehicle_data.get('year'),
-                        status='active' if vehicle_data.get('status') == 'active' else 'inactive'
+                        status='active'
                     )
                     db.session.add(new_vehicle)
                     vehicles_added += 1
@@ -96,20 +106,26 @@ def import_drivers_vehicles():
         motive_drivers = get_drivers()
         motive_vehicles = get_vehicles()
         
-        # Format driver names for display
+        # Format active driver names for display
         driver_names = []
         for driver_item in motive_drivers:
             user_data = driver_item.get('user', {})
+            # Only show active drivers
+            if user_data.get('status') != 'active':
+                continue
             first_name = user_data.get('first_name', '').strip()
             last_name = user_data.get('last_name', '').strip()
             name = f"{first_name} {last_name}".strip()
             if name:
                 driver_names.append(name)
         
-        # Format vehicle names for display
+        # Format active vehicle names for display
         vehicle_names = []
         for vehicle_item in motive_vehicles:
             vehicle_data = vehicle_item.get('vehicle', {})
+            # Only show active vehicles
+            if vehicle_data.get('status') != 'active':
+                continue
             make = vehicle_data.get('make', '')
             model = vehicle_data.get('model', '')
             number = vehicle_data.get('number', '')
