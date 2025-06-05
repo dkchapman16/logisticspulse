@@ -8,7 +8,7 @@ API_KEY = os.getenv("MOTIVE_API_KEY")
 BASE_URL = "https://api.gomotive.com/v1"
 
 def get_drivers():
-    """Get all drivers using API key authentication"""
+    """Get all drivers using API key authentication with pagination"""
     if not API_KEY:
         logger.error("MOTIVE_API_KEY not found in environment")
         return []
@@ -18,33 +18,37 @@ def get_drivers():
         "Content-Type": "application/json"
     }
     
-    # Try multiple potential endpoints
-    endpoints = [
-        f"{BASE_URL}/drivers",
-        f"{BASE_URL}/users",
-        "https://api.gomotive.com/v1/drivers",
-        "https://api.gomotive.com/v2/drivers",
-        "https://api.gomotive.com/drivers"
-    ]
+    # Use the working users endpoint with pagination
+    endpoint = "https://api.gomotive.com/v1/users"
+    all_drivers = []
+    page = 1
     
-    for endpoint in endpoints:
-        try:
-            response = requests.get(endpoint, headers=headers)
-            logger.info(f"Drivers API ({endpoint}) response: {response.status_code}")
+    try:
+        while True:
+            response = requests.get(f"{endpoint}?page_no={page}", headers=headers)
+            logger.info(f"Drivers API ({endpoint}) page {page} response: {response.status_code}")
             
             if response.status_code == 200:
                 data = response.json()
-                drivers = data.get('data', data.get('drivers', data.get('users', [])))
-                if drivers:
-                    logger.info(f"Retrieved {len(drivers)} drivers from Motive")
-                    return drivers
-            elif response.status_code != 404:
-                logger.info(f"Response from {endpoint}: {response.text[:200]}")
-        except Exception as e:
-            logger.error(f"Error with endpoint {endpoint}: {e}")
-            continue
-    
-    return []
+                drivers = data.get('users', [])
+                all_drivers.extend(drivers)
+                
+                # Check pagination
+                pagination = data.get('pagination', {})
+                total_pages = (pagination.get('total', 0) + pagination.get('per_page', 25) - 1) // pagination.get('per_page', 25)
+                
+                if page >= total_pages:
+                    break
+                page += 1
+            else:
+                logger.error(f"Failed to get drivers page {page}: {response.status_code} - {response.text}")
+                break
+        
+        logger.info(f"Retrieved {len(all_drivers)} total drivers from Motive across {page} pages")
+        return all_drivers
+    except Exception as e:
+        logger.error(f"Error getting drivers: {e}")
+        return []
 
 def get_vehicles():
     """Get all vehicles using API key authentication"""
