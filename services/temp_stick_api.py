@@ -11,7 +11,7 @@ from services.logger import setup_logger
 logger = setup_logger(__name__)
 
 TEMP_STICK_API_KEY = os.environ.get('TEMP_STICK_API_KEY')
-BASE_URL = 'https://www.tempstick.com/api/v1'
+BASE_URL = 'https://tempstickapi.com/api/v1'
 
 
 def celsius_to_fahrenheit(celsius):
@@ -30,18 +30,29 @@ def make_api_request(endpoint, params=None):
     headers = {
         'X-API-Key': TEMP_STICK_API_KEY,
         'Accept-Encoding': 'gzip',
-        'Content-Type': 'application/json'
+        'Content-Type': 'text/plain',
+        'User-Agent': 'FreightPace-TempMonitor/1.0'
     }
     
     try:
         response = requests.get(f'{BASE_URL}{endpoint}', headers=headers, params=params, timeout=30)
         response.raise_for_status()
         
-        # Handle GZIP compressed response
-        if response.headers.get('content-encoding') == 'gzip':
-            content = gzip.decompress(response.content)
-            return json.loads(content.decode('utf-8'))
-        else:
+        # Handle both GZIP and regular JSON responses
+        try:
+            # Try to decompress if it's GZIP
+            if response.headers.get('content-encoding') == 'gzip':
+                content = gzip.decompress(response.content)
+                return json.loads(content.decode('utf-8'))
+            else:
+                # Check if content starts with gzip magic number
+                if response.content.startswith(b'\x1f\x8b'):
+                    content = gzip.decompress(response.content)
+                    return json.loads(content.decode('utf-8'))
+                else:
+                    return response.json()
+        except gzip.BadGzipFile:
+            # Not actually gzipped, treat as regular JSON
             return response.json()
             
     except requests.exceptions.RequestException as e:
@@ -57,9 +68,9 @@ def make_api_request(endpoint, params=None):
 
 def get_sensors():
     """Get list of all Temp Stick sensors"""
-    data = make_api_request('/sensors')
-    if data:
-        sensors = data.get('sensors', [])
+    data = make_api_request('/sensors/all')
+    if data and data.get('type') == 'success':
+        sensors = data.get('data', {}).get('items', [])
         logger.info(f"Retrieved {len(sensors)} sensors from Temp Stick")
         return sensors
     return []
