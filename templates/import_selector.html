@@ -19,11 +19,27 @@
             {% endif %}
 
             {% if has_data %}
+                <div class="alert alert-info mb-4">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <i data-feather="info"></i>
+                            Found <strong>{{ drivers_count }}</strong> drivers and <strong>{{ vehicles_count }}</strong> vehicles in your Motive account
+                        </div>
+                        <form method="post" style="display: inline;">
+                            <input type="hidden" name="action" value="sync_motive">
+                            <button type="submit" class="btn btn-success">
+                                <i data-feather="refresh-cw"></i>
+                                Sync All to Database
+                            </button>
+                        </form>
+                    </div>
+                </div>
+                
                 <form method="post" class="row">
                     <div class="col-md-6">
                         <div class="card">
                             <div class="card-header">
-                                <h5><i data-feather="user"></i> Available Drivers</h5>
+                                <h5><i data-feather="user"></i> Available Drivers ({{ drivers_count }})</h5>
                             </div>
                             <div class="card-body" style="max-height: 400px; overflow-y: auto;">
                                 {% if drivers %}
@@ -51,7 +67,7 @@
                     <div class="col-md-6">
                         <div class="card">
                             <div class="card-header">
-                                <h5><i data-feather="truck"></i> Available Vehicles</h5>
+                                <h5><i data-feather="truck"></i> Available Vehicles ({{ vehicles_count }})</h5>
                             </div>
                             <div class="card-body" style="max-height: 400px; overflow-y: auto;">
                                 {% if vehicles %}
