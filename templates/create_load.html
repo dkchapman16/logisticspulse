@@ -1,109 +1,90 @@
-{% extends "layout.html" %}
 
-{% block title %}Create Load{% endblock %}
-
-{% block content %}
-<div class="container-fluid">
-    <div class="row">
-        <div class="col-12">
-            <div class="d-flex justify-content-between align-items-center mb-4">
-                <h2>📄 Extracted Data from RateCon</h2>
-                <a href="{{ url_for('loads.index') }}" class="btn btn-secondary">Back to Loads</a>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Create Load</title>
+</head>
+<body class="bg-gray-900">
+    <div class="max-w-4xl mx-auto py-8 px-6 bg-gray-800 rounded-lg">
+        <h2 class="text-2xl font-semibold text-white mb-6">Create Load</h2>
+        <form method="POST">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <div>
+                    <label class="block text-gray-300">Reference Number</label>
+                    <input type="text" name="reference_number"
+                           value="{{ data.reference_number }}"
+                           readonly
+                           class="mt-1 w-full bg-gray-700 text-white rounded-md p-2" />
+                </div>
+                <div>
+                    <label class="block text-gray-300">Pickup Name</label>
+                    <input type="text" name="pickup_name"
+                           value="{{ data.pickup.facility_name }}"
+                           readonly
+                           class="mt-1 w-full bg-gray-700 text-white rounded-md p-2" />
+                </div>
+                <div>
+                    <label class="block text-gray-300">Pickup Address</label>
+                    <input type="text" name="pickup_address"
+                           value="{{ data.pickup.address }}"
+                           readonly
+                           class="mt-1 w-full bg-gray-700 text-white rounded-md p-2" />
+                </div>
+                <div>
+                    <label class="block text-gray-300">Pickup Time</label>
+                    <input type="datetime-local" name="pickup_time"
+                           value="{{ data.pickup.scheduled_time }}"
+                           class="mt-1 w-full bg-gray-700 text-white rounded-md p-2" />
+                </div>
+                <div>
+                    <label class="block text-gray-300">Delivery Name</label>
+                    <input type="text" name="delivery_name"
+                           value="{{ data.delivery.facility_name }}"
+                           readonly
+                           class="mt-1 w-full bg-gray-700 text-white rounded-md p-2" />
+                </div>
+                <div>
+                    <label class="block text-gray-300">Delivery Address</label>
+                    <input type="text" name="delivery_address"
+                           value="{{ data.delivery.address }}"
+                           readonly
+                           class="mt-1 w-full bg-gray-700 text-white rounded-md p-2" />
+                </div>
+                <div>
+                    <label class="block text-gray-300">Delivery Time</label>
+                    <input type="datetime-local" name="delivery_time"
+                           value="{{ data.delivery.scheduled_time }}"
+                           class="mt-1 w-full bg-gray-700 text-white rounded-md p-2" />
+                </div>
+                <div>
+                    <label class="block text-gray-300">Customer Name</label>
+                    <input type="text" name="client_name"
+                           value="{{ data.client.name }}"
+                           readonly
+                           class="mt-1 w-full bg-gray-700 text-white rounded-md p-2" />
+                </div>
+                <div>
+                    <label class="block text-gray-300">Assign Driver</label>
+                    <select name="driver_id"
+                            class="mt-1 w-full bg-gray-700 text-white rounded-md p-2">
+                        {% for driver in drivers %}
+                            <option value="{{ driver.id }}">{{ driver.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
             </div>
-
-            {% if data %}
-                <div class="alert alert-success">
-                    <i data-feather="check-circle"></i>
-                    Data successfully extracted from the PDF. You can now create a new load with this information.
-                </div>
-            {% endif %}
-
-            <form method="post" action="{{ url_for('loads.create_load') }}" class="row">
-                <div class="col-md-6">
-                    <div class="card">
-                        <div class="card-header">
-                            <h5>Load Information</h5>
-                        </div>
-                        <div class="card-body">
-                            <div class="mb-3">
-                                <label for="reference_number" class="form-label">Reference Number</label>
-                                <input type="text" class="form-control" id="reference_number" name="reference_number" 
-                                       value="{{ data['reference_number'] if data else '' }}" readonly>
-                            </div>
-
-                            <div class="mb-3">
-                                <label for="customer" class="form-label">Customer</label>
-                                <input type="text" class="form-control" id="customer" name="customer" 
-                                       value="{{ data['client']['name'] if data and data.get('client') else '' }}" readonly>
-                            </div>
-
-                            <div class="mb-3">
-                                <label for="driver" class="form-label">Driver</label>
-                                <select class="form-select" id="driver" name="driver" required>
-                                    <option disabled selected>Select Driver</option>
-                                    {% for driver in drivers %}
-                                        <option value="{{ driver }}">{{ driver }}</option>
-                                    {% endfor %}
-                                </select>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="col-md-6">
-                    <div class="card">
-                        <div class="card-header">
-                            <h5>Pickup Information</h5>
-                        </div>
-                        <div class="card-body">
-                            <div class="mb-3">
-                                <label for="pickup_facility" class="form-label">Pickup Facility</label>
-                                <input type="text" class="form-control" id="pickup_facility" name="pickup_facility" 
-                                       value="{{ data['pickup']['facility_name'] if data and data.get('pickup') else '' }}" readonly>
-                            </div>
-
-                            <div class="mb-3">
-                                <label for="scheduled_pickup_time" class="form-label">Scheduled Pickup Time</label>
-                                <input type="datetime-local" class="form-control" id="scheduled_pickup_time" name="scheduled_pickup_time" 
-                                       value="{{ data['pickup']['scheduled_time'] if data and data.get('pickup') else '' }}">
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="card mt-3">
-                        <div class="card-header">
-                            <h5>Delivery Information</h5>
-                        </div>
-                        <div class="card-body">
-                            <div class="mb-3">
-                                <label for="delivery_facility" class="form-label">Delivery Facility</label>
-                                <input type="text" class="form-control" id="delivery_facility" name="delivery_facility" 
-                                       value="{{ data['delivery']['facility_name'] if data and data.get('delivery') else '' }}" readonly>
-                            </div>
-
-                            <div class="mb-3">
-                                <label for="scheduled_delivery_time" class="form-label">Scheduled Delivery Time</label>
-                                <input type="datetime-local" class="form-control" id="scheduled_delivery_time" name="scheduled_delivery_time" 
-                                       value="{{ data['delivery']['scheduled_time'] if data and data.get('delivery') else '' }}">
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="col-12 mt-4">
-                    <div class="d-flex justify-content-end gap-2">
-                        <a href="{{ url_for('loads.index') }}" class="btn btn-secondary">
-                            <i data-feather="x"></i>
-                            Cancel
-                        </a>
-                        <button type="submit" class="btn btn-primary">
-                            <i data-feather="package"></i>
-                            Create Load
-                        </button>
-                    </div>
-                </div>
-            </form>
-        </div>
+            <div class="mt-6 flex justify-end gap-4">
+                <button type="submit"
+                        class="bg-green-600 hover:bg-green-700 text-white font-semibold px-6 py-2 rounded-md">
+                    Create Load
+                </button>
+                <a href="{{ url_for('loads.index') }}"
+                   class="bg-transparent border border-gray-500 hover:bg-gray-700 text-gray-300 font-semibold px-6 py-2 rounded-md">
+                    Cancel
+                </a>
+            </div>
+        </form>
     </div>
-</div>
-{% endblock %}
+</body>
+</html>
