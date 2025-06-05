@@ -25,8 +25,8 @@ def import_drivers_vehicles():
                     motive_id = str(user_data.get('id'))
                     user_status = user_data.get('status', '')
                     
-                    # Only process active drivers
-                    if user_status != 'active':
+                    # Only process active drivers (role=driver, status=active)
+                    if user_status != 'active' or user_data.get('role') != 'driver':
                         continue
                     
                     first_name = user_data.get('first_name', '').strip()
@@ -106,12 +106,12 @@ def import_drivers_vehicles():
         motive_drivers = get_drivers()
         motive_vehicles = get_vehicles()
         
-        # Format active driver names for display
+        # Format active driver names for display (role=driver only)
         driver_names = []
         for driver_item in motive_drivers:
             user_data = driver_item.get('user', {})
-            # Only show active drivers
-            if user_data.get('status') != 'active':
+            # Only show active drivers (role=driver, status=active)
+            if user_data.get('status') != 'active' or user_data.get('role') != 'driver':
                 continue
             first_name = user_data.get('first_name', '').strip()
             last_name = user_data.get('last_name', '').strip()
