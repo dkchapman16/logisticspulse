@@ -34,7 +34,7 @@ def get_drivers():
             
             if response.status_code == 200:
                 data = response.json()
-                drivers = data.get('data', data.get('drivers', []))
+                drivers = data.get('data', data.get('drivers', data.get('users', [])))
                 if drivers:
                     logger.info(f"Retrieved {len(drivers)} drivers from Motive")
                     return drivers
