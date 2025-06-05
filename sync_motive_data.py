@@ -48,13 +48,16 @@ def sync_drivers():
     for user_item in motive_users:
         user_data = user_item.get('user', {})
         
+        # Only process active drivers (role=driver, status=active)
+        if user_data.get('status') != 'active' or user_data.get('role') != 'driver':
+            continue
+        
         motive_id = str(user_data.get('id'))
         first_name = user_data.get('first_name', '').strip()
         last_name = user_data.get('last_name', '').strip()
         name = f"{first_name} {last_name}".strip()
         email = user_data.get('email', '')
         phone = user_data.get('phone', '')
-        status = 'active' if user_data.get('status') == 'active' else 'inactive'
         
         if not name or not motive_id:
             continue
@@ -66,7 +69,7 @@ def sync_drivers():
             existing.name = name
             existing.email = email
             existing.phone = phone
-            existing.status = status
+            existing.status = 'active'
             print(f"Updated: {name}")
         else:
             new_driver = Driver(
@@ -75,7 +78,7 @@ def sync_drivers():
                 email=email,
                 phone=phone,
                 company='Hitched Logistics LLC',
-                status=status
+                status='active'
             )
             db.session.add(new_driver)
             print(f"Added: {name}")

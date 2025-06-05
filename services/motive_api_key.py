@@ -44,8 +44,15 @@ def get_drivers():
                 logger.error(f"Failed to get drivers page {page}: {response.status_code} - {response.text}")
                 break
         
-        logger.info(f"Retrieved {len(all_drivers)} total drivers from Motive across {page} pages")
-        return all_drivers
+        # Filter for only active drivers (role=driver, status=active)
+        active_drivers = []
+        for user_item in all_drivers:
+            user_data = user_item.get('user', {})
+            if user_data.get('status') == 'active' and user_data.get('role') == 'driver':
+                active_drivers.append(user_item)
+        
+        logger.info(f"Retrieved {len(all_drivers)} total users, {len(active_drivers)} active drivers from Motive across {page} pages")
+        return active_drivers
     except Exception as e:
         logger.error(f"Error getting drivers: {e}")
         return []

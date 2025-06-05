@@ -39,6 +39,11 @@ def add_real_drivers():
     
     for user_item in users:
         user_data = user_item.get('user', {})
+        
+        # Only process active drivers (role=driver, status=active)
+        if user_data.get('status') != 'active' or user_data.get('role') != 'driver':
+            continue
+            
         motive_id = str(user_data.get('id'))
         
         # Skip if already exists
@@ -58,7 +63,7 @@ def add_real_drivers():
             email=user_data.get('email', ''),
             phone=user_data.get('phone', ''),
             company='Hitched Logistics LLC',
-            status='active' if user_data.get('status') == 'active' else 'inactive'
+            status='active'
         )
         db.session.add(new_driver)
         print(f"Added driver: {name}")
