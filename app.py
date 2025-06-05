@@ -72,6 +72,7 @@ with app.app_context():
     app.register_blueprint(imports_bp)
     app.register_blueprint(availability_bp)
     app.register_blueprint(temperature_bp, url_prefix='/temperature')
+    app.register_blueprint(assets_bp)
     
     # Add root route redirect
     @app.route('/')

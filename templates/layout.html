@@ -130,6 +130,34 @@
                     </ul>
                 </div>
 
+                <!-- Assets Section -->
+                <div class="nav-section">
+                    <div class="nav-section-header">
+                        <i data-feather="database"></i>
+                        <span>Assets</span>
+                    </div>
+                    <ul class="nav-section-items">
+                        <li>
+                            <a class="nav-section-link {% if request.endpoint == 'assets.drivers' %}active{% endif %}" href="{{ url_for('assets.drivers') }}">
+                                <i data-feather="users"></i>
+                                <span>Drivers</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a class="nav-section-link {% if request.endpoint == 'assets.trucks' %}active{% endif %}" href="{{ url_for('assets.trucks') }}">
+                                <i data-feather="truck"></i>
+                                <span>Trucks</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a class="nav-section-link {% if request.endpoint == 'assets.trailers' %}active{% endif %}" href="{{ url_for('assets.trailers') }}">
+                                <i data-feather="package"></i>
+                                <span>Trailers</span>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+
                 <!-- Tools Section -->
                 <div class="nav-section">
                     <div class="nav-section-header">
