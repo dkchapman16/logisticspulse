@@ -98,24 +98,31 @@
 
 <!-- Create Trailer Modal -->
 <div class="modal fade" id="createTrailerModal" tabindex="-1">
-    <div class="modal-dialog modal-xl">
+    <div class="modal-dialog modal-fullscreen-lg-down" style="max-width: 95vw;">
         <div class="modal-content" style="background-color: var(--card-bg);">
-            <div class="modal-header border-bottom" style="border-color: var(--border-color) !important;">
+            <div class="modal-header border-bottom" style="border-color: var(--border-color) !important; padding: 1.5rem 2rem;">
                 <div class="d-flex align-items-center">
                     <div class="rounded-circle me-3 d-flex align-items-center justify-content-center" 
-                         style="width: 40px; height: 40px; background-color: var(--accent-color); color: var(--background);">
+                         style="width: 40px; height: 40px; background-color: var(--primary-action); color: #000;">
                         <i data-feather="package" style="width: 20px; height: 20px;"></i>
                     </div>
                     <h5 class="modal-title mb-0">Create a trailer</h5>
                 </div>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
-            <div class="modal-body p-4">
+            <div class="modal-body p-0">
                 <form id="createTrailerForm">
-                    <div class="row g-4">
-                        <!-- Trailer Info -->
-                        <div class="col-md-4">
-                            <h6 class="mb-3">Trailer Info</h6>
+                    <div class="row g-0">
+                        <!-- Trailer Info Section -->
+                        <div class="col-lg-4 border-end" style="border-color: var(--border-color) !important;">
+                            <div class="p-4">
+                                <div class="d-flex align-items-center mb-4 pb-3 border-bottom" style="border-color: var(--border-color) !important;">
+                                    <div class="rounded me-3 d-flex align-items-center justify-content-center" 
+                                         style="width: 32px; height: 32px; background-color: rgba(0, 196, 140, 0.1); color: var(--primary-action);">
+                                        <i data-feather="info" style="width: 16px; height: 16px;"></i>
+                                    </div>
+                                    <h6 class="mb-0 text-uppercase fw-bold" style="color: var(--primary-action); letter-spacing: 0.5px;">Trailer Info</h6>
+                                </div>
                             
                             <div class="mb-3">
                                 <label class="form-label">Tags</label>
@@ -211,9 +218,16 @@
                             </div>
                         </div>
 
-                        <!-- Expiration Dates -->
-                        <div class="col-md-4">
-                            <h6 class="mb-3">Expiration Dates</h6>
+                        <!-- Expiration Dates Section -->
+                        <div class="col-lg-4 border-end" style="border-color: var(--border-color) !important;">
+                            <div class="p-4">
+                                <div class="d-flex align-items-center mb-4 pb-3 border-bottom" style="border-color: var(--border-color) !important;">
+                                    <div class="rounded me-3 d-flex align-items-center justify-content-center" 
+                                         style="width: 32px; height: 32px; background-color: rgba(0, 196, 140, 0.1); color: var(--primary-action);">
+                                        <i data-feather="calendar" style="width: 16px; height: 16px;"></i>
+                                    </div>
+                                    <h6 class="mb-0 text-uppercase fw-bold" style="color: var(--primary-action); letter-spacing: 0.5px;">Expiration Dates</h6>
+                                </div>
 
                             <div class="mb-3">
                                 <label class="form-label">Annual Inspection Expiration Date</label>
@@ -301,10 +315,17 @@
                             </div>
                         </div>
 
-                        <!-- Features, Notes, and Assignments -->
-                        <div class="col-md-4">
-                            <!-- Features -->
-                            <h6 class="mb-3">Features</h6>
+                        <!-- Features & Assignments Section -->
+                        <div class="col-lg-4">
+                            <div class="p-4">
+                                <!-- Features -->
+                                <div class="d-flex align-items-center mb-4 pb-3 border-bottom" style="border-color: var(--border-color) !important;">
+                                    <div class="rounded me-3 d-flex align-items-center justify-content-center" 
+                                         style="width: 32px; height: 32px; background-color: rgba(0, 196, 140, 0.1); color: var(--primary-action);">
+                                        <i data-feather="settings" style="width: 16px; height: 16px;"></i>
+                                    </div>
+                                    <h6 class="mb-0 text-uppercase fw-bold" style="color: var(--primary-action); letter-spacing: 0.5px;">Features</h6>
+                                </div>
 
                             <div class="mb-3">
                                 <div class="form-check">
@@ -344,18 +365,30 @@
                                 <input type="number" class="form-control" name="length" placeholder="ft">
                             </div>
 
-                            <!-- Notes -->
-                            <h6 class="mb-3 mt-4">Notes</h6>
+                            <!-- Notes Section -->
+                            <div class="d-flex align-items-center mb-4 pb-3 border-bottom mt-5" style="border-color: var(--border-color) !important;">
+                                <div class="rounded me-3 d-flex align-items-center justify-content-center" 
+                                     style="width: 32px; height: 32px; background-color: rgba(0, 196, 140, 0.1); color: var(--primary-action);">
+                                    <i data-feather="edit-3" style="width: 16px; height: 16px;"></i>
+                                </div>
+                                <h6 class="mb-0 text-uppercase fw-bold" style="color: var(--primary-action); letter-spacing: 0.5px;">Notes</h6>
+                            </div>
                             
-                            <div class="mb-3">
+                            <div class="mb-4">
                                 <textarea class="form-control" name="notes" rows="3" placeholder="There are no notes yet"></textarea>
                                 <button type="button" class="btn btn-outline-primary btn-sm mt-2">
                                     ADD NOTE
                                 </button>
                             </div>
 
-                            <!-- Driver Assignments -->
-                            <h6 class="mb-3 mt-4">Driver Assignments</h6>
+                            <!-- Driver Assignments Section -->
+                            <div class="d-flex align-items-center mb-4 pb-3 border-bottom" style="border-color: var(--border-color) !important;">
+                                <div class="rounded me-3 d-flex align-items-center justify-content-center" 
+                                     style="width: 32px; height: 32px; background-color: rgba(0, 196, 140, 0.1); color: var(--primary-action);">
+                                    <i data-feather="users" style="width: 16px; height: 16px;"></i>
+                                </div>
+                                <h6 class="mb-0 text-uppercase fw-bold" style="color: var(--primary-action); letter-spacing: 0.5px;">Driver Assignments</h6>
+                            </div>
                             
                             <div class="table-responsive">
                                 <table class="table table-sm">
@@ -381,9 +414,12 @@
                     </div>
                 </form>
             </div>
-            <div class="modal-footer border-top" style="border-color: var(--border-color) !important;">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                <button type="button" class="btn btn-primary" onclick="createTrailer()">Create</button>
+            <div class="modal-footer border-top d-flex justify-content-end" style="border-color: var(--border-color) !important; padding: 1.5rem 2rem;">
+                <button type="button" class="btn btn-secondary me-3" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary px-4" onclick="createTrailer()">
+                    <i data-feather="plus" style="width: 16px; height: 16px;" class="me-2"></i>
+                    Create Trailer
+                </button>
             </div>
         </div>
     </div>
