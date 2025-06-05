@@ -104,23 +104,34 @@ function formatTimestamp(timestamp) {
         }
         
         // Convert to America/Chicago timezone (US Central)
-        const centralDate = new Date(utcDate.toLocaleString("en-US", {timeZone: "America/Chicago"}));
+        const options = {
+            timeZone: "America/Chicago",
+            year: 'numeric',
+            month: '2-digit',
+            day: '2-digit',
+            hour: '2-digit',
+            minute: '2-digit',
+            hour12: true
+        };
+        
+        const centralTimeString = utcDate.toLocaleString("en-US", options);
+        
+        // Also calculate relative time for context
         const now = new Date();
         const nowCentral = new Date(now.toLocaleString("en-US", {timeZone: "America/Chicago"}));
+        const centralDate = new Date(utcDate.toLocaleString("en-US", {timeZone: "America/Chicago"}));
         
         const diff = nowCentral - centralDate;
         const hours = Math.floor(diff / (1000 * 60 * 60));
         const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
         
-        if (diff < 0) {
-            // Future time, show actual time
-            return centralDate.toLocaleDateString() + ' ' + centralDate.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) + ' CT';
-        } else if (hours < 1) {
+        // Show relative time for recent updates, full time for older ones
+        if (hours < 1) {
             return `${minutes} min ago`;
         } else if (hours < 24) {
             return `${hours}h ${minutes}m ago`;
         } else {
-            return centralDate.toLocaleDateString() + ' ' + centralDate.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) + ' CT';
+            return centralTimeString.replace(',', '') + ' CT';
         }
     } catch (e) {
         return timestamp;
