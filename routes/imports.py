@@ -24,15 +24,18 @@ def import_drivers_vehicles():
                     user_data = driver_item.get('user', {})
                     motive_id = str(user_data.get('id'))
                     
-                    # Skip if already exists
-                    if Driver.query.filter_by(motive_driver_id=motive_id).first():
-                        continue
-                        
                     first_name = user_data.get('first_name', '').strip()
                     last_name = user_data.get('last_name', '').strip()
                     name = f"{first_name} {last_name}".strip()
                     
-                    if not name:
+                    if not name or not motive_id:
+                        continue
+                    
+                    # Skip if already exists by Motive ID or exact name match
+                    existing_by_id = Driver.query.filter_by(motive_driver_id=motive_id).first()
+                    existing_by_name = Driver.query.filter_by(name=name).first()
+                    
+                    if existing_by_id or existing_by_name:
                         continue
                         
                     new_driver = Driver(
@@ -50,14 +53,23 @@ def import_drivers_vehicles():
                 for vehicle_item in motive_vehicles:
                     vehicle_data = vehicle_item.get('vehicle', {})
                     motive_id = str(vehicle_data.get('id'))
+                    license_plate = vehicle_data.get('license_plate_number', '').strip()
                     
-                    # Skip if already exists
-                    if Vehicle.query.filter_by(motive_vehicle_id=motive_id).first():
+                    if not motive_id:
+                        continue
+                    
+                    # Skip if already exists by Motive ID or license plate
+                    existing_by_id = Vehicle.query.filter_by(motive_vehicle_id=motive_id).first()
+                    existing_by_plate = None
+                    if license_plate:
+                        existing_by_plate = Vehicle.query.filter_by(license_plate=license_plate).first()
+                    
+                    if existing_by_id or existing_by_plate:
                         continue
                         
                     new_vehicle = Vehicle(
                         motive_vehicle_id=motive_id,
-                        license_plate=vehicle_data.get('license_plate_number', ''),
+                        license_plate=license_plate,
                         make=vehicle_data.get('make', ''),
                         model=vehicle_data.get('model', ''),
                         year=vehicle_data.get('year'),
