@@ -176,3 +176,120 @@ class Milestone(db.Model):
     
     # Relationships
     driver = db.relationship('Driver', backref='milestones')
+
+
+class Truck(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    truck_number = db.Column(db.String(50), unique=True, nullable=False)
+    vin = db.Column(db.String(17), unique=True)
+    year = db.Column(db.Integer)
+    make = db.Column(db.String(50))
+    model = db.Column(db.String(50))
+    color = db.Column(db.String(30))
+    license_plate = db.Column(db.String(20))
+    state = db.Column(db.String(2))
+    status = db.Column(db.String(20), default='active')  # active, inactive, maintenance
+    
+    # Expiration dates
+    dot_expiration = db.Column(db.Date)
+    annual_inspection_expiration = db.Column(db.Date)
+    insurance_expiration = db.Column(db.Date)
+    registration_expiration = db.Column(db.Date)
+    annual_permit_expiration = db.Column(db.Date)
+    or_permit_expiration = db.Column(db.Date)
+    monthly_inspection = db.Column(db.Date)
+    
+    # Company IFTA
+    ifta_decal = db.Column(db.String(50))
+    
+    # Finance
+    ownership_type = db.Column(db.String(20))  # owned, leased, rental
+    date_acquired = db.Column(db.Date)
+    payment_start_date = db.Column(db.Date)
+    payment_amount = db.Column(db.Float)
+    monthly_payment = db.Column(db.Boolean, default=False)
+    service_date = db.Column(db.Date)
+    lender = db.Column(db.String(100))
+    contract_number = db.Column(db.String(50))
+    date_sold = db.Column(db.Date)
+    
+    # Specs
+    sleeper_purchased = db.Column(db.Boolean, default=False)
+    engine_type_brand = db.Column(db.String(50))
+    brake_type_brand = db.Column(db.String(50))
+    empty_weight = db.Column(db.Integer)
+    current_value = db.Column(db.Float)
+    replacement_cost = db.Column(db.Float)
+    
+    # Notes
+    notes = db.Column(db.Text)
+    
+    # Fuel card
+    fuel_card = db.Column(db.String(50))
+    
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+
+class Trailer(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    trailer_number = db.Column(db.String(50), unique=True, nullable=False)
+    status = db.Column(db.String(20), default='active')  # active, inactive, maintenance
+    labels = db.Column(db.String(200))
+    trailer_type = db.Column(db.String(50))  # dry_van, flatbed, reefer, etc.
+    length = db.Column(db.Integer)
+    model = db.Column(db.String(50))
+    vin = db.Column(db.String(17))
+    width = db.Column(db.Integer)
+    brake_type = db.Column(db.String(50))
+    roof = db.Column(db.String(50))
+    state = db.Column(db.String(2))
+    license_plate = db.Column(db.String(20))
+    
+    # Expiration dates
+    annual_inspection_expiration = db.Column(db.Date)
+    insurance_expiration = db.Column(db.Date)
+    registration_expiration = db.Column(db.Date)
+    annual_permit_expiration = db.Column(db.Date)
+    or_permit_expiration = db.Column(db.Date)
+    monthly_inspection = db.Column(db.Date)
+    
+    # Finance
+    ownership_type = db.Column(db.String(20))  # owned, leased, rental
+    other_accounts = db.Column(db.String(100))
+    payment_start_date = db.Column(db.Date)
+    payment_amount = db.Column(db.Float)
+    monthly_payment = db.Column(db.Boolean, default=False)
+    service_date = db.Column(db.Date)
+    lender = db.Column(db.String(100))
+    contract_number = db.Column(db.String(50))
+    date_sold = db.Column(db.Date)
+    
+    # Features
+    freight_walls = db.Column(db.Boolean, default=False)
+    winches = db.Column(db.Boolean, default=False)
+    ramps = db.Column(db.Boolean, default=False)
+    recessed_dte = db.Column(db.Boolean, default=False)
+    other = db.Column(db.String(100))
+    
+    # Notes
+    notes = db.Column(db.Text)
+    
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+
+class AssetAssignment(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    driver_id = db.Column(db.Integer, db.ForeignKey('driver.id'), nullable=False)
+    truck_id = db.Column(db.Integer, db.ForeignKey('truck.id'))
+    trailer_id = db.Column(db.Integer, db.ForeignKey('trailer.id'))
+    start_date = db.Column(db.Date, nullable=False)
+    end_date = db.Column(db.Date)
+    current = db.Column(db.Boolean, default=True)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    
+    # Relationships
+    driver = db.relationship('Driver', backref='asset_assignments')
+    truck = db.relationship('Truck', backref='assignments')
+    trailer = db.relationship('Trailer', backref='assignments')

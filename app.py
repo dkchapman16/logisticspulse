@@ -61,6 +61,7 @@ with app.app_context():
     from routes.imports import imports_bp
     from routes.availability import availability_bp
     from routes.temperature import temperature_bp
+    from routes.assets import assets_bp
     
     app.register_blueprint(dashboard_bp)
     app.register_blueprint(loads_bp)
