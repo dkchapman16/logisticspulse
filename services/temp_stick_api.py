@@ -3,6 +3,8 @@ Temp Stick API integration for reefer trailer temperature monitoring
 """
 import os
 import requests
+import gzip
+import json
 from datetime import datetime, timedelta
 from services.logger import setup_logger
 
@@ -12,87 +14,73 @@ TEMP_STICK_API_KEY = os.environ.get('TEMP_STICK_API_KEY')
 BASE_URL = 'https://www.tempstick.com/api/v1'
 
 
-def get_sensors():
-    """Get list of all Temp Stick sensors"""
+def celsius_to_fahrenheit(celsius):
+    """Convert Celsius to Fahrenheit using the formula: (C * 1.8) + 32"""
+    if celsius is None:
+        return None
+    return (celsius * 1.8) + 32
+
+
+def make_api_request(endpoint, params=None):
+    """Make API request with proper GZIP handling and authentication"""
     if not TEMP_STICK_API_KEY:
         logger.error("TEMP_STICK_API_KEY not found")
-        return []
+        return None
+    
+    headers = {
+        'X-API-Key': TEMP_STICK_API_KEY,
+        'Accept-Encoding': 'gzip',
+        'Content-Type': 'application/json'
+    }
     
     try:
-        # Try different authentication methods
-        headers = {
-            'X-API-Key': TEMP_STICK_API_KEY,
-            'Content-Type': 'application/json'
-        }
-        
-        response = requests.get(f'{BASE_URL}/sensors', headers=headers, timeout=30)
-        
-        # If that fails, try Bearer token
-        if response.status_code == 401 or response.status_code == 403:
-            headers = {
-                'Authorization': f'Bearer {TEMP_STICK_API_KEY}',
-                'Content-Type': 'application/json'
-            }
-            response = requests.get(f'{BASE_URL}/sensors', headers=headers, timeout=30)
-        
-        # If still fails, try API key in URL params
-        if response.status_code == 401 or response.status_code == 403:
-            params = {'api_key': TEMP_STICK_API_KEY}
-            response = requests.get(f'{BASE_URL}/sensors', params=params, timeout=30)
-        
+        response = requests.get(f'{BASE_URL}{endpoint}', headers=headers, params=params, timeout=30)
         response.raise_for_status()
         
-        data = response.json()
-        logger.info(f"Retrieved {len(data.get('sensors', []))} sensors from Temp Stick")
-        return data.get('sensors', [])
-        
+        # Handle GZIP compressed response
+        if response.headers.get('content-encoding') == 'gzip':
+            content = gzip.decompress(response.content)
+            return json.loads(content.decode('utf-8'))
+        else:
+            return response.json()
+            
     except requests.exceptions.RequestException as e:
-        logger.error(f"Error fetching sensors from Temp Stick: {e}")
-        return []
+        logger.error(f"Error making API request to {endpoint}: {e}")
+        return None
+    except json.JSONDecodeError as e:
+        logger.error(f"Error parsing JSON response from {endpoint}: {e}")
+        return None
     except Exception as e:
-        logger.error(f"Unexpected error in get_sensors: {e}")
-        return []
+        logger.error(f"Unexpected error in API request to {endpoint}: {e}")
+        return None
+
+
+def get_sensors():
+    """Get list of all Temp Stick sensors"""
+    data = make_api_request('/sensors')
+    if data:
+        sensors = data.get('sensors', [])
+        logger.info(f"Retrieved {len(sensors)} sensors from Temp Stick")
+        return sensors
+    return []
 
 
 def get_sensor_data(sensor_id, hours=24):
     """Get temperature data for a specific sensor"""
-    if not TEMP_STICK_API_KEY:
-        logger.error("TEMP_STICK_API_KEY not found")
-        return {}
+    # Calculate time range
+    end_time = datetime.utcnow()
+    start_time = end_time - timedelta(hours=hours)
     
-    try:
-        headers = {
-            'Authorization': f'Bearer {TEMP_STICK_API_KEY}',
-            'Content-Type': 'application/json'
-        }
-        
-        # Calculate time range
-        end_time = datetime.utcnow()
-        start_time = end_time - timedelta(hours=hours)
-        
-        params = {
-            'start': start_time.isoformat() + 'Z',
-            'end': end_time.isoformat() + 'Z'
-        }
-        
-        response = requests.get(
-            f'{BASE_URL}/sensors/{sensor_id}/data',
-            headers=headers,
-            params=params,
-            timeout=30
-        )
-        response.raise_for_status()
-        
-        data = response.json()
+    params = {
+        'start': start_time.isoformat() + 'Z',
+        'end': end_time.isoformat() + 'Z'
+    }
+    
+    data = make_api_request(f'/sensors/{sensor_id}/data', params)
+    if data:
         logger.info(f"Retrieved data for sensor {sensor_id}")
         return data
-        
-    except requests.exceptions.RequestException as e:
-        logger.error(f"Error fetching data for sensor {sensor_id}: {e}")
-        return {}
-    except Exception as e:
-        logger.error(f"Unexpected error in get_sensor_data: {e}")
-        return {}
+    return {}
 
 
 def get_current_temperatures():
@@ -117,17 +105,20 @@ def get_current_temperatures():
         if readings:
             # Get the most recent reading
             latest_reading = readings[-1]
+            temp_c = latest_reading.get('temperature')  # Temp Stick returns temperature in Celsius
+            temp_f = celsius_to_fahrenheit(temp_c)
+            
             current_readings.append({
                 'sensor_id': sensor_id,
                 'name': sensor.get('name', f'Sensor {sensor_id}'),
                 'location': sensor.get('location', 'Unknown'),
-                'temperature_f': latest_reading.get('temperature_f'),
-                'temperature_c': latest_reading.get('temperature_c'),
+                'temperature_f': temp_f,
+                'temperature_c': temp_c,
                 'humidity': latest_reading.get('humidity'),
                 'timestamp': latest_reading.get('timestamp'),
                 'battery_level': sensor.get('battery_level'),
                 'signal_strength': sensor.get('signal_strength'),
-                'status': determine_status(latest_reading.get('temperature_f'))
+                'status': determine_status(temp_f)
             })
     
     return current_readings
