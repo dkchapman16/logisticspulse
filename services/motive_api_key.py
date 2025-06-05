@@ -14,25 +14,37 @@ def get_drivers():
         return []
     
     headers = {
-        "Authorization": f"Bearer {API_KEY}",
+        "X-API-KEY": API_KEY,
         "Content-Type": "application/json"
     }
     
-    try:
-        response = requests.get(f"{BASE_URL}/drivers", headers=headers)
-        logger.info(f"Drivers API response: {response.status_code}")
-        
-        if response.status_code == 200:
-            data = response.json()
-            logger.info(f"Retrieved {len(data.get('data', []))} drivers from Motive")
-            return data.get('data', [])
-        else:
-            logger.error(f"Failed to get drivers: {response.status_code} - {response.text}")
-            return []
+    # Try multiple potential endpoints
+    endpoints = [
+        f"{BASE_URL}/drivers",
+        f"{BASE_URL}/users",
+        "https://api.gomotive.com/v1/drivers",
+        "https://api.gomotive.com/v2/drivers",
+        "https://api.gomotive.com/drivers"
+    ]
+    
+    for endpoint in endpoints:
+        try:
+            response = requests.get(endpoint, headers=headers)
+            logger.info(f"Drivers API ({endpoint}) response: {response.status_code}")
             
-    except Exception as e:
-        logger.error(f"Error fetching drivers: {e}")
-        return []
+            if response.status_code == 200:
+                data = response.json()
+                drivers = data.get('data', data.get('drivers', []))
+                if drivers:
+                    logger.info(f"Retrieved {len(drivers)} drivers from Motive")
+                    return drivers
+            elif response.status_code != 404:
+                logger.info(f"Response from {endpoint}: {response.text[:200]}")
+        except Exception as e:
+            logger.error(f"Error with endpoint {endpoint}: {e}")
+            continue
+    
+    return []
 
 def get_vehicles():
     """Get all vehicles using API key authentication"""
@@ -41,25 +53,39 @@ def get_vehicles():
         return []
     
     headers = {
-        "Authorization": f"Bearer {API_KEY}",
+        "X-API-KEY": API_KEY,
         "Content-Type": "application/json"
     }
     
-    try:
-        response = requests.get(f"{BASE_URL}/vehicles", headers=headers)
-        logger.info(f"Vehicles API response: {response.status_code}")
-        
-        if response.status_code == 200:
-            data = response.json()
-            logger.info(f"Retrieved {len(data.get('data', []))} vehicles from Motive")
-            return data.get('data', [])
-        else:
-            logger.error(f"Failed to get vehicles: {response.status_code} - {response.text}")
-            return []
+    # Try multiple potential endpoints
+    endpoints = [
+        f"{BASE_URL}/vehicles",
+        f"{BASE_URL}/assets",
+        "https://api.gomotive.com/v1/vehicles", 
+        "https://api.gomotive.com/v2/vehicles",
+        "https://api.gomotive.com/vehicles"
+    ]
+    
+    for endpoint in endpoints:
+        try:
+            response = requests.get(endpoint, headers=headers)
+            logger.info(f"Vehicles API ({endpoint}) response: {response.status_code}")
             
-    except Exception as e:
-        logger.error(f"Error fetching vehicles: {e}")
-        return []
+            if response.status_code == 200:
+                data = response.json()
+                vehicles = data.get('data', data.get('vehicles', data.get('assets', [])))
+                if vehicles:
+                    logger.info(f"Retrieved {len(vehicles)} vehicles from Motive")
+                    return vehicles
+                else:
+                    logger.info(f"Empty response from {endpoint}: {data}")
+            elif response.status_code != 404:
+                logger.info(f"Response from {endpoint}: {response.text[:200]}")
+        except Exception as e:
+            logger.error(f"Error with endpoint {endpoint}: {e}")
+            continue
+    
+    return []
 
 def test_connection():
     """Test the Motive API connection and return basic info"""
