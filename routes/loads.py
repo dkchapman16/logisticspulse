@@ -52,7 +52,12 @@ def create_load():
         flash('Load created successfully!', 'success')
         return redirect(url_for('loads.index'))
 
-    # Example data context; in practice, ensure 'data' is provided from RateCon extraction flow
-    # data = {'reference_number': '', 'pickup': {}, 'delivery': {}, 'client': {}}
+    # Default empty data structure to avoid template errors
+    data = {
+        'reference_number': '',
+        'pickup': {'facility_name': '', 'address': '', 'scheduled_time': ''},
+        'delivery': {'facility_name': '', 'address': '', 'scheduled_time': ''},
+        'client': {'name': ''}
+    }
     drivers = Driver.query.all()
-    return render_template('create_load.html', drivers=drivers, data={})
+    return render_template('create_load.html', drivers=drivers, data=data)
